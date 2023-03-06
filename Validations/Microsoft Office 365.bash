@@ -32,6 +32,8 @@
 #
 ####################################################################################################
 
+# Set Apps to check, valid options are: "Microsoft Excel" "Microsoft OneNote" "Microsoft Outlook" "Microsoft PowerPoint" "Microsoft Word" "OneDrive"
+appsToCheck=("Microsoft Excel" "Microsoft OneNote" "Microsoft Outlook" "Microsoft PowerPoint" "Microsoft Word" "OneDrive")
 appChecks=""
 RESULT=""
 
@@ -69,12 +71,9 @@ function appCheck() {
 # Check for Microsoft Office 365 apps (i.e., Microsoft_365_and_Office_16.70.23021201_Installer.pkg)
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-appCheck "Microsoft Excel"
-appCheck "Microsoft OneNote"
-appCheck "Microsoft Outlook"
-appCheck "Microsoft PowerPoint"
-appCheck "Microsoft Word"
-appCheck "OneDrive"
+for app in ${appsToCheck[@]}; do
+  appCheck "Microsoft Excel"
+done
 
 
 
