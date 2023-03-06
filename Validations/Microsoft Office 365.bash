@@ -36,7 +36,7 @@
 appsToCheck=("Microsoft Excel" "Microsoft OneNote" "Microsoft Outlook" "Microsoft PowerPoint" "Microsoft Word" "OneDrive")
 appChecks=""
 RESULT=""
-
+IFS=""
 
 
 ####################################################################################################
@@ -72,7 +72,7 @@ function appCheck() {
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 for app in ${appsToCheck[@]}; do
-  appCheck "Microsoft Excel"
+  appCheck "$app"
 done
 
 
