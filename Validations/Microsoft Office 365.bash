@@ -13,6 +13,9 @@
 #   Version 0.0.1, 06-Mar-2023, Dan K. Snelson (@dan-snelson)
 #   - Original Version
 #
+#   Version 0.0.2, 06-Mar-2023, Andrew Clark (@drtaru)
+#   - Simplified modification
+#
 ####################################################################################
 # A script to collect the installation status of Microsoft Office 365.             #
 #                                                                                  #
