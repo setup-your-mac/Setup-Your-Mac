@@ -16,6 +16,9 @@
 #       - Complete
 #   - Play video at Welcome dialog (Issue No. 36)
 #
+#   Version 1.8.1, 07-Mar-2023, Dan K. Snelson (@dan-snelson)
+#   - Added `currentLoggedInUser` function to better validate `loggedInUser`
+#
 ####################################################################################################
 
 
@@ -30,7 +33,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.8.0"
+scriptVersion="1.8.1-rc1"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin/
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -48,7 +51,7 @@ outdatedOsAction="${9:-"/System/Library/CoreServices/Software Update.app"}"     
 osVersion=$( sw_vers -productVersion )
 osBuild=$( sw_vers -buildVersion )
 osMajorVersion=$( echo "${osVersion}" | awk -F '.' '{print $1}' )
-loggedInUser=$( echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ { print $3 }' )
+# loggedInUser=$( echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ { print $3 }' )
 reconOptions=""
 exitCode="0"
 
@@ -76,6 +79,17 @@ fi
 
 function updateScriptLog() {
     echo -e "$( date +%Y-%m-%d\ %H:%M:%S ) - ${1}" | tee -a "${scriptLog}"
+}
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Pre-flight Check: Current Logged-in User Function
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+function currentLoggedInUser() {
+    loggedInUser=$( echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ { print $3 }' )
+    updateScriptLog "Pre-flight Check: Current Logged-in User: ${loggedInUser}"
 }
 
 
@@ -186,14 +200,40 @@ caffeinate -dimsu -w $$ &
 # Pre-flight Check: Validate logged-in user
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-if [[ -z "${loggedInUser}" || "${loggedInUser}" == "loginwindow" ]]; then
-    updateScriptLog "Pre-flight Check: No user logged-in; exiting."
-    exit 1
-else
-    loggedInUserFullname=$( id -F "${loggedInUser}" )
-    loggedInUserFirstname=$( echo "$loggedInUserFullname" | cut -d " " -f 1 )
-    loggedInUserID=$( id -u "${loggedInUser}" )
-fi
+# if [[ -z "${loggedInUser}" || "${loggedInUser}" == "loginwindow" ]]; then
+#     updateScriptLog "Pre-flight Check: No user logged-in; exiting."
+#     exit 1
+# else
+#     loggedInUserFullname=$( id -F "${loggedInUser}" )
+#     loggedInUserFirstname=$( echo "$loggedInUserFullname" | cut -d " " -f 1 )
+#     loggedInUserID=$( id -u "${loggedInUser}" )
+# fi
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Pre-flight Check: Validate Logged-in System Accounts
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+updateScriptLog "Pre-flight Check: Check for Logged-in System Accounts …"
+currentLoggedInUser
+
+counter="1"
+
+until { [[ "${loggedInUser}" != "_mbsetupuser" ]] || [[ "${counter}" -gt "180" ]]; } && { [[ "${loggedInUser}" != "loginwindow" ]] || [[ "${counter}" -gt "30" ]]; } ; do
+
+	updateScriptLog "Pre-flight Check: Logged-in Counter: ${counter}"
+	currentLoggedInUser
+	sleep 2
+	((counter++))
+
+done
+
+loggedInUserFullname=$( id -F "${loggedInUser}" )
+loggedInUserFirstname=$( echo "$loggedInUserFullname" | cut -d " " -f 1 )
+loggedInUserID=$( id -u "${loggedInUser}" )
+updateScriptLog "Pre-flight Check: Current Logged-in User First Name: ${loggedInUserFirstname}"
+updateScriptLog "Pre-flight Check: Current Logged-in User ID: ${loggedInUserID}"
 
 
 
