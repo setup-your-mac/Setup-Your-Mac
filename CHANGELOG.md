@@ -1,5 +1,12 @@
 # CHANGELOG
 
+## 1.8.1
+### 11-Mar-2023
+- Added `currentLoggedInUser` function to better validate `loggedInUser` (Addresses [Issue No. 2](https://github.com/dan-snelson/Setup-Your-Mac/issues/2))
+- Added new [Microsoft Office 365](/Setup-Your-Mac/Validations/Microsoft%20Office%20365.bash) Remote Validation ([Pull Request No. 3](https://github.com/dan-snelson/Setup-Your-Mac/pull/3))
+- Improved logging when `welcomeDialog` is `video` or `false` (Addresses [Issue No. 4](https://github.com/dan-snelson/Setup-Your-Mac/issues/4))
+- Create `overlayicon` from Self Service's custom icon (thanks, Mike Schwartz!)
+
 ## 1.8.0
 ### 06-Mar-2023
 [Release-specific Blog Post](https://snelson.us/2023/03/setup-your-mac-1-8-0-via-swiftdialog/)

@@ -17,10 +17,10 @@
 #   - Play video at Welcome dialog (Issue No. 36)
 #
 #   Version 1.8.1, 11-Mar-2023, Dan K. Snelson (@dan-snelson)
-#   - Added `currentLoggedInUser` function to better validate `loggedInUser`
-#   - Added new "Microsoft Office 365" Remote Validation
-#   - Improved logging when `welcomeDialog` is `video` or `false`
-#   - Create `overlayicon` from Self Service (thanks, @Mike Schwartz!)
+#   - Added `currentLoggedInUser` function to better validate `loggedInUser` (Issue No. 2)
+#   - Added new "Microsoft Office 365" Remote Validation (Pull Request No. 3)
+#   - Improved logging when `welcomeDialog` is `video` or `false` (Issue No. 4)
+#   - Create `overlayicon` from Self Service's custom icon (thanks, Mike Schwartz!)
 #
 ####################################################################################################
 
@@ -36,7 +36,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.8.1-rc4"
+scriptVersion="1.8.1"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin/
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -209,7 +209,7 @@ counter="1"
 
 until { [[ "${loggedInUser}" != "_mbsetupuser" ]] || [[ "${counter}" -gt "180" ]]; } && { [[ "${loggedInUser}" != "loginwindow" ]] || [[ "${counter}" -gt "30" ]]; } ; do
 
-	updateScriptLog "PRE-FLIGHT CHECK: Logged-in Counter: ${counter}"
+	updateScriptLog "PRE-FLIGHT CHECK: Logged-in User Counter: ${counter}"
 	currentLoggedInUser
 	sleep 2
 	((counter++))
@@ -488,7 +488,7 @@ welcomeJSON='{
 ####################################################################################################
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# "Setup Your Mac" dialog Title, Message, Icon and Overlay Icon (thanks, @Mike Schwartz!)
+# "Setup Your Mac" dialog Title, Message, Icon and Overlay Icon
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 title="Setting up ${loggedInUserFirstname}'s Mac"
@@ -497,15 +497,13 @@ bannerImage="https://img.freepik.com/free-photo/yellow-watercolor-paper_95678-44
 bannerText="Setting up ${loggedInUserFirstname}'s Mac"
 helpmessage="If you need assistance, please contact the Global Service Department:  \n- **Telephone:** +1 (801) 555-1212  \n- **Email:** support@domain.org  \n- **Knowledge Base Article:** KB0057050  \n\n**Computer Information:** \n\n- **Operating System:**  ${macOSproductVersion} ($macOSbuildVersion)  \n- **Serial Number:** ${serialNumber}  \n- **Dialog:** ${dialogVersion}  \n- **Started:** ${timestamp}"
 infobox="Analyzing input …" # Customize at "Update Setup Your Mac's infobox"
-# selfServiceBrandingImage="/Users/${loggedInUser}/Library/Application Support/com.jamfsoftware.selfservice.mac/Documents/Images/brandingimage.png"
-# if [[ ! -f "${selfServiceBrandingImage}" ]]; then
-#     overlayicon="https://ics.services.jamfcloud.com/icon/hash_aa63d5813d6ed4846b623ed82acdd1562779bf3716f2d432a8ee533bba8950ee"
-# else
-#     # overlayicon=$( defaults read /Library/Preferences/com.jamfsoftware.jamf.plist self_service_app_path 2>&1 )
-#     overlayicon="${selfServiceBrandingImage}"
-# fi
+
+# Create `overlayicon` from Self Service's custom icon (thanks, Mike Schwartz!)
 xxd -p -s 260 "$(defaults read /Library/Preferences/com.jamfsoftware.jamf self_service_app_path)"/Icon$'\r'/..namedfork/rsrc | xxd -r -p > /var/tmp/overlayicon.icns
 overlayicon="/var/tmp/overlayicon.icns"
+
+# Uncomment to use generic, Self Service icon as overlayicon
+# overlayicon="https://ics.services.jamfcloud.com/icon/hash_aa63d5813d6ed4846b623ed82acdd1562779bf3716f2d432a8ee533bba8950ee"
 
 # Set initial icon based on whether the Mac is a desktop or laptop
 if system_profiler SPPowerDataType | grep -q "Battery Power"; then
@@ -1852,6 +1850,12 @@ function quitScript() {
     # updateScriptLog "QUIT SCRIPT: Reenable 'jamf' binary check-in"
     # launchctl bootstrap system "${jamflaunchDaemon}"
 
+    # Remove overlayicon
+    if [[ -e ${overlayicon} ]]; then
+        updateScriptLog "QUIT SCRIPT: Removing ${overlayicon} …"
+        rm "${overlayicon}"
+    fi
+    
     # Remove welcomeCommandFile
     if [[ -e ${welcomeCommandFile} ]]; then
         updateScriptLog "QUIT SCRIPT: Removing ${welcomeCommandFile} …"
