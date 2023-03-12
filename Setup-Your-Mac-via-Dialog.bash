@@ -22,6 +22,9 @@
 #   - Improved logging when `welcomeDialog` is `video` or `false` (Issue No. 4)
 #   - Create `overlayicon` from Self Service's custom icon (thanks, Mike Schwartz!)
 #
+#   Version 1.8.2, 12-Mar-2023, Dan K. Snelson (@dan-snelson)
+#   - Allow "first name" to correctly handle names in "Lastname, Firstname" format (thanks, @meschwartz!)
+#
 ####################################################################################################
 
 
@@ -36,7 +39,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.8.1"
+scriptVersion="1.8.2-rc1"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin/
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
