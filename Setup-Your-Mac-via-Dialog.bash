@@ -217,7 +217,7 @@ until { [[ "${loggedInUser}" != "_mbsetupuser" ]] || [[ "${counter}" -gt "180" ]
 done
 
 loggedInUserFullname=$( id -F "${loggedInUser}" )
-loggedInUserFirstname=$( echo "$loggedInUserFullname" | cut -d " " -f 1 )
+loggedInUserFirstname=$( echo "$loggedInUserFullname" | sed -E 's/^.*, // ; s/([^ ]*).*/\1/' )
 loggedInUserID=$( id -u "${loggedInUser}" )
 updateScriptLog "PRE-FLIGHT CHECK: Current Logged-in User First Name: ${loggedInUserFirstname}"
 updateScriptLog "PRE-FLIGHT CHECK: Current Logged-in User ID: ${loggedInUserID}"
