@@ -20,10 +20,12 @@
 #   - Added `currentLoggedInUser` function to better validate `loggedInUser` (Issue No. 2)
 #   - Added new "Microsoft Office 365" Remote Validation (Pull Request No. 3)
 #   - Improved logging when `welcomeDialog` is `video` or `false` (Issue No. 4)
-#   - Create `overlayicon` from Self Service's custom icon (thanks, Mike Schwartz!)
+#   - Create `overlayicon` from Self Service's custom icon (thanks, @meschwartz!)
 #
-#   Version 1.8.2, 12-Mar-2023, Dan K. Snelson (@dan-snelson)
-#   - Allow "first name" to correctly handle names in "Lastname, Firstname" format (thanks, @meschwartz!)
+#   Version 1.8.2, 14-Mar-2023, Dan K. Snelson (@dan-snelson)
+#   - Allow "first name" to correctly handle names in "Lastname, Firstname" format (Pull Request No. 11; thanks, @meschwartz!)
+#   - Corrected `PATH` (thanks, @Theile!)
+#   - `Configuration` no longer displays in SYM's `infobox` when `welcomeDialog` was set to `false` or `video` (Issue No. 12; thanks, @Manikandan!)
 #
 ####################################################################################################
 
@@ -39,8 +41,8 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.8.2-rc1"
-export PATH=/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin/
+scriptVersion="1.8.2-rc2"
+export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
 welcomeDialog="${6:-"userInput"}"                                               # Parameter 6: Welcome dialog [ userInput (default) | video | false ]
@@ -2218,13 +2220,20 @@ dialogUpdateWelcome "quit:"
 # Output Line Number in `verbose` Debug Mode
 if [[ "${debugMode}" == "verbose" ]]; then updateScriptLog "# # # SETUP YOUR MAC VERBOSE DEBUG MODE: Line No. ${LINENO} # # #" ; fi
 
+# When `welcomeDialog` was set to `false` or `video`, set the value of `infoboxConfiguration` to null (thanks, @Manikandan!)
+if [[ "${symConfiguration}" == *"Catch-all"* ]]; then
+    infoboxConfiguration=""
+else
+    infoboxConfiguration="${symConfiguration}"
+fi
+
 infobox=""
 
 if [[ -n ${comment} ]]; then infobox+="**Comment:**  \n$comment  \n\n" ; fi
 if [[ -n ${computerName} ]]; then infobox+="**Computer Name:**  \n$computerName  \n\n" ; fi
 if [[ -n ${userName} ]]; then infobox+="**Username:**  \n$userName  \n\n" ; fi
 if [[ -n ${assetTag} ]]; then infobox+="**Asset Tag:**  \n$assetTag  \n\n" ; fi
-if [[ -n ${symConfiguration} ]]; then infobox+="**Configuration:**  \n$symConfiguration  \n\n" ; fi
+if [[ -n ${infoboxConfiguration} ]]; then infobox+="**Configuration:**  \n$infoboxConfiguration  \n\n" ; fi
 if [[ -n ${department} ]]; then infobox+="**Department:**  \n$department  \n\n" ; fi
 
 dialogUpdateSetupYourMac "infobox: ${infobox}"
