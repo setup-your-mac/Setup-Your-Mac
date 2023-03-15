@@ -25,7 +25,8 @@
 #   Version 1.8.2, 14-Mar-2023, Dan K. Snelson (@dan-snelson)
 #   - Allow "first name" to correctly handle names in "Lastname, Firstname" format (Pull Request No. 11; thanks, @meschwartz!)
 #   - Corrected `PATH` (thanks, @Theile!)
-#   - `Configuration` no longer displays in SYM's `infobox` when `welcomeDialog` was set to `false` or `video` (Issue No. 12; thanks, @Manikandan!)
+#   - `Configuration` no longer displays in SYM's `infobox` when `welcomeDialog` is set to `false` or `video` (Issue No. 12; thanks, @Manikandan!)
+#   - Previously installed apps with a `filepath` validation now display "Previously Installed" (instead of a generic "Installed"; thanks for the idea, @Manikandan!)
 #
 ####################################################################################################
 
@@ -41,7 +42,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.8.2-rc2"
+scriptVersion="1.8.2-rc3"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -574,7 +575,7 @@ dialogSetupYourMacCMD="$dialogBinary \
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #
 # From @astrugatch: I added this line to global variables:
-# jsonURL=${10}                                                               # URL Hosting JSON for policy_array
+# jsonURL=${10} # URL Hosting JSON for policy_array
 #
 # And this line replaces the entirety of the policy_array (~ line 503):
 # policy_array=("$(curl -sL $jsonURL)")
@@ -1412,8 +1413,10 @@ function confirmPolicyExecution() {
                 sleep 1
             elif [[ -f "${validation}" ]]; then
                 updateScriptLog "SETUP YOUR MAC DIALOG: Confirm Policy Execution: ${validation} exists; skipping 'run_jamf_trigger ${trigger}'"
+                previouslyInstalled="true"
             else
                 updateScriptLog "SETUP YOUR MAC DIALOG: Confirm Policy Execution: ${validation} does NOT exist; executing 'run_jamf_trigger ${trigger}'"
+                previouslyInstalled="false"
                 run_jamf_trigger "${trigger}"
             fi
             ;;
@@ -1464,7 +1467,9 @@ function validatePolicyResult() {
 
         */* ) 
             updateScriptLog "SETUP YOUR MAC DIALOG: Validate Policy Result: Testing for \"$validation\" …"
-            if [[ -f "${validation}" ]]; then
+            if [[ "${previouslyInstalled}" == "true" ]]; then
+                dialogUpdateSetupYourMac "listitem: index: $i, status: success, statustext: Previously Installed"
+            elif [[ -f "${validation}" ]]; then
                 dialogUpdateSetupYourMac "listitem: index: $i, status: success, statustext: Installed"
             else
                 dialogUpdateSetupYourMac "listitem: index: $i, status: fail, statustext: Failed"
@@ -2220,7 +2225,7 @@ dialogUpdateWelcome "quit:"
 # Output Line Number in `verbose` Debug Mode
 if [[ "${debugMode}" == "verbose" ]]; then updateScriptLog "# # # SETUP YOUR MAC VERBOSE DEBUG MODE: Line No. ${LINENO} # # #" ; fi
 
-# When `welcomeDialog` was set to `false` or `video`, set the value of `infoboxConfiguration` to null (thanks, @Manikandan!)
+# When `welcomeDialog` is set to `false` or `video`, set the value of `infoboxConfiguration` to null (thanks, @Manikandan!)
 if [[ "${symConfiguration}" == *"Catch-all"* ]]; then
     infoboxConfiguration=""
 else

@@ -5,7 +5,9 @@
 ### 14-Mar-2023
 - Allow "first name" to correctly handle names in "Lastname, Firstname" format ([Pull Request No. 11](https://github.com/dan-snelson/Setup-Your-Mac/pull/11); thanks @meschwartz!)
 - Corrected `PATH` (thanks, @Theile!)
-- `Configuration` no longer displays in SYM's `infobox` when `welcomeDialog` was set to `false` or `video` (Addresses [Issue No. 12](https://github.com/dan-snelson/Setup-Your-Mac/issues/12); thanks, @Manikandan!)
+- `Configuration` no longer displays in SYM's `infobox` when `welcomeDialog` is set to `false` or `video` (Addresses [Issue No. 12](https://github.com/dan-snelson/Setup-Your-Mac/issues/12); thanks, @Manikandan!)
+- Previously installed apps with a `filepath` validation now display "Previously Installed" (instead of a generic "Installed"; thanks for the idea, @Manikandan!)
+
 
 ## 1.8.1
 ### 11-Mar-2023
