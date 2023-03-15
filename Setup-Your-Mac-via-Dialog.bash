@@ -239,7 +239,25 @@ else
     /bin/launchctl bootout system "$jamflaunchDaemon"
 fi
 
-
+function reenableJamfLaunchDaemon() {
+updateScriptLog "QUIT SCRIPT: Re-enabling 'jamf' binary check-in"
+# Launch Daemon listed similar to com.jamfsoftware.task.Every 15 Minutes, based on check-in settings
+if [[ $(/bin/launchctl list | grep com.jamfsoftware.task.E) ]]; then
+	updateScriptLog "QUIT SCRIPT: 'jamf' binary check-In daemon already bootstrapped and started"
+else
+	updateScriptLog "QUIT SCRIPT: 'jamf' binary check-in daemon not loaded, attempting to bootstrap and start"
+	result="0"
+	until [ $result -eq 3 ]; do
+		/bin/launchctl bootstrap system "${jamflaunchDaemon}" && /bin/launchctl start "${jamflaunchDaemon}"
+		result="$?"
+		if [ $result = 3 ]; then
+			updateScriptLog "QUIT SCRIPT: Staring 'jamf' binary check-in daemon"
+		else
+			updateScriptLog "QUIT SCRIPT: Failed to start 'jamf' binary check-in daemon"
+		fi
+	done
+fi
+}
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Pre-flight Check: Validate / install swiftDialog (Thanks big bunches, @acodega!)
@@ -1849,6 +1867,7 @@ function quitScript() {
     # Purposely commented-out on 2023-01-26-092705; presumes Mac will be rebooted
     # updateScriptLog "QUIT SCRIPT: Reenable 'jamf' binary check-in"
     # launchctl bootstrap system "${jamflaunchDaemon}"
+    reenableJamfLaunchDaemon
 
     # Remove overlayicon
     if [[ -e ${overlayicon} ]]; then
