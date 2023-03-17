@@ -22,11 +22,12 @@
 #   - Improved logging when `welcomeDialog` is `video` or `false` (Issue No. 4)
 #   - Create `overlayicon` from Self Service's custom icon (thanks, @meschwartz!)
 #
-#   Version 1.8.2, 14-Mar-2023, Dan K. Snelson (@dan-snelson)
+#   Version 1.8.2, 16-Mar-2023, Dan K. Snelson (@dan-snelson)
 #   - Allow "first name" to correctly handle names in "Lastname, Firstname" format (Pull Request No. 11; thanks, @meschwartz!)
 #   - Corrected `PATH` (thanks, @Theile!)
 #   - `Configuration` no longer displays in SYM's `infobox` when `welcomeDialog` is set to `false` or `video` (Issue No. 12; thanks, @Manikandan!)
-#   - Previously installed apps with a `filepath` validation now display "Previously Installed" (instead of a generic "Installed"; thanks for the idea, @Manikandan!)
+#   - Previously installed apps with a `filepath` validation now display "Previously Installed" (instead of a generic "Installed"; Issue No. 13; thanks for the idea, @Manikandan!)
+#   - Updated icon hashes
 #
 ####################################################################################################
 
@@ -42,7 +43,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.8.2-rc3"
+scriptVersion="1.8.2-rc4"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -683,7 +684,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "Final Configuration",
-                        "icon": "00d7c19b984222630f20b6821425c3548e4b5094ecd846b03bde0994aaf08826",
+                        "icon": "4723e3e341a7e11e6881e418cf91b157fcc081bdb8948697750e5da3562df728",
                         "progresstext": "Finalizing Configuration …",
                         "trigger_list": [
                             {
@@ -698,7 +699,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "Computer Inventory",
-                        "icon": "90958d0e1f8f8287a86a1198d21cded84eeea44886df2b3357d909fe2e6f1296",
+                        "icon": "ff2147a6c09f5ef73d1c4406d00346811a9c64c0b6b7f36eb52fcb44943d26f9",
                         "progresstext": "A listing of your Mac’s apps and settings — its inventory — is sent automatically to the Jamf Pro server daily.",
                         "trigger_list": [
                             {
@@ -815,7 +816,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "Final Configuration",
-                        "icon": "00d7c19b984222630f20b6821425c3548e4b5094ecd846b03bde0994aaf08826",
+                        "icon": "4723e3e341a7e11e6881e418cf91b157fcc081bdb8948697750e5da3562df728",
                         "progresstext": "Finalizing Configuration …",
                         "trigger_list": [
                             {
@@ -830,7 +831,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "Computer Inventory",
-                        "icon": "90958d0e1f8f8287a86a1198d21cded84eeea44886df2b3357d909fe2e6f1296",
+                        "icon": "ff2147a6c09f5ef73d1c4406d00346811a9c64c0b6b7f36eb52fcb44943d26f9",
                         "progresstext": "A listing of your Mac’s apps and settings — its inventory — is sent automatically to the Jamf Pro server daily.",
                         "trigger_list": [
                             {
@@ -990,7 +991,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "Final Configuration",
-                        "icon": "00d7c19b984222630f20b6821425c3548e4b5094ecd846b03bde0994aaf08826",
+                        "icon": "4723e3e341a7e11e6881e418cf91b157fcc081bdb8948697750e5da3562df728",
                         "progresstext": "Finalizing Configuration …",
                         "trigger_list": [
                             {
@@ -1005,7 +1006,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "Computer Inventory",
-                        "icon": "90958d0e1f8f8287a86a1198d21cded84eeea44886df2b3357d909fe2e6f1296",
+                        "icon": "ff2147a6c09f5ef73d1c4406d00346811a9c64c0b6b7f36eb52fcb44943d26f9",
                         "progresstext": "A listing of your Mac’s apps and settings — its inventory — is sent automatically to the Jamf Pro server daily.",
                         "trigger_list": [
                             {
@@ -1082,7 +1083,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "Final Configuration",
-                        "icon": "00d7c19b984222630f20b6821425c3548e4b5094ecd846b03bde0994aaf08826",
+                        "icon": "4723e3e341a7e11e6881e418cf91b157fcc081bdb8948697750e5da3562df728",
                         "progresstext": "Finalizing Configuration …",
                         "trigger_list": [
                             {
@@ -1097,7 +1098,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "Computer Inventory",
-                        "icon": "90958d0e1f8f8287a86a1198d21cded84eeea44886df2b3357d909fe2e6f1296",
+                        "icon": "ff2147a6c09f5ef73d1c4406d00346811a9c64c0b6b7f36eb52fcb44943d26f9",
                         "progresstext": "A listing of your Mac’s apps and settings — its inventory — is sent automatically to the Jamf Pro server daily.",
                         "trigger_list": [
                             {
