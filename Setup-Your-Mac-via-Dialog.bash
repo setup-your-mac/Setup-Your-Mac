@@ -235,18 +235,42 @@ updateScriptLog "PRE-FLIGHT CHECK: Current Logged-in User ID: ${loggedInUserID}"
 # Pre-flight Check: Temporarily disable `jamf` binary check-in (thanks, @mactroll and @cube!)
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
+function toggleJamfLaunchDaemon() {
+
+jamflaunchDaemon="/Library/LaunchDaemons/com.jamfsoftware.task.1.plist"
+
 if [[ "${debugMode}" == "true" ]] || [[ "${debugMode}" == "verbose" ]] ; then
-    updateScriptLog "PRE-FLIGHT CHECK: DEBUG MODE: Normally, 'jamf' binary check-in would be temporarily disabled"
+	if [[ $(/bin/launchctl list | grep com.jamfsoftware.task.E) ]]; then
+		updateScriptLog "PRE-FLIGHT CHECK: DEBUG MODE: Normally, 'jamf' binary check-in would be temporarily disabled"
+	else
+		updateScriptLog "QUIT SCRIPT: DEBUG MODE: Normally, 'jamf' binary check-in would be re-enabled"
+	fi
 else
-    updateScriptLog "PRE-FLIGHT CHECK: Temporarily disable 'jamf' binary check-in"
-    jamflaunchDaemon="/Library/LaunchDaemons/com.jamfsoftware.task.1.plist"
-    while [[ ! -f "${jamflaunchDaemon}" ]] ; do
-        sleep 0.1
-    done
-    /bin/launchctl bootout system "$jamflaunchDaemon"
+	while [[ ! -f "${jamflaunchDaemon}" ]] ; do
+		sleep 0.1
+	done
+	if [[ $(/bin/launchctl list | grep com.jamfsoftware.task.E) ]]; then
+		updateScriptLog "PRE-FLIGHT CHECK: Temporarily disable 'jamf' binary check-in"
+		/bin/launchctl bootout system "${jamflaunchDaemon}"
+	else
+		updateScriptLog "QUIT SCRIPT: Re-enabling 'jamf' binary check-in"
+		updateScriptLog "QUIT SCRIPT: 'jamf' binary check-in daemon not loaded, attempting to bootstrap and start"
+		result="0"
+		until [ $result -eq 3 ]; do
+			/bin/launchctl bootstrap system "${jamflaunchDaemon}" && /bin/launchctl start "${jamflaunchDaemon}"
+			result="$?"
+			if [ $result = 3 ]; then
+				updateScriptLog "QUIT SCRIPT: Staring 'jamf' binary check-in daemon"
+			else
+				updateScriptLog "QUIT SCRIPT: Failed to start 'jamf' binary check-in daemon"
+			fi
+		done
+	fi
 fi
+}
 
-
+# Disable the 'jamf' binary check-in
+toggleJamfLaunchDaemon
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Pre-flight Check: Validate / install swiftDialog (Thanks big bunches, @acodega!)
@@ -1855,11 +1879,9 @@ function quitScript() {
     # Stop `caffeinate` process
     updateScriptLog "QUIT SCRIPT: De-caffeinate …"
     killProcess "caffeinate"
-
-    # Reenable 'jamf' binary check-in
-    # Purposely commented-out on 2023-01-26-092705; presumes Mac will be rebooted
-    # updateScriptLog "QUIT SCRIPT: Reenable 'jamf' binary check-in"
-    # launchctl bootstrap system "${jamflaunchDaemon}"
+    
+    # Enable the 'jamf' binary check-in
+    toggleJamfLaunchDaemon
 
     # Remove overlayicon
     if [[ -e ${overlayicon} ]]; then
