@@ -9,24 +9,11 @@
 #
 # HISTORY
 #
-#   Version 1.8.0, 06-Mar-2023, Dan K. Snelson (@dan-snelson)
-#   - Introduces "Configurations" (thanks, @drtaru!)
-#       - Required
-#       - Recommended
-#       - Complete
-#   - Play video at Welcome dialog (Issue No. 36)
-#
-#   Version 1.8.1, 11-Mar-2023, Dan K. Snelson (@dan-snelson)
-#   - Added `currentLoggedInUser` function to better validate `loggedInUser` (Issue No. 2)
-#   - Added new "Microsoft Office 365" Remote Validation (Pull Request No. 3)
-#   - Improved logging when `welcomeDialog` is `video` or `false` (Issue No. 4)
-#   - Create `overlayicon` from Self Service's custom icon (thanks, @meschwartz!)
-#
-#   Version 1.8.2, 16-Mar-2023, Dan K. Snelson (@dan-snelson)
+#   Version 1.9.0, 18-Mar-2023, Dan K. Snelson (@dan-snelson)
+#   - Previously installed apps with a `filepath` validation now display "Previously Installed" (instead of a generic "Installed"; Issue No. 13; thanks for the idea, @Manikandan!)
 #   - Allow "first name" to correctly handle names in "Lastname, Firstname" format (Pull Request No. 11; thanks, @meschwartz!)
 #   - Corrected `PATH` (thanks, @Theile!)
 #   - `Configuration` no longer displays in SYM's `infobox` when `welcomeDialog` is set to `false` or `video` (Issue No. 12; thanks, @Manikandan!)
-#   - Previously installed apps with a `filepath` validation now display "Previously Installed" (instead of a generic "Installed"; Issue No. 13; thanks for the idea, @Manikandan!)
 #   - Updated icon hashes
 #
 ####################################################################################################
@@ -43,7 +30,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.8.2-rc4"
+scriptVersion="1.9.0-rc1"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -505,7 +492,7 @@ bannerText="Setting up ${loggedInUserFirstname}'s Mac"
 helpmessage="If you need assistance, please contact the Global Service Department:  \n- **Telephone:** +1 (801) 555-1212  \n- **Email:** support@domain.org  \n- **Knowledge Base Article:** KB0057050  \n\n**Computer Information:** \n\n- **Operating System:**  ${macOSproductVersion} ($macOSbuildVersion)  \n- **Serial Number:** ${serialNumber}  \n- **Dialog:** ${dialogVersion}  \n- **Started:** ${timestamp}"
 infobox="Analyzing input …" # Customize at "Update Setup Your Mac's infobox"
 
-# Create `overlayicon` from Self Service's custom icon (thanks, Mike Schwartz!)
+# Create `overlayicon` from Self Service's custom icon (thanks, @meschwartz!)
 xxd -p -s 260 "$(defaults read /Library/Preferences/com.jamfsoftware.jamf self_service_app_path)"/Icon$'\r'/..namedfork/rsrc | xxd -r -p > /var/tmp/overlayicon.icns
 overlayicon="/var/tmp/overlayicon.icns"
 
