@@ -9,12 +9,13 @@
 #
 # HISTORY
 #
-#   Version 1.9.0, 18-Mar-2023, Dan K. Snelson (@dan-snelson)
+#   Version 1.9.0, 03-Apr-2023, Dan K. Snelson (@dan-snelson)
 #   - Previously installed apps with a `filepath` validation now display "Previously Installed" (instead of a generic "Installed"; Issue No. 13; thanks for the idea, @Manikandan!)
 #   - Allow "first name" to correctly handle names in "Lastname, Firstname" format (Pull Request No. 11; thanks, @meschwartz!)
 #   - Corrected `PATH` (thanks, @Theile!)
 #   - `Configuration` no longer displays in SYM's `infobox` when `welcomeDialog` is set to `false` or `video` (Issue No. 12; thanks, @Manikandan!)
 #   - Updated icon hashes
+#   - New `toggleJamfLaunchDaemon` function (Pull Request No. 16; thanks, @robjschroeder!)
 #
 ####################################################################################################
 
@@ -30,7 +31,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.9.0-rc1"
+scriptVersion="1.9.0-rc2"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -219,10 +220,10 @@ updateScriptLog "PRE-FLIGHT CHECK: Current Logged-in User ID: ${loggedInUserID}"
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Pre-flight Check: Temporarily disable `jamf` binary check-in (thanks, @mactroll, @cube, and @robjschroeder!)
+# Pre-flight Check: Toggle `jamf` binary check-in (thanks, @robjschroeder!)
+# shellcheck disable=SC2143
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-# shellcheck disable=SC2143
 function toggleJamfLaunchDaemon() {
 	
 jamflaunchDaemon="/Library/LaunchDaemons/com.jamfsoftware.task.1.plist"
@@ -257,6 +258,7 @@ fi
 }
 
 toggleJamfLaunchDaemon
+
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Pre-flight Check: Validate / install swiftDialog (Thanks big bunches, @acodega!)
@@ -1866,6 +1868,7 @@ function quitScript() {
     updateScriptLog "QUIT SCRIPT: De-caffeinate …"
     killProcess "caffeinate"
 
+    # Toggle `jamf` binary check-in 
     toggleJamfLaunchDaemon
 
     # Remove overlayicon
