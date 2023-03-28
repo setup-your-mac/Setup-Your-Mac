@@ -16,6 +16,7 @@
 #   - `Configuration` no longer displays in SYM's `infobox` when `welcomeDialog` is set to `false` or `video` (Issue No. 12; thanks, @Manikandan!)
 #   - Updated icon hashes
 #   - New `toggleJamfLaunchDaemon` function (Pull Request No. 16; thanks, @robjschroeder!)
+#   - Formatted policyJSON with [Erik Lynd's JSON Tools](https://marketplace.visualstudio.com/items?itemName=eriklynd.json-tools)
 #
 ####################################################################################################
 
@@ -31,7 +32,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.9.0-rc2"
+scriptVersion="1.9.0-rc3"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -204,10 +205,10 @@ counter="1"
 
 until { [[ "${loggedInUser}" != "_mbsetupuser" ]] || [[ "${counter}" -gt "180" ]]; } && { [[ "${loggedInUser}" != "loginwindow" ]] || [[ "${counter}" -gt "30" ]]; } ; do
 
-	updateScriptLog "PRE-FLIGHT CHECK: Logged-in User Counter: ${counter}"
-	currentLoggedInUser
-	sleep 2
-	((counter++))
+    updateScriptLog "PRE-FLIGHT CHECK: Logged-in User Counter: ${counter}"
+    currentLoggedInUser
+    sleep 2
+    ((counter++))
 
 done
 
@@ -225,39 +226,40 @@ updateScriptLog "PRE-FLIGHT CHECK: Current Logged-in User ID: ${loggedInUserID}"
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 function toggleJamfLaunchDaemon() {
-	
+    
 jamflaunchDaemon="/Library/LaunchDaemons/com.jamfsoftware.task.1.plist"
 if [[ "${debugMode}" == "true" ]] || [[ "${debugMode}" == "verbose" ]] ; then
-	if [[ $(/bin/launchctl list | grep com.jamfsoftware.task.E) ]]; then
-		updateScriptLog "PRE-FLIGHT CHECK: DEBUG MODE: Normally, 'jamf' binary check-in would be temporarily disabled"
-	else
-		updateScriptLog "QUIT SCRIPT: DEBUG MODE: Normally, 'jamf' binary check-in would be re-enabled"
-	fi
+    if [[ $(/bin/launchctl list | grep com.jamfsoftware.task.E) ]]; then
+        updateScriptLog "PRE-FLIGHT CHECK: DEBUG MODE: Normally, 'jamf' binary check-in would be temporarily disabled"
+    else
+        updateScriptLog "QUIT SCRIPT: DEBUG MODE: Normally, 'jamf' binary check-in would be re-enabled"
+    fi
 else
-	while [[ ! -f "${jamflaunchDaemon}" ]] ; do
-		sleep 0.1
-	done
-	if [[ $(/bin/launchctl list | grep com.jamfsoftware.task.E) ]]; then
-		updateScriptLog "PRE-FLIGHT CHECK: Temporarily disable 'jamf' binary check-in"
-		/bin/launchctl bootout system "${jamflaunchDaemon}"
-	else
-		updateScriptLog "QUIT SCRIPT: Re-enabling 'jamf' binary check-in"
-		updateScriptLog "QUIT SCRIPT: 'jamf' binary check-in daemon not loaded, attempting to bootstrap and start"
-		result="0"
-		until [ $result -eq 3 ]; do
-			/bin/launchctl bootstrap system "${jamflaunchDaemon}" && /bin/launchctl start "${jamflaunchDaemon}"
-			result="$?"
-			if [ $result = 3 ]; then
-				updateScriptLog "QUIT SCRIPT: Staring 'jamf' binary check-in daemon"
-			else
-				updateScriptLog "QUIT SCRIPT: Failed to start 'jamf' binary check-in daemon"
-			fi
-		done
-	fi
+    while [[ ! -f "${jamflaunchDaemon}" ]] ; do
+        sleep 0.1
+    done
+    if [[ $(/bin/launchctl list | grep com.jamfsoftware.task.E) ]]; then
+        updateScriptLog "PRE-FLIGHT CHECK: Temporarily disable 'jamf' binary check-in"
+        /bin/launchctl bootout system "${jamflaunchDaemon}"
+    else
+        updateScriptLog "QUIT SCRIPT: Re-enabling 'jamf' binary check-in"
+        updateScriptLog "QUIT SCRIPT: 'jamf' binary check-in daemon not loaded, attempting to bootstrap and start"
+        result="0"
+        until [ $result -eq 3 ]; do
+            /bin/launchctl bootstrap system "${jamflaunchDaemon}" && /bin/launchctl start "${jamflaunchDaemon}"
+            result="$?"
+            if [ $result = 3 ]; then
+                updateScriptLog "QUIT SCRIPT: Staring 'jamf' binary check-in daemon"
+            else
+                updateScriptLog "QUIT SCRIPT: Failed to start 'jamf' binary check-in daemon"
+            fi
+        done
+    fi
 fi
 }
 
 toggleJamfLaunchDaemon
+
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -313,7 +315,7 @@ function dialogCheck() {
 
     else
 
-        updateScriptLog "PRE-FLIGHT CHECK: swiftDialog version $(dialog --version) found; proceeding..."
+        updateScriptLog "PRE-FLIGHT CHECK: swiftDialog version $(/usr/local/bin/dialog --version) found; proceeding..."
 
     fi
 
@@ -321,6 +323,8 @@ function dialogCheck() {
 
 if [[ ! -e "/Library/Application Support/Dialog/Dialog.app" ]]; then
     dialogCheck
+else
+    updateScriptLog "PRE-FLIGHT CHECK: swiftDialog version $(/usr/local/bin/dialog --version) found; proceeding..."
 fi
 
 
@@ -424,7 +428,8 @@ welcomeVideo="--title \"$welcomeTitle\" \
 # "Welcome" JSON for Capturing User Input (thanks, @bartreardon!)
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-welcomeJSON='{
+welcomeJSON='
+{
     "bannerimage" : "'"${welcomeBannerImage}"'",
     "bannertext" : "'"${welcomeBannerText}"'",
     "title" : "'"${welcomeTitle}"'",
@@ -454,7 +459,7 @@ welcomeJSON='{
             "regexerror" : "Please enter (at least) seven digits for the Asset Tag, optionally preceed by either AP, IP or CD."
         }
     ],
-  "selectitems" : [
+    "selectitems" : [
         {   "title" : "Configuration",
             "default" : "Required",
             "values" : [
@@ -496,7 +501,8 @@ welcomeJSON='{
         }
     ],
     "height" : "725"
-}'
+}
+'
 
 
 
@@ -514,7 +520,7 @@ title="Setting up ${loggedInUserFirstname}'s Mac"
 message="Please wait while the following apps are installed …"
 bannerImage="https://img.freepik.com/free-photo/yellow-watercolor-paper_95678-446.jpg"
 bannerText="Setting up ${loggedInUserFirstname}'s Mac"
-helpmessage="If you need assistance, please contact the Global Service Department:  \n- **Telephone:** +1 (801) 555-1212  \n- **Email:** support@domain.org  \n- **Knowledge Base Article:** KB0057050  \n\n**Computer Information:** \n\n- **Operating System:**  ${macOSproductVersion} ($macOSbuildVersion)  \n- **Serial Number:** ${serialNumber}  \n- **Dialog:** ${dialogVersion}  \n- **Started:** ${timestamp}"
+helpmessage="If you need assistance, please contact the Global Service Department:  \n- **Telephone:** +1 (801) 555-1212  \n- **Email:** support@domain.org  \n- **Knowledge Base Article:** KB0057050  \n\n**Computer Information:**  \n- **Operating System:**  ${macOSproductVersion} (${macOSbuildVersion})  \n- **Serial Number:** ${serialNumber}  \n- **Dialog:** ${dialogVersion}  \n- **Started:** ${timestamp}"
 infobox="Analyzing input …" # Customize at "Update Setup Your Mac's infobox"
 
 # Create `overlayicon` from Self Service's custom icon (thanks, @meschwartz!)
@@ -979,7 +985,8 @@ function policyJSONConfiguration() {
                                 "validation": "/Applications/Microsoft Teams.app/Contents/Info.plist"
                             }
                         ]
-                    },                    {
+                    },
+                    {
                         "listitem": "Adobe Acrobat Reader",
                         "icon": "988b669ca27eab93a9bcd53bb7e2873fb98be4eaa95ae8974c14d611bea1d95f",
                         "progresstext": "Views, prints, and comments on PDF documents, and connects to Adobe Document Cloud.",
@@ -1521,9 +1528,9 @@ function validatePolicyResult() {
                             jamfProPolicyNameFailures+="• $listitem  \n"
                         fi
                     else
-                        # Inelligible
+                        # Ineligible
                         updateScriptLog "SETUP YOUR MAC DIALOG: Locally Validate Policy Result: Rosetta 2 is not applicable"
-                        dialogUpdateSetupYourMac "listitem: index: $i, status: error, statustext: Inelligible"
+                        dialogUpdateSetupYourMac "listitem: index: $i, status: error, statustext: Ineligible"
                     fi
                     ;;
                 filevault )
