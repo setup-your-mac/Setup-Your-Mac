@@ -394,7 +394,7 @@ welcomeMessage="Please enter your Mac's **Asset Tag**, select your preferred **C
 welcomeBannerImage="https://img.freepik.com/free-photo/yellow-watercolor-paper_95678-446.jpg"
 welcomeBannerText="Happy $( date +'%A' ), ${loggedInUserFirstname} and welcome to your new Mac!"
 welcomeCaption="Please review the above video, then click Continue."
-welcomeVideoID="vimeoid=803933536"
+welcomeVideoID="vimeoid=812753953"
 
 # Welcome icon set to either light or dark, based on user's Apperance setting (thanks, @mm2270!)
 appleInterfaceStyle=$( /usr/bin/defaults read /Users/"${loggedInUser}"/Library/Preferences/.GlobalPreferences.plist AppleInterfaceStyle 2>&1 )
