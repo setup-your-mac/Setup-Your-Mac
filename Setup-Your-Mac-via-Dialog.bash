@@ -32,7 +32,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.9.0-rc4"
+scriptVersion="1.9.0-rc5"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -587,13 +587,13 @@ dialogSetupYourMacCMD="$dialogBinary \
 #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #
-# From @wakco: If you would prefer to get your policyJSON externally replace it with:
+# Thanks, @wakco: If you would prefer to get your policyJSON externally replace it with:
 #  - policyJSON="$(cat /path/to/file.json)" # For getting from a file, replacing /path/to/file.json with the path to your file, or
 #  - policyJSON="$(curl -sL https://server.name/jsonquery)" # For a URL, replacing https://server.name/jsonquery with the URL of your file.
 #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #
-# From @astrugatch: I added this line to global variables:
+# Thanks, @astrugatch: I added this line to global variables:
 # jsonURL=${10} # URL Hosting JSON for policy_array
 #
 # And this line replaces the entirety of the policy_array (~ line 503):
@@ -2243,7 +2243,7 @@ dialogUpdateWelcome "quit:"
 # Output Line Number in `verbose` Debug Mode
 if [[ "${debugMode}" == "verbose" ]]; then updateScriptLog "# # # SETUP YOUR MAC VERBOSE DEBUG MODE: Line No. ${LINENO} # # #" ; fi
 
-# When `welcomeDialog` is set to `false` or `video`, set the value of `infoboxConfiguration` to null (thanks, @Manikandan!)
+# When `welcomeDialog` is set to `false` or `video`, set the value of `infoboxConfiguration` to null (thanks for the idea, @Manikandan!)
 if [[ "${symConfiguration}" == *"Catch-all"* ]]; then
     infoboxConfiguration=""
 else
