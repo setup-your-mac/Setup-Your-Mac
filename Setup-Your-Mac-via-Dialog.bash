@@ -9,7 +9,7 @@
 #
 # HISTORY
 #
-#   Version 1.9.0, 03-Apr-2023, Dan K. Snelson (@dan-snelson)
+#   Version 1.9.0, 01-Apr-2023, Dan K. Snelson (@dan-snelson)
 #   - Previously installed apps with a `filepath` validation now display "Previously Installed" (instead of a generic "Installed"; Issue No. 13; thanks for the idea, @Manikandan!)
 #   - Allow "first name" to correctly handle names in "Lastname, Firstname" format (Pull Request No. 11; thanks, @meschwartz!)
 #   - Corrected `PATH` (thanks, @Theile!)
@@ -17,6 +17,7 @@
 #   - Updated icon hashes
 #   - New `toggleJamfLaunchDaemon` function (Pull Request No. 16; thanks, @robjschroeder!)
 #   - Formatted policyJSON with [Erik Lynd's JSON Tools](https://marketplace.visualstudio.com/items?itemName=eriklynd.json-tools)
+#   - Corrected an issue where inventory would be submitted twice (thanks, @Manikandan!)
 #
 ####################################################################################################
 
@@ -1397,8 +1398,8 @@ function run_jamf_trigger() {
     elif [[ "$trigger" == "recon" ]]; then
 
         dialogUpdateSetupYourMac "listitem: index: $i, status: wait, statustext: Updating …, "
-        updateScriptLog "SETUP YOUR MAC DIALOG: Updating computer inventory with the following reconOptions: \"${reconOptions}\" …"
-        eval "${jamfBinary} recon ${reconOptions}"
+        updateScriptLog "SETUP YOUR MAC DIALOG: Computer inventory, with the following reconOptions: \"${reconOptions}\", will be be executed in the 'confirmPolicyExecution' function …"
+        # eval "${jamfBinary} recon ${reconOptions}"
 
     else
 

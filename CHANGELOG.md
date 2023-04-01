@@ -10,6 +10,7 @@
 - Updated icon hashes
 - `toggleJamfLaunchDaemon` function ([Pull Request No. 16](https://github.com/dan-snelson/Setup-Your-Mac/pull/16); thanks, @robjschroeder!)
 - Formatted policyJSON with [Erik Lynd's JSON Tools](https://marketplace.visualstudio.com/items?itemName=eriklynd.json-tools)
+- Corrected an issue where inventory would be submitted twice (thanks, @Manikandan!)
 
 ## 1.8.1
 ### 11-Mar-2023
