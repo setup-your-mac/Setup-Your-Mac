@@ -2,7 +2,7 @@
 
 
 ## 1.9.0
-### 03-Apr-2023
+### 01-Apr-2023
 - Previously installed apps with a `filepath` validation now display "Previously Installed" (instead of a generic "Installed"; [Issue No. 13](https://github.com/dan-snelson/Setup-Your-Mac/issues/13); thanks for the idea, @Manikandan!)
 - Allow "first name" to correctly handle names in "Lastname, Firstname" format ([Pull Request No. 11](https://github.com/dan-snelson/Setup-Your-Mac/pull/11); thanks @meschwartz!)
 - Corrected `PATH` (thanks, @Theile!)
