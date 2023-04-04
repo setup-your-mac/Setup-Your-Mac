@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 1.10.0
+### Release Date TBD
+- 🔥 **Breaking Change** for users of Setup Your Mac prior to `1.10.0` 🔥 
+  - Added `recon` validation, which **must** be used when specifiying the `recon` trigger (Addresses [Issue No. 19](https://github.com/dan-snelson/Setup-Your-Mac/issues/19))
+- Standardized formatting of `toggleJamfLaunchDaemon` function
+- Limit the 'loggedInUserFirstname' variable to 10 characters and capitalize its first letter (Addresses [Issue No. 20](https://github.com/dan-snelson/Setup-Your-Mac/issues/20); thanks @mani2care!)
 
 ## 1.9.0
 ### 01-Apr-2023

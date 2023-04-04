@@ -9,15 +9,11 @@
 #
 # HISTORY
 #
-#   Version 1.9.0, 01-Apr-2023, Dan K. Snelson (@dan-snelson)
-#   - Previously installed apps with a `filepath` validation now display "Previously Installed" (instead of a generic "Installed"; Issue No. 13; thanks for the idea, @Manikandan!)
-#   - Allow "first name" to correctly handle names in "Lastname, Firstname" format (Pull Request No. 11; thanks, @meschwartz!)
-#   - Corrected `PATH` (thanks, @Theile!)
-#   - `Configuration` no longer displays in SYM's `infobox` when `welcomeDialog` is set to `false` or `video` (Issue No. 12; thanks, @Manikandan!)
-#   - Updated icon hashes
-#   - New `toggleJamfLaunchDaemon` function (Pull Request No. 16; thanks, @robjschroeder!)
-#   - Formatted policyJSON with [Erik Lynd's JSON Tools](https://marketplace.visualstudio.com/items?itemName=eriklynd.json-tools)
-#   - Corrected an issue where inventory would be submitted twice (thanks, @Manikandan!)
+#   Version 1.10.0, Release Date TBD, Dan K. Snelson (@dan-snelson)
+#   - 🔥 **Breaking Change** for users of Setup Your Mac prior to `1.10.0` 🔥 
+#       - Added `recon` validation, which **must** be used when specifiying the `recon` trigger (Addresses Issue No. 19)
+#   - Standardized formatting of `toggleJamfLaunchDaemon` function
+#   - Limit the 'loggedInUserFirstname' variable to 10 characters and capitalize its first letter (Addresses Issue No. 20; thanks @mani2care!)
 #
 ####################################################################################################
 
@@ -33,7 +29,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.9.0"
+scriptVersion="1.10.0-rc1"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -214,7 +210,7 @@ until { [[ "${loggedInUser}" != "_mbsetupuser" ]] || [[ "${counter}" -gt "180" ]
 done
 
 loggedInUserFullname=$( id -F "${loggedInUser}" )
-loggedInUserFirstname=$( echo "$loggedInUserFullname" | sed -E 's/^.*, // ; s/([^ ]*).*/\1/' )
+loggedInUserFirstname=$( echo "$loggedInUserFullname" | sed -E 's/^.*, // ; s/([^ ]*).*/\1/' | sed 's/\(.\{10\}\).*/\1.../' | awk '{print toupper(substr($0,1,1))substr($0,2)}' )
 loggedInUserID=$( id -u "${loggedInUser}" )
 updateScriptLog "PRE-FLIGHT CHECK: Current Logged-in User First Name: ${loggedInUserFirstname}"
 updateScriptLog "PRE-FLIGHT CHECK: Current Logged-in User ID: ${loggedInUserID}"
@@ -228,35 +224,50 @@ updateScriptLog "PRE-FLIGHT CHECK: Current Logged-in User ID: ${loggedInUserID}"
 
 function toggleJamfLaunchDaemon() {
     
-jamflaunchDaemon="/Library/LaunchDaemons/com.jamfsoftware.task.1.plist"
-if [[ "${debugMode}" == "true" ]] || [[ "${debugMode}" == "verbose" ]] ; then
-    if [[ $(/bin/launchctl list | grep com.jamfsoftware.task.E) ]]; then
-        updateScriptLog "PRE-FLIGHT CHECK: DEBUG MODE: Normally, 'jamf' binary check-in would be temporarily disabled"
+    jamflaunchDaemon="/Library/LaunchDaemons/com.jamfsoftware.task.1.plist"
+
+    if [[ "${debugMode}" == "true" ]] || [[ "${debugMode}" == "verbose" ]] ; then
+
+        if [[ $(/bin/launchctl list | grep com.jamfsoftware.task.E) ]]; then
+            updateScriptLog "PRE-FLIGHT CHECK: DEBUG MODE: Normally, 'jamf' binary check-in would be temporarily disabled"
+        else
+            updateScriptLog "QUIT SCRIPT: DEBUG MODE: Normally, 'jamf' binary check-in would be re-enabled"
+        fi
+
     else
-        updateScriptLog "QUIT SCRIPT: DEBUG MODE: Normally, 'jamf' binary check-in would be re-enabled"
-    fi
-else
-    while [[ ! -f "${jamflaunchDaemon}" ]] ; do
-        sleep 0.1
-    done
-    if [[ $(/bin/launchctl list | grep com.jamfsoftware.task.E) ]]; then
-        updateScriptLog "PRE-FLIGHT CHECK: Temporarily disable 'jamf' binary check-in"
-        /bin/launchctl bootout system "${jamflaunchDaemon}"
-    else
-        updateScriptLog "QUIT SCRIPT: Re-enabling 'jamf' binary check-in"
-        updateScriptLog "QUIT SCRIPT: 'jamf' binary check-in daemon not loaded, attempting to bootstrap and start"
-        result="0"
-        until [ $result -eq 3 ]; do
-            /bin/launchctl bootstrap system "${jamflaunchDaemon}" && /bin/launchctl start "${jamflaunchDaemon}"
-            result="$?"
-            if [ $result = 3 ]; then
-                updateScriptLog "QUIT SCRIPT: Staring 'jamf' binary check-in daemon"
-            else
-                updateScriptLog "QUIT SCRIPT: Failed to start 'jamf' binary check-in daemon"
-            fi
+
+        while [[ ! -f "${jamflaunchDaemon}" ]] ; do
+            sleep 0.1
         done
+
+        if [[ $(/bin/launchctl list | grep com.jamfsoftware.task.E) ]]; then
+
+            updateScriptLog "PRE-FLIGHT CHECK: Temporarily disable 'jamf' binary check-in"
+            /bin/launchctl bootout system "${jamflaunchDaemon}"
+
+        else
+
+            updateScriptLog "QUIT SCRIPT: Re-enabling 'jamf' binary check-in"
+            updateScriptLog "QUIT SCRIPT: 'jamf' binary check-in daemon not loaded, attempting to bootstrap and start"
+            result="0"
+
+            until [ $result -eq 3 ]; do
+
+                /bin/launchctl bootstrap system "${jamflaunchDaemon}" && /bin/launchctl start "${jamflaunchDaemon}"
+                result="$?"
+
+                if [ $result = 3 ]; then
+                    updateScriptLog "QUIT SCRIPT: Staring 'jamf' binary check-in daemon"
+                else
+                    updateScriptLog "QUIT SCRIPT: Failed to start 'jamf' binary check-in daemon"
+                fi
+
+            done
+
+        fi
+
     fi
-fi
+
 }
 
 toggleJamfLaunchDaemon
@@ -723,7 +734,7 @@ function policyJSONConfiguration() {
                         "trigger_list": [
                             {
                                 "trigger": "recon",
-                                "validation": "None"
+                                "validation": "recon"
                             }
                         ]
                     }
@@ -855,7 +866,7 @@ function policyJSONConfiguration() {
                         "trigger_list": [
                             {
                                 "trigger": "recon",
-                                "validation": "None"
+                                "validation": "recon"
                             }
                         ]
                     }
@@ -1031,7 +1042,7 @@ function policyJSONConfiguration() {
                         "trigger_list": [
                             {
                                 "trigger": "recon",
-                                "validation": "None"
+                                "validation": "recon"
                             }
                         ]
                     }
@@ -1123,7 +1134,7 @@ function policyJSONConfiguration() {
                         "trigger_list": [
                             {
                                 "trigger": "recon",
-                                "validation": "None"
+                                "validation": "recon"
                             }
                         ]
                     }
@@ -1390,16 +1401,7 @@ function run_jamf_trigger() {
     if [[ "${debugMode}" == "true" ]] || [[ "${debugMode}" == "verbose" ]] ; then
 
         updateScriptLog "SETUP YOUR MAC DIALOG: DEBUG MODE: TRIGGER: $jamfBinary policy -trigger $trigger"
-        if [[ "$trigger" == "recon" ]]; then
-            updateScriptLog "SETUP YOUR MAC DIALOG: DEBUG MODE: RECON: $jamfBinary recon ${reconOptions}"
-        fi
         sleep 1
-
-    elif [[ "$trigger" == "recon" ]]; then
-
-        dialogUpdateSetupYourMac "listitem: index: $i, status: wait, statustext: Updating …, "
-        updateScriptLog "SETUP YOUR MAC DIALOG: Computer inventory, with the following reconOptions: \"${reconOptions}\", will be be executed in the 'confirmPolicyExecution' function …"
-        # eval "${jamfBinary} recon ${reconOptions}"
 
     else
 
@@ -1429,6 +1431,8 @@ function confirmPolicyExecution() {
     case ${validation} in
 
         */* ) # If the validation variable contains a forward slash (i.e., "/"), presume it's a path and check if that path exists on disk
+            # Output Line Number in `verbose` Debug Mode
+            if [[ "${debugMode}" == "verbose" ]]; then updateScriptLog "# # # SETUP YOUR MAC VERBOSE DEBUG MODE: Line No. ${LINENO} # # #" ; fi
             if [[ "${debugMode}" == "true" ]] || [[ "${debugMode}" == "verbose" ]] ; then
                 updateScriptLog "SETUP YOUR MAC DIALOG: Confirm Policy Execution: DEBUG MODE: Skipping 'run_jamf_trigger ${trigger}'"
                 sleep 1
@@ -1442,7 +1446,9 @@ function confirmPolicyExecution() {
             fi
             ;;
 
-        "None" )
+        "None" | "none" )
+            # Output Line Number in `verbose` Debug Mode
+            if [[ "${debugMode}" == "verbose" ]]; then updateScriptLog "# # # SETUP YOUR MAC VERBOSE DEBUG MODE: Line No. ${LINENO} # # #" ; fi
             updateScriptLog "SETUP YOUR MAC DIALOG: Confirm Policy Execution: ${validation}"
             if [[ "${debugMode}" == "true" ]] || [[ "${debugMode}" == "verbose" ]] ; then
                 sleep 1
@@ -1451,7 +1457,22 @@ function confirmPolicyExecution() {
             fi
             ;;
 
+        "Recon" | "recon" )
+            # Output Line Number in `verbose` Debug Mode
+            if [[ "${debugMode}" == "verbose" ]]; then updateScriptLog "# # # SETUP YOUR MAC VERBOSE DEBUG MODE: Line No. ${LINENO} # # #" ; fi
+            updateScriptLog "SETUP YOUR MAC DIALOG: Confirm Policy Execution: ${validation}"
+            if [[ "${debugMode}" == "true" ]] || [[ "${debugMode}" == "verbose" ]] ; then
+                updateScriptLog "SETUP YOUR MAC DIALOG: DEBUG MODE: Set 'debugMode' to false to update computer inventory with the following 'reconOptions': \"${reconOptions}\" …"
+            else
+                updateScriptLog "SETUP YOUR MAC DIALOG: Updating computer inventory with the following 'reconOptions': \"${reconOptions}\" …"
+                dialogUpdateSetupYourMac "listitem: index: $i, status: wait, statustext: Updating …, "
+                eval "${jamfBinary} recon ${reconOptions} -verbose | tee -a ${scriptLog}"
+            fi
+            ;;
+
         * )
+            # Output Line Number in `verbose` Debug Mode
+            if [[ "${debugMode}" == "verbose" ]]; then updateScriptLog "# # # SETUP YOUR MAC VERBOSE DEBUG MODE: Line No. ${LINENO} # # #" ; fi
             updateScriptLog "SETUP YOUR MAC DIALOG: Confirm Policy Execution Catch-all: ${validation}"
             if [[ "${debugMode}" == "true" ]] || [[ "${debugMode}" == "verbose" ]] ; then
                 sleep 1
@@ -1684,25 +1705,29 @@ function validatePolicyResult() {
 
 
         ###
-        # None (always evaluates as successful)
-        # For triggers which don't require validation, for example: recon
+        # None: For triggers which don't require validation
+        # (Always evaluates as: 'success' and 'Installed')
         ###
 
-        "None" )
+        "None" | "none")
             # Output Line Number in `verbose` Debug Mode
             if [[ "${debugMode}" == "verbose" ]]; then updateScriptLog "# # # SETUP YOUR MAC VERBOSE DEBUG MODE: Line No. ${LINENO} # # #" ; fi
             updateScriptLog "SETUP YOUR MAC DIALOG: Confirm Policy Execution: ${validation}"
             dialogUpdateSetupYourMac "listitem: index: $i, status: success, statustext: Installed"
-            if [[ "${trigger}" == "recon" ]]; then
-                dialogUpdateSetupYourMac "listitem: index: $i, status: wait, statustext: Updating …, "
-                updateScriptLog "SETUP YOUR MAC DIALOG: Updating computer inventory with the following reconOptions: \"${reconOptions}\" …"
-                if [[ "${debugMode}" == "true" ]] || [[ "${debugMode}" == "verbose" ]] ; then
-                    updateScriptLog "SETUP YOUR MAC DIALOG: DEBUG MODE: eval ${jamfBinary} recon ${reconOptions}"
-                else
-                    eval "${jamfBinary} recon ${reconOptions}"
-                fi
-                dialogUpdateSetupYourMac "listitem: index: $i, status: success, statustext: Updated"
-            fi
+            ;;
+
+
+
+        ###
+        # Recon: For reporting computer inventory update
+        # (Always evaluates as: 'success' and 'Updated')
+        ###
+
+        "Recon" | "recon" )
+            # Output Line Number in `verbose` Debug Mode
+            if [[ "${debugMode}" == "verbose" ]]; then updateScriptLog "# # # SETUP YOUR MAC VERBOSE DEBUG MODE: Line No. ${LINENO} # # #" ; fi
+            updateScriptLog "SETUP YOUR MAC DIALOG: Confirm Policy Execution: ${validation}"
+            dialogUpdateSetupYourMac "listitem: index: $i, status: success, statustext: Updated"
             ;;
 
 
