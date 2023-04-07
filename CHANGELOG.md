@@ -2,12 +2,21 @@
 
 ## 1.10.0
 ### Release Date TBD
+- :new: **Configuration Download Estimate** (Addresses [Issue No. 7]((https://github.com/dan-snelson/Setup-Your-Mac/issues/7)); thanks for the idea, @DevliegereM; heavy-lifting provided by @bartreardon!)
+  - Manually set `configurationDownloadEstimation` within the script to `true` to enable
+  - Specify an arbitrary value for `correctionCoefficient` (i.e., a "fudge factor" to help estimates match reality)
+  - Calculate total file size (in MB) for each Configuration, then populate:
+    - `configurationOneSize`
+    - `configurationTwoSize`
+    - `configurationThreeSize`
 - 🔥 **Breaking Change** for users of Setup Your Mac prior to `1.10.0` 🔥 
   - Added `recon` validation, which **must** be used when specifying the `recon` trigger (Addresses [Issue No. 19](https://github.com/dan-snelson/Setup-Your-Mac/issues/19))
 - Standardized formatting of `toggleJamfLaunchDaemon` function
-- Limit the 'loggedInUserFirstname' variable to 25 characters and capitalize its first letter (Addresses [Issue No. 20](https://github.com/dan-snelson/Setup-Your-Mac/issues/20); thanks @mani2care!)
-- Added line break to 'welcomeTitle' and 'welcomeBannerText'
+- Limit the `loggedInUserFirstname` variable to `25` characters and capitalize its first letter (Addresses [Issue No. 20](https://github.com/dan-snelson/Setup-Your-Mac/issues/20); thanks @mani2care!)
+- Added line break to `welcomeTitle` and `welcomeBannerText`
 - Replaced some generic "Mac" instances with hardware-specific model name (thanks, @pico!)
+- Replaced `verbose` Debug Mode code with `outputLineNumberInVerboseDebugMode` function (thanks, @bartreardon!)
+- Removed dependency on `dialogApp`
 
 ## 1.9.0
 ### 01-Apr-2023

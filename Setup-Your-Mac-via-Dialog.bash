@@ -10,12 +10,21 @@
 # HISTORY
 #
 #   Version 1.10.0, Release Date TBD, Dan K. Snelson (@dan-snelson)
+#   - 🆕 **Configuration Download Estimate** (Addresses [Issue No. 7]((https://github.com/dan-snelson/Setup-Your-Mac/issues/7)); thanks for the idea, @DevliegereM; heavy-lifting provided by @bartreardon!)
+#       - Manually set `configurationDownloadEstimation` within the script to `true` to enable
+#       - Specify an arbitrary value for `correctionCoefficient` (i.e., a "fudge factor" to help estimates match reality)
+#       - Calculate total file size (in MB) for each Configuration, then populate:
+#           - `configurationOneSize`
+#           - `configurationTwoSize`
+#           - `configurationThreeSize`
 #   - 🔥 **Breaking Change** for users of Setup Your Mac prior to `1.10.0` 🔥 
-#       - Added `recon` validation, which **must** be used when specifying the `recon` trigger (Addresses Issue No. 19)
+#       - Added `recon` validation, which **must** be used when specifying the `recon` trigger (Addresses [Issue No. 19](https://github.com/dan-snelson/Setup-Your-Mac/issues/19))
 #   - Standardized formatting of `toggleJamfLaunchDaemon` function
-#   - Limit the 'loggedInUserFirstname' variable to 25 characters and capitalize its first letter (Addresses Issue No. 20; thanks @mani2care!)
-#   - Added line break to 'welcomeTitle' and 'welcomeBannerText'
-#   - Replaced generic "Mac" with hardware-specific model name (thanks, @pico!)
+#   - Limit the `loggedInUserFirstname` variable to `25` characters and capitalize its first letter (Addresses [Issue No. 20](https://github.com/dan-snelson/Setup-Your-Mac/issues/20); thanks @mani2care!)
+#   - Added line break to `welcomeTitle` and `welcomeBannerText`
+#   - Replaced some generic "Mac" instances with hardware-specific model name (thanks, @pico!)
+#   - Replaced `verbose` Debug Mode code with `outputLineNumberInVerboseDebugMode` function (thanks, @bartreardon!)
+#   - Removed dependency on `dialogApp`
 #
 ####################################################################################################
 
@@ -31,7 +40,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.10.0-rc2"
+scriptVersion="1.10.0-rc3"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -52,6 +61,18 @@ osMajorVersion=$( echo "${osVersion}" | awk -F '.' '{print $1}' )
 modelName=$( /usr/libexec/PlistBuddy -c 'Print :0:_items:0:machine_name' /dev/stdin <<< "$(system_profiler -xml SPHardwareDataType)" )
 reconOptions=""
 exitCode="0"
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Configuration Download Estimation
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+configurationDownloadEstimation="true"  # [ false (default) | true ]
+correctionCoefficient="1.05"            # "Fudge factor" (to help estimate match reality)
+configurationOneSize="47"               # Total File Size (in MB) for Configuration One 
+configurationTwoSize="175"              # Total File Size (in MB) for Configuration Two
+configurationThreeSize="195"            # Total File Size (in MB) for Configuration Three
 
 
 
@@ -213,7 +234,6 @@ until { [[ "${loggedInUser}" != "_mbsetupuser" ]] || [[ "${counter}" -gt "180" ]
 done
 
 loggedInUserFullname=$( id -F "${loggedInUser}" )
-# loggedInUserFullname="raju, manikandanrajusubbaramanigoundar"
 loggedInUserFirstname=$( echo "$loggedInUserFullname" | sed -E 's/^.*, // ; s/([^ ]*).*/\1/' | sed 's/\(.\{25\}\).*/\1…/' | awk '{print toupper(substr($0,1,1))substr($0,2)}' )
 loggedInUserID=$( id -u "${loggedInUser}" )
 updateScriptLog "PRE-FLIGHT CHECK: Current Logged-in User First Name: ${loggedInUserFirstname}"
@@ -386,11 +406,12 @@ esac
 # Set Dialog path, Command Files, JAMF binary, log files and currently logged-in user
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-dialogApp="/Library/Application\ Support/Dialog/Dialog.app/Contents/MacOS/Dialog"
+# dialogApp="/Library/Application\ Support/Dialog/Dialog.app/Contents/MacOS/Dialog"
 dialogBinary="/usr/local/bin/dialog"
-welcomeCommandFile=$( mktemp /var/tmp/dialogWelcome.XXX )
-setupYourMacCommandFile=$( mktemp /var/tmp/dialogSetupYourMac.XXX )
-failureCommandFile=$( mktemp /var/tmp/dialogFailure.XXX )
+welcomeJSONFile=$( mktemp -u /var/tmp/welcomeJSONFile.XXX )
+welcomeCommandFile=$( mktemp -u /var/tmp/dialogWelcome.XXX )
+setupYourMacCommandFile=$( mktemp -u /var/tmp/dialogSetupYourMac.XXX )
+failureCommandFile=$( mktemp -u /var/tmp/dialogFailure.XXX )
 jamfBinary="/usr/local/bin/jamf"
 
 
@@ -446,11 +467,13 @@ welcomeVideo="--title \"$welcomeTitle\" \
 
 welcomeJSON='
 {
+    "commandfile" : "'"${welcomeCommandFile}"'",
     "bannerimage" : "'"${welcomeBannerImage}"'",
     "bannertext" : "'"${welcomeBannerText}"'",
     "title" : "'"${welcomeTitle}"'",
     "message" : "'"${welcomeMessage}"'",
     "icon" : "'"${welcomeIcon}"'",
+    "infobox" : "Analyzing …",
     "iconsize" : "198.0",
     "button1text" : "Continue",
     "button2text" : "Quit",
@@ -634,8 +657,7 @@ setupYourMacPolicyArrayIconPrefixUrl="https://ics.services.jamfcloud.com/icon/ha
 
 function policyJSONConfiguration() {
 
-    # Output Line Number in `verbose` Debug Mode
-    if [[ "${debugMode}" == "verbose" ]]; then updateScriptLog "WELCOME DIALOG: # # # SETUP YOUR MAC VERBOSE DEBUG MODE: Line No. ${LINENO} # # #" ; fi
+    outputLineNumberInVerboseDebugMode
 
     updateScriptLog "WELCOME DIALOG: PolicyJSON Configuration: $symConfiguration"
 
@@ -1258,6 +1280,16 @@ esac
 ####################################################################################################
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Output Line Number in `verbose` Debug Mode (thanks, @bartreardon!)
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+function outputLineNumberInVerboseDebugMode() {
+    if [[ "${debugMode}" == "verbose" ]]; then updateScriptLog "# # # SETUP YOUR MAC VERBOSE DEBUG MODE: Line No. ${BASH_LINENO[0]} # # #" ; fi
+}
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Run command as logged-in user (thanks, @scriptingosx!)
 # shellcheck disable=SC2145
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -1276,7 +1308,7 @@ function runAsUser() {
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 function dialogUpdateWelcome(){
-    updateScriptLog "WELCOME DIALOG: $1"
+    # updateScriptLog "WELCOME DIALOG: $1"
     echo "$1" >> "$welcomeCommandFile"
 }
 
@@ -1310,8 +1342,7 @@ function dialogUpdateFailure(){
 
 function finalise(){
 
-    # Output Line Number in `verbose` Debug Mode
-    if [[ "${debugMode}" == "verbose" ]]; then updateScriptLog "# # # SETUP YOUR MAC VERBOSE DEBUG MODE: Line No. ${LINENO} # # #" ; fi
+    outputLineNumberInVerboseDebugMode
 
     if [[ "${jamfProPolicyTriggerFailure}" == "failed" ]]; then
 
@@ -1397,8 +1428,7 @@ function get_json_value_welcomeDialog() {
 
 function run_jamf_trigger() {
 
-    # Output Line Number in `verbose` Debug Mode
-    if [[ "${debugMode}" == "verbose" ]]; then updateScriptLog "# # # SETUP YOUR MAC VERBOSE DEBUG MODE: Line No. ${LINENO} # # #" ; fi
+    outputLineNumberInVerboseDebugMode
 
     trigger="$1"
 
@@ -1425,8 +1455,7 @@ function run_jamf_trigger() {
 
 function confirmPolicyExecution() {
 
-    # Output Line Number in `verbose` Debug Mode
-    if [[ "${debugMode}" == "verbose" ]]; then updateScriptLog "# # # SETUP YOUR MAC VERBOSE DEBUG MODE: Line No. ${LINENO} # # #" ; fi
+    outputLineNumberInVerboseDebugMode
 
     trigger="${1}"
     validation="${2}"
@@ -1435,8 +1464,8 @@ function confirmPolicyExecution() {
     case ${validation} in
 
         */* ) # If the validation variable contains a forward slash (i.e., "/"), presume it's a path and check if that path exists on disk
-            # Output Line Number in `verbose` Debug Mode
-            if [[ "${debugMode}" == "verbose" ]]; then updateScriptLog "# # # SETUP YOUR MAC VERBOSE DEBUG MODE: Line No. ${LINENO} # # #" ; fi
+
+            outputLineNumberInVerboseDebugMode
             if [[ "${debugMode}" == "true" ]] || [[ "${debugMode}" == "verbose" ]] ; then
                 updateScriptLog "SETUP YOUR MAC DIALOG: Confirm Policy Execution: DEBUG MODE: Skipping 'run_jamf_trigger ${trigger}'"
                 sleep 1
@@ -1451,8 +1480,8 @@ function confirmPolicyExecution() {
             ;;
 
         "None" | "none" )
-            # Output Line Number in `verbose` Debug Mode
-            if [[ "${debugMode}" == "verbose" ]]; then updateScriptLog "# # # SETUP YOUR MAC VERBOSE DEBUG MODE: Line No. ${LINENO} # # #" ; fi
+
+            outputLineNumberInVerboseDebugMode
             updateScriptLog "SETUP YOUR MAC DIALOG: Confirm Policy Execution: ${validation}"
             if [[ "${debugMode}" == "true" ]] || [[ "${debugMode}" == "verbose" ]] ; then
                 sleep 1
@@ -1462,8 +1491,8 @@ function confirmPolicyExecution() {
             ;;
 
         "Recon" | "recon" )
-            # Output Line Number in `verbose` Debug Mode
-            if [[ "${debugMode}" == "verbose" ]]; then updateScriptLog "# # # SETUP YOUR MAC VERBOSE DEBUG MODE: Line No. ${LINENO} # # #" ; fi
+
+            outputLineNumberInVerboseDebugMode
             updateScriptLog "SETUP YOUR MAC DIALOG: Confirm Policy Execution: ${validation}"
             if [[ "${debugMode}" == "true" ]] || [[ "${debugMode}" == "verbose" ]] ; then
                 updateScriptLog "SETUP YOUR MAC DIALOG: DEBUG MODE: Set 'debugMode' to false to update computer inventory with the following 'reconOptions': \"${reconOptions}\" …"
@@ -1475,8 +1504,8 @@ function confirmPolicyExecution() {
             ;;
 
         * )
-            # Output Line Number in `verbose` Debug Mode
-            if [[ "${debugMode}" == "verbose" ]]; then updateScriptLog "# # # SETUP YOUR MAC VERBOSE DEBUG MODE: Line No. ${LINENO} # # #" ; fi
+
+            outputLineNumberInVerboseDebugMode
             updateScriptLog "SETUP YOUR MAC DIALOG: Confirm Policy Execution Catch-all: ${validation}"
             if [[ "${debugMode}" == "true" ]] || [[ "${debugMode}" == "verbose" ]] ; then
                 sleep 1
@@ -1497,8 +1526,7 @@ function confirmPolicyExecution() {
 
 function validatePolicyResult() {
 
-    # Output Line Number in `verbose` Debug Mode
-    if [[ "${debugMode}" == "verbose" ]]; then updateScriptLog "# # # SETUP YOUR MAC VERBOSE DEBUG MODE: Line No. ${LINENO} # # #" ; fi
+    outputLineNumberInVerboseDebugMode
 
     trigger="${1}"
     validation="${2}"
@@ -1714,8 +1742,8 @@ function validatePolicyResult() {
         ###
 
         "None" | "none")
-            # Output Line Number in `verbose` Debug Mode
-            if [[ "${debugMode}" == "verbose" ]]; then updateScriptLog "# # # SETUP YOUR MAC VERBOSE DEBUG MODE: Line No. ${LINENO} # # #" ; fi
+
+            outputLineNumberInVerboseDebugMode
             updateScriptLog "SETUP YOUR MAC DIALOG: Confirm Policy Execution: ${validation}"
             dialogUpdateSetupYourMac "listitem: index: $i, status: success, statustext: Installed"
             ;;
@@ -1728,8 +1756,8 @@ function validatePolicyResult() {
         ###
 
         "Recon" | "recon" )
-            # Output Line Number in `verbose` Debug Mode
-            if [[ "${debugMode}" == "verbose" ]]; then updateScriptLog "# # # SETUP YOUR MAC VERBOSE DEBUG MODE: Line No. ${LINENO} # # #" ; fi
+
+            outputLineNumberInVerboseDebugMode
             updateScriptLog "SETUP YOUR MAC DIALOG: Confirm Policy Execution: ${validation}"
             dialogUpdateSetupYourMac "listitem: index: $i, status: success, statustext: Updated"
             ;;
@@ -1741,8 +1769,8 @@ function validatePolicyResult() {
         ###
 
         * )
-            # Output Line Number in `verbose` Debug Mode
-            if [[ "${debugMode}" == "verbose" ]]; then updateScriptLog "# # # SETUP YOUR MAC VERBOSE DEBUG MODE: Line No. ${LINENO} # # #" ; fi
+
+            outputLineNumberInVerboseDebugMode
             updateScriptLog "SETUP YOUR MAC DIALOG: Validate Policy Results Catch-all: ${validation}"
             dialogUpdateSetupYourMac "listitem: index: $i, status: error, statustext: Error"
             ;;
@@ -1779,8 +1807,7 @@ function killProcess() {
 
 function completionAction() {
 
-    # Output Line Number in `verbose` Debug Mode
-    if [[ "${debugMode}" == "verbose" ]]; then updateScriptLog "# # # SETUP YOUR MAC VERBOSE DEBUG MODE: Line No. ${LINENO} # # #" ; fi
+    outputLineNumberInVerboseDebugMode
 
     if [[ "${debugMode}" == "true" ]] || [[ "${debugMode}" == "verbose" ]] ; then
 
@@ -1891,13 +1918,92 @@ function completionAction() {
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Welcome dialog 'infobox' animation (thanks, @bartreadon!)
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+function welcomeDialogInfoboxAnimation() {
+    callingPID=$1
+    clock_emojis=("🕐" "🕑" "🕒" "🕓" "🕔" "🕕" "🕖" "🕗" "🕘" "🕙" "🕚" "🕛")
+    while true; do
+        for emoji in "${clock_emojis[@]}"; do
+            if kill -0 "$callingPID" 2>/dev/null; then
+                dialogUpdateWelcome "infobox: Testing Connection $emoji"
+            else
+                break
+            fi
+            sleep 0.6
+        done
+    done
+}
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Check the network quality (thanks, @bartreadon!)
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+function checkNetworkQuality() {
+    
+    myPID="$$"
+    updateScriptLog "WELCOME DIALOG: Display Welcome dialog 'infobox' animation …"
+    welcomeDialogInfoboxAnimation "$myPID" &
+    welcomeDialogInfoboxAnimationPID="$!"
+
+    networkquality -s -v -c > /var/tmp/networkqualityTest
+    kill ${welcomeDialogInfoboxAnimationPID}
+    outputLineNumberInVerboseDebugMode
+
+    updateScriptLog "WELCOME DIALOG: Completed networkqualityTest …"
+    networkqualityTest=$( < /var/tmp/networkqualityTest )
+    rm /var/tmp/networkqualityTest
+
+    case "${osVersion}" in
+
+        11* ) 
+            dlThroughput="N/A; macOS ${osVersion}"
+            dlResponsiveness="N/A; macOS ${osVersion}"
+            dlStartDate="N/A; macOS ${osVersion}"
+            dlEndDate="N/A; macOS ${osVersion}"
+            ;;
+
+        12* | 13* )
+            dlThroughput=$( get_json_value "$networkqualityTest" "dl_throughput")
+            dlResponsiveness=$( get_json_value "$networkqualityTest" "dl_responsiveness" )
+            dlStartDate=$( get_json_value "$networkqualityTest" "start_date" )
+            dlEndDate=$( get_json_value "$networkqualityTest" "end_date" )
+            ;;
+
+    esac
+
+    mbps=$( echo "scale=2; ( $dlThroughput / 1000000 )" | bc )
+    updateScriptLog "WELCOME DIALOG: $mbps (Mbps)"
+
+    configurationOneEstimatedSeconds=$( echo "scale=2; (((( $configurationOneSize / $mbps ) * 60 ) * 60 ) * $correctionCoefficient )" | bc | sed 's/\.[0-9]*//' )
+    updateScriptLog "WELCOME DIALOG: Configuration One Estimated Seconds: $configurationOneEstimatedSeconds"
+    updateScriptLog "WELCOME DIALOG: Configuration One Estimate: $(printf '%dh:%dm:%ds\n' $((configurationOneEstimatedSeconds/3600)) $((configurationOneEstimatedSeconds%3600/60)) $((configurationOneEstimatedSeconds%60)))"
+
+    configurationTwoEstimatedSeconds=$( echo "scale=2; (((( $configurationTwoSize / $mbps ) * 60 ) * 60 ) * $correctionCoefficient )" | bc | sed 's/\.[0-9]*//' )
+    updateScriptLog "WELCOME DIALOG: Configuration Two Estimated Seconds: $configurationTwoEstimatedSeconds"
+    updateScriptLog "WELCOME DIALOG: Configuration Two Estimate: $(printf '%dh:%dm:%ds\n' $((configurationTwoEstimatedSeconds/3600)) $((configurationTwoEstimatedSeconds%3600/60)) $((configurationTwoEstimatedSeconds%60)))"
+
+    configurationThreeEstimatedSeconds=$( echo "scale=2; (((( $configurationThreeSize / $mbps ) * 60 ) * 60 ) * $correctionCoefficient )" | bc | sed 's/\.[0-9]*//' )
+    updateScriptLog "WELCOME DIALOG: Configuration Three Estimated Seconds: $configurationThreeEstimatedSeconds"
+    updateScriptLog "WELCOME DIALOG: Configuration Three Estimate: $(printf '%dh:%dm:%ds\n' $((configurationThreeEstimatedSeconds/3600)) $((configurationThreeEstimatedSeconds%3600/60)) $((configurationThreeEstimatedSeconds%60)))"
+
+    updateScriptLog "WELCOME DIALOG: Network Quality Test: Started: $dlStartDate, Ended: $dlEndDate; Download: $mbps Mbps, Responsiveness: $dlResponsiveness"
+    dialogUpdateWelcome "infobox: **Connection:**  \n- Download:  \n$mbps Mbps  \n\n**Estimates:**  \n- Required: $(printf '%dh:%dm:%ds\n' $((configurationOneEstimatedSeconds/3600)) $((configurationOneEstimatedSeconds%3600/60)) $((configurationOneEstimatedSeconds%60)))  \n\n- Recommended: $(printf '%dh:%dm:%ds\n' $((configurationTwoEstimatedSeconds/3600)) $((configurationTwoEstimatedSeconds%3600/60)) $((configurationTwoEstimatedSeconds%60)))  \n\n- Complete: $(printf '%dh:%dm:%ds\n' $((configurationThreeEstimatedSeconds/3600)) $((configurationThreeEstimatedSeconds%3600/60)) $((configurationThreeEstimatedSeconds%60)))"
+
+}
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Quit Script (thanks, @bartreadon!)
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 function quitScript() {
 
-    # Output Line Number in `verbose` Debug Mode
-    if [[ "${debugMode}" == "verbose" ]]; then updateScriptLog "# # # SETUP YOUR MAC VERBOSE DEBUG MODE: Line No. ${LINENO} # # #" ; fi
+    outputLineNumberInVerboseDebugMode
 
     updateScriptLog "QUIT SCRIPT: Exiting …"
 
@@ -1920,6 +2026,12 @@ function quitScript() {
         rm "${welcomeCommandFile}"
     fi
 
+    # Remove welcomeJSONFile
+    if [[ -e ${welcomeJSONFile} ]]; then
+        updateScriptLog "QUIT SCRIPT: Removing ${welcomeJSONFile} …"
+        rm "${welcomeJSONFile}"
+    fi
+
     # Remove setupYourMacCommandFile
     if [[ -e ${setupYourMacCommandFile} ]]; then
         updateScriptLog "QUIT SCRIPT: Removing ${setupYourMacCommandFile} …"
@@ -1933,10 +2045,10 @@ function quitScript() {
     fi
 
     # Remove any default dialog file
-    if [[ -e /var/tmp/dialog.log ]]; then
-        updateScriptLog "QUIT SCRIPT: Removing default dialog file …"
-        rm /var/tmp/dialog.log
-    fi
+    # if [[ -e /var/tmp/dialog.log ]]; then
+    #     updateScriptLog "QUIT SCRIPT: Removing default dialog file …"
+    #     rm /var/tmp/dialog.log
+    # fi
 
     # Check for user clicking "Quit" at Welcome dialog
     if [[ "${welcomeReturnCode}" == "2" ]]; then
@@ -1987,16 +2099,14 @@ if [[ "${welcomeDialog}" == "video" ]]; then
     updateScriptLog "WELCOME DIALOG: Displaying "
     eval "${dialogBinary} --args ${welcomeVideo}"
 
-    # Output Line Number in `verbose` Debug Mode
-    if [[ "${debugMode}" == "verbose" ]]; then updateScriptLog "WELCOME DIALOG: # # # SETUP YOUR MAC VERBOSE DEBUG MODE: Line No. ${LINENO} # # #" ; fi
+    outputLineNumberInVerboseDebugMode
     symConfiguration="Catch-all (video)"
     policyJSONConfiguration
 
     eval "${dialogSetupYourMacCMD[*]}" & sleep 0.3
     dialogSetupYourMacProcessID=$!
     until pgrep -q -x "Dialog"; do
-        # Output Line Number in `verbose` Debug Mode
-        if [[ "${debugMode}" == "verbose" ]]; then updateScriptLog "# # # SETUP YOUR MAC VERBOSE DEBUG MODE: Line No. ${LINENO} # # #" ; fi
+        outputLineNumberInVerboseDebugMode
         updateScriptLog "WELCOME DIALOG: Waiting to display 'Setup Your Mac' dialog; pausing"
         sleep 0.5
     done
@@ -2005,14 +2115,36 @@ if [[ "${welcomeDialog}" == "video" ]]; then
 
 elif [[ "${welcomeDialog}" == "userInput" ]]; then
 
-    # Output Line Number in `verbose` Debug Mode
-    if [[ "${debugMode}" == "verbose" ]]; then updateScriptLog "# # # SETUP YOUR MAC VERBOSE DEBUG MODE: Line No. ${LINENO} # # #" ; fi
+    outputLineNumberInVerboseDebugMode
 
-    # Write Welcome JSON to disk
-    echo "$welcomeJSON" > "$welcomeCommandFile"
+    # Estimate Configuration Download Times
+    if [[ "${configurationDownloadEstimation}" == "true" ]]; then
 
-    welcomeResults=$( eval "${dialogApp} --jsonfile ${welcomeCommandFile} --json" )
+        outputLineNumberInVerboseDebugMode
 
+        updateScriptLog "WELCOME DIALOG: Starting networkqualityTest …"
+        checkNetworkQuality &
+
+        updateScriptLog "WELCOME DIALOG: Write 'welcomeJSON' to $welcomeJSONFile …"
+        echo "$welcomeJSON" > "$welcomeJSONFile"
+
+        updateScriptLog "WELCOME DIALOG: Display 'Welcome' dialog …"
+        # welcomeResults=$( eval "${dialogBinary} --jsonfile ${welcomeJSONFile} --json" )
+        welcomeResults=$( eval "${dialogBinary} --jsonfile ${welcomeJSONFile} --json" )
+
+    else
+
+        # Display Welcome dialog, sans estimation of Configuration download times
+        updateScriptLog "WELCOME DIALOG: Skipping estimation of Configuration download times"
+        
+        # Write Welcome JSON to disk
+        welcomeJSON=${welcomeJSON//Analyzing …/}
+        echo "$welcomeJSON" > "$welcomeJSONFile"
+        welcomeResults=$( eval "${dialogBinary} --jsonfile ${welcomeJSONFile} --json" )
+
+    fi
+
+    # Evaluate User Input
     if [[ -z "${welcomeResults}" ]]; then
         welcomeReturnCode="2"
     else
@@ -2130,8 +2262,7 @@ elif [[ "${welcomeDialog}" == "userInput" ]]; then
             eval "${dialogSetupYourMacCMD[*]}" & sleep 0.3
             dialogSetupYourMacProcessID=$!
             until pgrep -q -x "Dialog"; do
-                # Output Line Number in `verbose` Debug Mode
-                if [[ "${debugMode}" == "verbose" ]]; then updateScriptLog "# # # SETUP YOUR MAC VERBOSE DEBUG MODE: Line No. ${LINENO} # # #" ; fi
+                outputLineNumberInVerboseDebugMode
                 updateScriptLog "WELCOME DIALOG: Waiting to display 'Setup Your Mac' dialog; pausing"
                 sleep 0.5
             done
@@ -2169,8 +2300,7 @@ else
     # Select "Catch-all" policyJSON 
     ###
 
-    # Output Line Number in `verbose` Debug Mode
-    if [[ "${debugMode}" == "verbose" ]]; then updateScriptLog "WELCOME DIALOG: # # # SETUP YOUR MAC VERBOSE DEBUG MODE: Line No. ${LINENO} # # #" ; fi
+    outputLineNumberInVerboseDebugMode
     symConfiguration="Catch-all ('Welcome' dialog disabled)"
     policyJSONConfiguration
 
@@ -2183,8 +2313,7 @@ else
     eval "${dialogSetupYourMacCMD[*]}" & sleep 0.3
     dialogSetupYourMacProcessID=$!
     until pgrep -q -x "Dialog"; do
-        # Output Line Number in `verbose` Debug Mode
-        if [[ "${debugMode}" == "verbose" ]]; then updateScriptLog "# # # SETUP YOUR MAC VERBOSE DEBUG MODE: Line No. ${LINENO} # # #" ; fi
+        outputLineNumberInVerboseDebugMode
         updateScriptLog "WELCOME DIALOG: Waiting to display 'Setup Your Mac' dialog; pausing"
         sleep 0.5
     done
@@ -2199,8 +2328,7 @@ fi
 # Iterate through policyJSON to construct the list for swiftDialog
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-# Output Line Number in `verbose` Debug Mode
-if [[ "${debugMode}" == "verbose" ]]; then updateScriptLog "# # # SETUP YOUR MAC VERBOSE DEBUG MODE: Line No. ${LINENO} # # #" ; fi
+outputLineNumberInVerboseDebugMode
 
 dialog_step_length=$(get_json_value "${policyJSON}" "steps.length")
 for (( i=0; i<dialog_step_length; i++ )); do
@@ -2216,8 +2344,7 @@ done
 # Determine the "progress: increment" value based on the number of steps in policyJSON
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-# Output Line Number in `verbose` Debug Mode
-if [[ "${debugMode}" == "verbose" ]]; then updateScriptLog "# # # SETUP YOUR MAC VERBOSE DEBUG MODE: Line No. ${LINENO} # # #" ; fi
+outputLineNumberInVerboseDebugMode
 
 totalProgressSteps=$(get_json_value "${policyJSON}" "steps.length")
 progressIncrementValue=$(( 100 / totalProgressSteps ))
@@ -2231,8 +2358,7 @@ updateScriptLog "SETUP YOUR MAC DIALOG: Progress Increment Value: ${progressIncr
 # To add a character to the start, use "/#/" instead of the "/%/"
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-# Output Line Number in `verbose` Debug Mode
-if [[ "${debugMode}" == "verbose" ]]; then updateScriptLog "# # # SETUP YOUR MAC VERBOSE DEBUG MODE: Line No. ${LINENO} # # #" ; fi
+outputLineNumberInVerboseDebugMode
 
 list_item_string=${list_item_array[*]/%/,}
 dialogUpdateSetupYourMac "list: ${list_item_string%?}"
@@ -2247,8 +2373,7 @@ dialogUpdateSetupYourMac "list: show"
 # Set initial progress bar
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-# Output Line Number in `verbose` Debug Mode
-if [[ "${debugMode}" == "verbose" ]]; then updateScriptLog "# # # SETUP YOUR MAC VERBOSE DEBUG MODE: Line No. ${LINENO} # # #" ; fi
+outputLineNumberInVerboseDebugMode
 
 updateScriptLog "SETUP YOUR MAC DIALOG: Initial progress bar"
 dialogUpdateSetupYourMac "progress: 1"
@@ -2259,8 +2384,7 @@ dialogUpdateSetupYourMac "progress: 1"
 # Close Welcome dialog
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-# Output Line Number in `verbose` Debug Mode
-if [[ "${debugMode}" == "verbose" ]]; then updateScriptLog "# # # SETUP YOUR MAC VERBOSE DEBUG MODE: Line No. ${LINENO} # # #" ; fi
+outputLineNumberInVerboseDebugMode
 
 dialogUpdateWelcome "quit:"
 
@@ -2270,8 +2394,7 @@ dialogUpdateWelcome "quit:"
 # Update Setup Your Mac's infobox
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-# Output Line Number in `verbose` Debug Mode
-if [[ "${debugMode}" == "verbose" ]]; then updateScriptLog "# # # SETUP YOUR MAC VERBOSE DEBUG MODE: Line No. ${LINENO} # # #" ; fi
+outputLineNumberInVerboseDebugMode
 
 # When `welcomeDialog` is set to `false` or `video`, set the value of `infoboxConfiguration` to null (thanks for the idea, @Manikandan!)
 if [[ "${symConfiguration}" == *"Catch-all"* ]]; then
@@ -2299,8 +2422,7 @@ dialogUpdateSetupYourMac "infobox: ${infobox}"
 
 for (( i=0; i<dialog_step_length; i++ )); do 
 
-    # Output Line Number in `verbose` Debug Mode
-    if [[ "${debugMode}" == "verbose" ]]; then updateScriptLog "# # # SETUP YOUR MAC VERBOSE DEBUG MODE: Line No. ${LINENO} # # #" ; fi
+    outputLineNumberInVerboseDebugMode
 
     # Initialize SECONDS
     SECONDS="0"
@@ -2354,7 +2476,6 @@ done
 # Complete processing and enable the "Done" button
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-# Output Line Number in `verbose` Debug Mode
-if [[ "${debugMode}" == "verbose" ]]; then updateScriptLog "# # # SETUP YOUR MAC VERBOSE DEBUG MODE: Line No. ${LINENO} # # #" ; fi
+outputLineNumberInVerboseDebugMode
 
 finalise
