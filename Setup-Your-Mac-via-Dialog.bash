@@ -433,6 +433,14 @@ welcomeBannerText="Happy $( date +'%A' ), ${loggedInUserFirstname}!  \nWelcome t
 welcomeCaption="Please review the above video, then click Continue."
 welcomeVideoID="vimeoid=812753953"
 
+# Check if the custom welcomeBannerImage is available, and if not, use a alternative image
+if curl --output /dev/null --silent --head --fail "$welcomeBannerImage"; then
+    updateScriptLog "WELCOME DIALOG: welcomeBannerImage is available, using it"
+else
+    updateScriptLog "WELCOME DIALOG: welcomeBannerImage is not available, using a default image"
+    welcomeBannerImage="https://img.freepik.com/free-photo/yellow-watercolor-paper_95678-448.jpg"
+fi
+
 # Welcome icon set to either light or dark, based on user's Apperance setting (thanks, @mm2270!)
 appleInterfaceStyle=$( /usr/bin/defaults read /Users/"${loggedInUser}"/Library/Preferences/.GlobalPreferences.plist AppleInterfaceStyle 2>&1 )
 if [[ "${appleInterfaceStyle}" == "Dark" ]]; then
@@ -561,6 +569,14 @@ bannerImage="https://img.freepik.com/free-photo/yellow-watercolor-paper_95678-44
 bannerText="Setting up ${loggedInUserFirstname}‘s ${modelName}"
 helpmessage="If you need assistance, please contact the Global Service Department:  \n- **Telephone:** +1 (801) 555-1212  \n- **Email:** support@domain.org  \n- **Knowledge Base Article:** KB0057050  \n\n**Computer Information:**  \n- **Operating System:**  ${macOSproductVersion} (${macOSbuildVersion})  \n- **Serial Number:** ${serialNumber}  \n- **Dialog:** ${dialogVersion}  \n- **Started:** ${timestamp}"
 infobox="Analyzing input …" # Customize at "Update Setup Your Mac's infobox"
+
+# Check if the custom bannerImage is available, and if not, use a alternative image
+if curl --output /dev/null --silent --head --fail "$bannerImage"; then
+    updateScriptLog "WELCOME DIALOG: bannerImage is available"
+else
+    updateScriptLog "WELCOME DIALOG: bannerImage is not available, using alternative image"
+    bannerImage="https://img.freepik.com/free-photo/yellow-watercolor-paper_95678-448.jpg"
+fi
 
 # Create `overlayicon` from Self Service's custom icon (thanks, @meschwartz!)
 xxd -p -s 260 "$(defaults read /Library/Preferences/com.jamfsoftware.jamf self_service_app_path)"/Icon$'\r'/..namedfork/rsrc | xxd -r -p > /var/tmp/overlayicon.icns
