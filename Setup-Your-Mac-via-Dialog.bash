@@ -25,6 +25,7 @@
 #   - Replaced some generic "Mac" instances with hardware-specific model name (thanks, @pico!)
 #   - Replaced `verbose` Debug Mode code with `outputLineNumberInVerboseDebugMode` function (thanks, @bartreardon!)
 #   - Removed dependency on `dialogApp`
+#   - Check `bannerImage` and `welcomeBannerImage` ([Pull Request No. 22](https://github.com/dan-snelson/Setup-Your-Mac/pull/22); thanks @amadotejada!)
 #
 ####################################################################################################
 
