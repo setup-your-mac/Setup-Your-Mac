@@ -399,9 +399,9 @@ welcomeVideoID="vimeoid=812753953"
 
 # Check if the custom welcomeBannerImage is available, and if not, use a alternative image
 if curl --output /dev/null --silent --head --fail "$welcomeBannerImage"; then
-    echo "welcomeBannerImage is available"
+    updateScriptLog "WELCOME DIALOG: welcomeBannerImage is available, using it"
 else
-    echo "welcomeBannerImage is not available, using alternative image"
+    updateScriptLog "WELCOME DIALOG: welcomeBannerImage is not available, using a default image"
     welcomeBannerImage="https://img.freepik.com/free-photo/yellow-watercolor-paper_95678-448.jpg"
 fi
 
@@ -534,9 +534,9 @@ infobox="Analyzing input …" # Customize at "Update Setup Your Mac's infobox"
 
 # Check if the custom bannerImage is available, and if not, use a alternative image
 if curl --output /dev/null --silent --head --fail "$bannerImage"; then
-    echo "bannerImage is available"
+    updateScriptLog "WELCOME DIALOG: bannerImage is available"
 else
-    echo "bannerImage is not available, using alternative image"
+    updateScriptLog "WELCOME DIALOG: bannerImage is not available, using alternative image"
     bannerImage="https://img.freepik.com/free-photo/yellow-watercolor-paper_95678-448.jpg"
 fi
 
