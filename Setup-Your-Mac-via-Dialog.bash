@@ -11,12 +11,15 @@
 #
 #   Version 1.10.0, Release Date TBD, Dan K. Snelson (@dan-snelson)
 #   - 🆕 **Configuration Download Estimate** (Addresses [Issue No. 7]((https://github.com/dan-snelson/Setup-Your-Mac/issues/7)); thanks for the idea, @DevliegereM; heavy-lifting provided by @bartreardon!)
-#       - Manually set `configurationDownloadEstimation` within the script to `true` to enable
-#       - Specify an arbitrary value for `correctionCoefficient` (i.e., a "fudge factor" to help estimates match reality)
-#       - Calculate total file size (in MB) for each Configuration, then populate:
+#       - Manually set `configurationDownloadEstimation` within the SYM script to `true` to enable
+#       - New `calculateFreeDiskSpace` function will record free space to `scriptLog` before and after SYM execution
+#           - Compare before and after free space values via: `grep "free" $scriptLog`
+#       - Populate the following variables, in Gibibits (i.e., Total File Size in Gigabytes * 7.451), for each Configuration:
 #           - `configurationOneSize`
 #           - `configurationTwoSize`
 #           - `configurationThreeSize`
+#       - Specify an arbitrary value for `correctionCoefficient` (i.e., a "fudge factor" to help estimates match reality)
+#           - Validate actual elapsed time with: `grep "Elapsed" $scriptLog`
 #   - 🔥 **Breaking Change** for users of Setup Your Mac prior to `1.10.0` 🔥 
 #       - Added `recon` validation, which **must** be used when specifying the `recon` trigger (Addresses [Issue No. 19](https://github.com/dan-snelson/Setup-Your-Mac/issues/19))
 #   - Standardized formatting of `toggleJamfLaunchDaemon` function
@@ -41,7 +44,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.10.0-rc5"
+scriptVersion="1.10.0-rc6"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -70,10 +73,10 @@ exitCode="0"
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 configurationDownloadEstimation="true"  # [ false (default) | true ]
-correctionCoefficient="1.05"            # "Fudge factor" (to help estimate match reality)
-configurationOneSize="47"               # Total File Size (in MB) for Configuration One 
-configurationTwoSize="175"              # Total File Size (in MB) for Configuration Two
-configurationThreeSize="195"            # Total File Size (in MB) for Configuration Three
+correctionCoefficient="1.01"            # "Fudge factor" (to help estimate match reality)
+configurationOneSize="34"               # Configuration One in Gibibits (i.e., Total File Size in Gigabytes * 7.451) 
+configurationTwoSize="62"               # Configuration Two in Gibibits (i.e., Total File Size in Gigabytes * 7.451) 
+configurationThreeSize="106"            # Configuration Three in Gibibits (i.e., Total File Size in Gigabytes * 7.451) 
 
 
 
@@ -489,7 +492,7 @@ welcomeJSON='
     "infotext" : "'"${scriptVersion}"'",
     "blurscreen" : "true",
     "ontop" : "true",
-    "titlefont" : "shadow=true, size=28",
+    "titlefont" : "shadow=true, size=36, colour=#000000",
     "messagefont" : "size=14",
     "textfield" : [
         {   "title" : "Computer Name",
@@ -612,7 +615,7 @@ dialogSetupYourMacCMD="$dialogBinary \
 --button1text \"Wait\" \
 --button1disabled \
 --infotext \"$scriptVersion\" \
---titlefont 'shadow=true, size=36' \
+--titlefont 'shadow=true, size=36, colour=#000000' \
 --messagefont 'size=14' \
 --height '780' \
 --position 'centre' \
@@ -1321,6 +1324,25 @@ function runAsUser() {
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Calculate Free Disk Space
+# Disk Usage with swiftDialog (https://snelson.us/2022/11/disk-usage-with-swiftdialog-0-0-2/)
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+function calculateFreeDiskSpace() {
+
+    freeSpace=$( diskutil info / | grep -E 'Free Space|Available Space|Container Free Space' | awk -F ":\s*" '{ print $2 }' | awk -F "(" '{ print $1 }' | xargs )
+    freeBytes=$( diskutil info / | grep -E 'Free Space|Available Space|Container Free Space' | awk -F "(\\\(| Bytes\\\))" '{ print $2 }' )
+    diskBytes=$( diskutil info / | grep -E 'Total Space' | awk -F "(\\\(| Bytes\\\))" '{ print $2 }' )
+    freePercentage=$( echo "scale=2; ( $freeBytes * 100 ) / $diskBytes" | bc )
+    diskSpace="$freeSpace free (${freePercentage}% available)"
+
+    updateScriptLog "${1}: Disk Space: ${diskSpace}"
+
+}
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Update the "Welcome" dialog
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
@@ -1360,6 +1382,13 @@ function dialogUpdateFailure(){
 function finalise(){
 
     outputLineNumberInVerboseDebugMode
+
+    if [[ "${configurationDownloadEstimation}" == "true" ]]; then
+
+        outputLineNumberInVerboseDebugMode
+        calculateFreeDiskSpace "FINALISE USER EXPERIENCE"
+
+    fi
 
     if [[ "${jamfProPolicyTriggerFailure}" == "failed" ]]; then
 
@@ -1936,11 +1965,13 @@ function completionAction() {
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Welcome dialog 'infobox' animation (thanks, @bartreadon!)
+# To convert emojis, see: https://r12a.github.io/app-conversion/
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 function welcomeDialogInfoboxAnimation() {
     callingPID=$1
-    clock_emojis=("🕐" "🕑" "🕒" "🕓" "🕔" "🕕" "🕖" "🕗" "🕘" "🕙" "🕚" "🕛")
+    # clock_emojis=("🕐" "🕑" "🕒" "🕓" "🕔" "🕕" "🕖" "🕗" "🕘" "🕙" "🕚" "🕛")
+    clock_emojis=("&#128336;" "&#128337;" "&#128338;" "&#128339;" "&#128340;" "&#128341;" "&#128342;" "&#128343;" "&#128344;" "&#128345;" "&#128346;" "&#128347;")
     while true; do
         for emoji in "${clock_emojis[@]}"; do
             if kill -0 "$callingPID" 2>/dev/null; then
@@ -2008,7 +2039,7 @@ function checkNetworkQuality() {
     updateScriptLog "WELCOME DIALOG: Configuration Three Estimate: $(printf '%dh:%dm:%ds\n' $((configurationThreeEstimatedSeconds/3600)) $((configurationThreeEstimatedSeconds%3600/60)) $((configurationThreeEstimatedSeconds%60)))"
 
     updateScriptLog "WELCOME DIALOG: Network Quality Test: Started: $dlStartDate, Ended: $dlEndDate; Download: $mbps Mbps, Responsiveness: $dlResponsiveness"
-    dialogUpdateWelcome "infobox: **Connection:**  \n- Download:  \n$mbps Mbps  \n\n**Estimates:**  \n- Required:  \n$(printf '%dh:%dm:%ds\n' $((configurationOneEstimatedSeconds/3600)) $((configurationOneEstimatedSeconds%3600/60)) $((configurationOneEstimatedSeconds%60)))  \n\n- Recommended:  \n$(printf '%dh:%dm:%ds\n' $((configurationTwoEstimatedSeconds/3600)) $((configurationTwoEstimatedSeconds%3600/60)) $((configurationTwoEstimatedSeconds%60)))  \n\n- Complete:  \n$(printf '%dh:%dm:%ds\n' $((configurationThreeEstimatedSeconds/3600)) $((configurationThreeEstimatedSeconds%3600/60)) $((configurationThreeEstimatedSeconds%60)))"
+    dialogUpdateWelcome "infobox: **Connection:**  \n- Download:  \n$mbps Mbps  \n\n**Estimates (beta):**  \n- Required:  \n$(printf '%dh:%dm:%ds\n' $((configurationOneEstimatedSeconds/3600)) $((configurationOneEstimatedSeconds%3600/60)) $((configurationOneEstimatedSeconds%60)))  \n\n- Recommended:  \n$(printf '%dh:%dm:%ds\n' $((configurationTwoEstimatedSeconds/3600)) $((configurationTwoEstimatedSeconds%3600/60)) $((configurationTwoEstimatedSeconds%60)))  \n\n- Complete:  \n$(printf '%dh:%dm:%ds\n' $((configurationThreeEstimatedSeconds/3600)) $((configurationThreeEstimatedSeconds%3600/60)) $((configurationThreeEstimatedSeconds%60)))"
 
 }
 
@@ -2138,6 +2169,8 @@ elif [[ "${welcomeDialog}" == "userInput" ]]; then
     if [[ "${configurationDownloadEstimation}" == "true" ]]; then
 
         outputLineNumberInVerboseDebugMode
+
+        calculateFreeDiskSpace "WELCOME DIALOG"
 
         updateScriptLog "WELCOME DIALOG: Starting networkqualityTest …"
         checkNetworkQuality &

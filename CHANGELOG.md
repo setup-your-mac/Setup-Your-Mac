@@ -2,15 +2,18 @@
 
 ## 1.10.0
 ### Release Date TBD
-- :new: **Configuration Download Estimate** (Addresses [Issue No. 7]((https://github.com/dan-snelson/Setup-Your-Mac/issues/7)); thanks for the idea, @DevliegereM; heavy-lifting provided by @bartreardon!)
-  - Manually set `configurationDownloadEstimation` within the script to `true` to enable
-  - Specify an arbitrary value for `correctionCoefficient` (i.e., a "fudge factor" to help estimates match reality)
-  - Calculate total file size (in MB) for each Configuration, then populate:
-    - `configurationOneSize`
-    - `configurationTwoSize`
-    - `configurationThreeSize`
+- 🆕 **Configuration Download Estimate** (Addresses [Issue No. 7]((https://github.com/dan-snelson/Setup-Your-Mac/issues/7)); thanks for the idea, @DevliegereM; heavy-lifting provided by @bartreardon!)
+    - Manually set `configurationDownloadEstimation` within the SYM script to `true` to enable
+    - New `calculateFreeDiskSpace` function will record free space to `scriptLog` before and after SYM execution
+        - Compare before and after free space values via: `grep "free" $scriptLog`
+    - Populate the following variables, in Gibibits (i.e., Total File Size in Gigabytes * 7.451), for each Configuration:
+        - `configurationOneSize`
+        - `configurationTwoSize`
+        - `configurationThreeSize`
+    - Specify an arbitrary value for `correctionCoefficient` (i.e., a "fudge factor" to help estimates match reality)
+        - Validate actual elapsed time with: `grep "Elapsed" $scriptLog`
 - 🔥 **Breaking Change** for users of Setup Your Mac prior to `1.10.0` 🔥 
-  - Added `recon` validation, which **must** be used when specifying the `recon` trigger (Addresses [Issue No. 19](https://github.com/dan-snelson/Setup-Your-Mac/issues/19))
+    - Added `recon` validation, which **must** be used when specifying the `recon` trigger (Addresses [Issue No. 19](https://github.com/dan-snelson/Setup-Your-Mac/issues/19))
 - Standardized formatting of `toggleJamfLaunchDaemon` function
 - Limit the `loggedInUserFirstname` variable to `25` characters and capitalize its first letter (Addresses [Issue No. 20](https://github.com/dan-snelson/Setup-Your-Mac/issues/20); thanks @mani2care!)
 - Added line break to `welcomeTitle` and `welcomeBannerText`
