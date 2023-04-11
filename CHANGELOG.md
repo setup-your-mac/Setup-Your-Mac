@@ -7,6 +7,7 @@
     - New `calculateFreeDiskSpace` function will record free space to `scriptLog` before and after SYM execution
         - Compare before and after free space values via: `grep "free" $scriptLog`
     - Populate the following variables, in Gibibits (i.e., Total File Size in Gigabytes * 7.451), for each Configuration:
+        - `configurationCatchAllSize`
         - `configurationOneSize`
         - `configurationTwoSize`
         - `configurationThreeSize`

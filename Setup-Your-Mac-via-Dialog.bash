@@ -15,6 +15,7 @@
 #       - New `calculateFreeDiskSpace` function will record free space to `scriptLog` before and after SYM execution
 #           - Compare before and after free space values via: `grep "free" $scriptLog`
 #       - Populate the following variables, in Gibibits (i.e., Total File Size in Gigabytes * 7.451), for each Configuration:
+#           - `configurationCatchAllSize`
 #           - `configurationOneSize`
 #           - `configurationTwoSize`
 #           - `configurationThreeSize`
@@ -44,7 +45,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.10.0-rc6"
+scriptVersion="1.10.0-rc7"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -74,6 +75,7 @@ exitCode="0"
 
 configurationDownloadEstimation="true"  # [ false (default) | true ]
 correctionCoefficient="1.01"            # "Fudge factor" (to help estimate match reality)
+configurationCatchAllSize="34"          # Catch-all Configuration in Gibibits (i.e., Total File Size in Gigabytes * 7.451) 
 configurationOneSize="34"               # Configuration One in Gibibits (i.e., Total File Size in Gigabytes * 7.451) 
 configurationTwoSize="62"               # Configuration Two in Gibibits (i.e., Total File Size in Gigabytes * 7.451) 
 configurationThreeSize="106"            # Configuration Three in Gibibits (i.e., Total File Size in Gigabytes * 7.451) 
@@ -492,7 +494,7 @@ welcomeJSON='
     "infotext" : "'"${scriptVersion}"'",
     "blurscreen" : "true",
     "ontop" : "true",
-    "titlefont" : "shadow=true, size=36, colour=#000000",
+    "titlefont" : "shadow=true, size=36, colour=#FFFDF4",
     "messagefont" : "size=14",
     "textfield" : [
         {   "title" : "Computer Name",
@@ -615,7 +617,7 @@ dialogSetupYourMacCMD="$dialogBinary \
 --button1text \"Wait\" \
 --button1disabled \
 --infotext \"$scriptVersion\" \
---titlefont 'shadow=true, size=36, colour=#000000' \
+--titlefont 'shadow=true, size=36, colour=#FFFDF4' \
 --messagefont 'size=14' \
 --height '780' \
 --position 'centre' \
@@ -1481,7 +1483,7 @@ function run_jamf_trigger() {
     if [[ "${debugMode}" == "true" ]] || [[ "${debugMode}" == "verbose" ]] ; then
 
         updateScriptLog "SETUP YOUR MAC DIALOG: DEBUG MODE: TRIGGER: $jamfBinary policy -trigger $trigger"
-        sleep 1
+        sleep 15 #1
 
     else
 
@@ -1514,7 +1516,7 @@ function confirmPolicyExecution() {
             outputLineNumberInVerboseDebugMode
             if [[ "${debugMode}" == "true" ]] || [[ "${debugMode}" == "verbose" ]] ; then
                 updateScriptLog "SETUP YOUR MAC DIALOG: Confirm Policy Execution: DEBUG MODE: Skipping 'run_jamf_trigger ${trigger}'"
-                sleep 1
+                sleep 15 #1
             elif [[ -f "${validation}" ]]; then
                 updateScriptLog "SETUP YOUR MAC DIALOG: Confirm Policy Execution: ${validation} exists; skipping 'run_jamf_trigger ${trigger}'"
                 previouslyInstalled="true"
@@ -1530,7 +1532,7 @@ function confirmPolicyExecution() {
             outputLineNumberInVerboseDebugMode
             updateScriptLog "SETUP YOUR MAC DIALOG: Confirm Policy Execution: ${validation}"
             if [[ "${debugMode}" == "true" ]] || [[ "${debugMode}" == "verbose" ]] ; then
-                sleep 1
+                sleep 15 #1
             else
                 run_jamf_trigger "${trigger}"
             fi
@@ -1554,7 +1556,7 @@ function confirmPolicyExecution() {
             outputLineNumberInVerboseDebugMode
             updateScriptLog "SETUP YOUR MAC DIALOG: Confirm Policy Execution Catch-all: ${validation}"
             if [[ "${debugMode}" == "true" ]] || [[ "${debugMode}" == "verbose" ]] ; then
-                sleep 1
+                sleep 15 #1
             else
                 run_jamf_trigger "${trigger}"
             fi
@@ -1987,10 +1989,33 @@ function welcomeDialogInfoboxAnimation() {
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Check the network quality (thanks, @bartreadon!)
+# Setup Your Mac dialog 'infobox' animation (thanks, @bartreadon!)
+# To convert emojis, see: https://r12a.github.io/app-conversion/
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-function checkNetworkQuality() {
+function setupYourMacDialogInfoboxAnimation() {
+    callingPID=$1
+    # clock_emojis=("🕐" "🕑" "🕒" "🕓" "🕔" "🕕" "🕖" "🕗" "🕘" "🕙" "🕚" "🕛")
+    clock_emojis=("&#128336;" "&#128337;" "&#128338;" "&#128339;" "&#128340;" "&#128341;" "&#128342;" "&#128343;" "&#128344;" "&#128345;" "&#128346;" "&#128347;")
+    while true; do
+        for emoji in "${clock_emojis[@]}"; do
+            if kill -0 "$callingPID" 2>/dev/null; then
+                dialogUpdateSetupYourMac "infobox: Testing Connection $emoji"
+            else
+                break
+            fi
+            sleep 0.6
+        done
+    done
+}
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Check Network Quality for Configurations (thanks, @bartreadon!)
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+function checkNetworkQualityConfigurations() {
     
     myPID="$$"
     updateScriptLog "WELCOME DIALOG: Display Welcome dialog 'infobox' animation …"
@@ -2040,6 +2065,57 @@ function checkNetworkQuality() {
 
     updateScriptLog "WELCOME DIALOG: Network Quality Test: Started: $dlStartDate, Ended: $dlEndDate; Download: $mbps Mbps, Responsiveness: $dlResponsiveness"
     dialogUpdateWelcome "infobox: **Connection:**  \n- Download:  \n$mbps Mbps  \n\n**Estimates (beta):**  \n- Required:  \n$(printf '%dh:%dm:%ds\n' $((configurationOneEstimatedSeconds/3600)) $((configurationOneEstimatedSeconds%3600/60)) $((configurationOneEstimatedSeconds%60)))  \n\n- Recommended:  \n$(printf '%dh:%dm:%ds\n' $((configurationTwoEstimatedSeconds/3600)) $((configurationTwoEstimatedSeconds%3600/60)) $((configurationTwoEstimatedSeconds%60)))  \n\n- Complete:  \n$(printf '%dh:%dm:%ds\n' $((configurationThreeEstimatedSeconds/3600)) $((configurationThreeEstimatedSeconds%3600/60)) $((configurationThreeEstimatedSeconds%60)))"
+
+}
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Check Network Quality for Catch-all Configuration (thanks, @bartreadon!)
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+function checkNetworkQualityCatchAllConfiguration() {
+    
+    myPID="$$"
+    updateScriptLog "SETUP YOUR MAC DIALOG: Display Welcome dialog 'infobox' animation …"
+    setupYourMacDialogInfoboxAnimation "$myPID" &
+    setupYourMacDialogInfoboxAnimationPID="$!"
+
+    networkquality -s -v -c > /var/tmp/networkqualityTest
+    kill ${setupYourMacDialogInfoboxAnimationPID}
+    outputLineNumberInVerboseDebugMode
+
+    updateScriptLog "SETUP YOUR MAC DIALOG: Completed networkqualityTest …"
+    networkqualityTest=$( < /var/tmp/networkqualityTest )
+    rm /var/tmp/networkqualityTest
+
+    case "${osVersion}" in
+
+        11* ) 
+            dlThroughput="N/A; macOS ${osVersion}"
+            dlResponsiveness="N/A; macOS ${osVersion}"
+            dlStartDate="N/A; macOS ${osVersion}"
+            dlEndDate="N/A; macOS ${osVersion}"
+            ;;
+
+        12* | 13* )
+            dlThroughput=$( get_json_value "$networkqualityTest" "dl_throughput")
+            dlResponsiveness=$( get_json_value "$networkqualityTest" "dl_responsiveness" )
+            dlStartDate=$( get_json_value "$networkqualityTest" "start_date" )
+            dlEndDate=$( get_json_value "$networkqualityTest" "end_date" )
+            ;;
+
+    esac
+
+    mbps=$( echo "scale=2; ( $dlThroughput / 1000000 )" | bc )
+    updateScriptLog "SETUP YOUR MAC DIALOG: $mbps (Mbps)"
+
+    configurationCatchAllEstimatedSeconds=$( echo "scale=2; (((( $configurationCatchAllSize / $mbps ) * 60 ) * 60 ) * $correctionCoefficient )" | bc | sed 's/\.[0-9]*//' )
+    updateScriptLog "SETUP YOUR MAC DIALOG: Catch-all Configuration Estimated Seconds: $configurationCatchAllEstimatedSeconds"
+    updateScriptLog "SETUP YOUR MAC DIALOG: Catch-all Configuration Estimate: $(printf '%dh:%dm:%ds\n' $((configurationCatchAllEstimatedSeconds/3600)) $((configurationCatchAllEstimatedSeconds%3600/60)) $((configurationCatchAllEstimatedSeconds%60)))"
+
+    updateScriptLog "SETUP YOUR MAC DIALOG: Network Quality Test: Started: $dlStartDate, Ended: $dlEndDate; Download: $mbps Mbps, Responsiveness: $dlResponsiveness"
+    dialogUpdateSetupYourMac "infobox: **Connection:**  \n- Download:  \n$mbps Mbps  \n\n**Estimates (beta):**  \n- $(printf '%dh:%dm:%ds\n' $((configurationCatchAllEstimatedSeconds/3600)) $((configurationCatchAllEstimatedSeconds%3600/60)) $((configurationCatchAllEstimatedSeconds%60)))"
 
 }
 
@@ -2173,7 +2249,7 @@ elif [[ "${welcomeDialog}" == "userInput" ]]; then
         calculateFreeDiskSpace "WELCOME DIALOG"
 
         updateScriptLog "WELCOME DIALOG: Starting networkqualityTest …"
-        checkNetworkQuality &
+        checkNetworkQualityConfigurations &
 
         updateScriptLog "WELCOME DIALOG: Write 'welcomeJSON' to $welcomeJSONFile …"
         echo "$welcomeJSON" > "$welcomeJSONFile"
@@ -2446,11 +2522,31 @@ dialogUpdateWelcome "quit:"
 
 outputLineNumberInVerboseDebugMode
 
-# When `welcomeDialog` is set to `false` or `video`, set the value of `infoboxConfiguration` to null (thanks for the idea, @Manikandan!)
 if [[ "${symConfiguration}" == *"Catch-all"* ]]; then
-    infoboxConfiguration=""
+
+    if [[ "${configurationDownloadEstimation}" == "true" ]]; then
+
+        outputLineNumberInVerboseDebugMode
+
+        checkNetworkQualityCatchAllConfiguration &
+
+        outputLineNumberInVerboseDebugMode
+
+        updateScriptLog "SETUP YOUR MAC DIALOG: **Connection:**  \n- Download:  \n$mbps Mbps  \n\n**Estimate (beta):**  \n- $(printf '%dh:%dm:%ds\n' $((configurationCatchAllEstimatedSeconds/3600)) $((configurationCatchAllEstimatedSeconds%3600/60)) $((configurationCatchAllEstimatedSeconds%60)))"
+
+        infoboxConfiguration="**Connection:**  \n- Download:  \n$mbps Mbps  \n\n**Estimate (beta):**  \n- $(printf '%dh:%dm:%ds\n' $((configurationCatchAllEstimatedSeconds/3600)) $((configurationCatchAllEstimatedSeconds%3600/60)) $((configurationCatchAllEstimatedSeconds%60)))"
+
+    else
+
+        # When `welcomeDialog` is set to `false` or `video`, set the value of `infoboxConfiguration` to null (thanks for the idea, @Manikandan!)
+        infoboxConfiguration=""
+
+    fi
+
 else
+
     infoboxConfiguration="${symConfiguration}"
+
 fi
 
 infobox=""
