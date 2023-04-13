@@ -30,6 +30,7 @@
 #   - Replaced `verbose` Debug Mode code with `outputLineNumberInVerboseDebugMode` function (thanks, @bartreardon!)
 #   - Removed dependency on `dialogApp`
 #   - Check `bannerImage` and `welcomeBannerImage` ([Pull Request No. 22](https://github.com/dan-snelson/Setup-Your-Mac/pull/22); thanks @amadotejada!)
+#   - A "raw" unsorted listing of departments — with possible duplicates — is converted to a sorted, unique, JSON-compatible `departmentList` variable (Addresses [Issue No. 23](https://github.com/dan-snelson/Setup-Your-Mac/issues/23); thanks @rougegoat!)
 #
 ####################################################################################################
 
@@ -45,7 +46,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.10.0-rc7"
+scriptVersion="1.10.0-rc8"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -57,13 +58,14 @@ outdatedOsAction="${9:-"/System/Library/CoreServices/Software Update.app"}"     
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Operating System, currently logged-in user and default Exit Code
+# Operating System, Computer Model Name, etc.
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 osVersion=$( sw_vers -productVersion )
 osBuild=$( sw_vers -buildVersion )
 osMajorVersion=$( echo "${osVersion}" | awk -F '.' '{print $1}' )
 modelName=$( /usr/libexec/PlistBuddy -c 'Print :0:_items:0:machine_name' /dev/stdin <<< "$(system_profiler -xml SPHardwareDataType)" )
+debugModeSleepAmount="3"
 reconOptions=""
 exitCode="0"
 
@@ -476,6 +478,18 @@ welcomeVideo="--title \"$welcomeTitle\" \
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# "Welcome" Departments (thanks, @rougegoat!)
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+# An unsorted, comma-separated list of departments (with possible duplication)
+departmentListRaw="Asset Management,Sales,Australia Area Office,Purchasing / Sourcing,Board of Directors,Strategic Initiatives & Programs,Operations,Business Development,Marketing,Creative Services,Customer Service / Customer Experience,Risk Management,Engineering,Finance / Accounting,Sales,General Management,Human Resources,Marketing,Investor Relations,Legal,Marketing,Sales,Product Management,Production,Corporate Communications,Information Technology / Technology,Quality Assurance,Project Management Office,Sales,Technology"
+
+# A sorted, unique, JSON-compatible list of departments
+departmentList=$( echo "${departmentListRaw}" | tr ',' '\n' | sort -f | uniq | sed -e 's/^/\"/' -e 's/$/\",/' -e '$ s/.$//' )
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # "Welcome" JSON for Capturing User Input (thanks, @bartreardon!)
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
@@ -525,31 +539,7 @@ welcomeJSON='
             "default" : "Please select your department",
             "values" : [
                 "Please select your department",
-                "Asset Management",
-                "Australia Area Office",
-                "Board of Directors",
-                "Business Development",
-                "Corporate Communications",
-                "Creative Services",
-                "Customer Service / Customer Experience",
-                "Engineering",
-                "Finance / Accounting",
-                "General Management",
-                "Human Resources",
-                "Information Technology / Technology",
-                "Investor Relations",
-                "Legal",
-                "Marketing",
-                "Operations",
-                "Product Management",
-                "Production",
-                "Project Management Office",
-                "Purchasing / Sourcing",
-                "Quality Assurance",
-                "Risk Management",
-                "Sales",
-                "Strategic Initiatives & Programs",
-                "Technology"
+                '${departmentList}'
             ]
         }
     ],
@@ -1483,7 +1473,7 @@ function run_jamf_trigger() {
     if [[ "${debugMode}" == "true" ]] || [[ "${debugMode}" == "verbose" ]] ; then
 
         updateScriptLog "SETUP YOUR MAC DIALOG: DEBUG MODE: TRIGGER: $jamfBinary policy -trigger $trigger"
-        sleep 15 #1
+        sleep "${debugModeSleepAmount}"
 
     else
 
@@ -1516,7 +1506,7 @@ function confirmPolicyExecution() {
             outputLineNumberInVerboseDebugMode
             if [[ "${debugMode}" == "true" ]] || [[ "${debugMode}" == "verbose" ]] ; then
                 updateScriptLog "SETUP YOUR MAC DIALOG: Confirm Policy Execution: DEBUG MODE: Skipping 'run_jamf_trigger ${trigger}'"
-                sleep 15 #1
+                sleep "${debugModeSleepAmount}"
             elif [[ -f "${validation}" ]]; then
                 updateScriptLog "SETUP YOUR MAC DIALOG: Confirm Policy Execution: ${validation} exists; skipping 'run_jamf_trigger ${trigger}'"
                 previouslyInstalled="true"
@@ -1532,7 +1522,7 @@ function confirmPolicyExecution() {
             outputLineNumberInVerboseDebugMode
             updateScriptLog "SETUP YOUR MAC DIALOG: Confirm Policy Execution: ${validation}"
             if [[ "${debugMode}" == "true" ]] || [[ "${debugMode}" == "verbose" ]] ; then
-                sleep 15 #1
+                sleep "${debugModeSleepAmount}"
             else
                 run_jamf_trigger "${trigger}"
             fi
@@ -1556,7 +1546,7 @@ function confirmPolicyExecution() {
             outputLineNumberInVerboseDebugMode
             updateScriptLog "SETUP YOUR MAC DIALOG: Confirm Policy Execution Catch-all: ${validation}"
             if [[ "${debugMode}" == "true" ]] || [[ "${debugMode}" == "verbose" ]] ; then
-                sleep 15 #1
+                sleep "${debugModeSleepAmount}"
             else
                 run_jamf_trigger "${trigger}"
             fi
