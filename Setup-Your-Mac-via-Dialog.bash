@@ -46,7 +46,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.10.0-rc8"
+scriptVersion="1.10.0-rc9"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -414,7 +414,6 @@ esac
 # Set Dialog path, Command Files, JAMF binary, log files and currently logged-in user
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-# dialogApp="/Library/Application\ Support/Dialog/Dialog.app/Contents/MacOS/Dialog"
 dialogBinary="/usr/local/bin/dialog"
 welcomeJSONFile=$( mktemp -u /var/tmp/welcomeJSONFile.XXX )
 welcomeCommandFile=$( mktemp -u /var/tmp/dialogWelcome.XXX )
@@ -2157,12 +2156,6 @@ function quitScript() {
         updateScriptLog "QUIT SCRIPT: Removing ${failureCommandFile} …"
         rm "${failureCommandFile}"
     fi
-
-    # Remove any default dialog file
-    # if [[ -e /var/tmp/dialog.log ]]; then
-    #     updateScriptLog "QUIT SCRIPT: Removing default dialog file …"
-    #     rm /var/tmp/dialog.log
-    # fi
 
     # Check for user clicking "Quit" at Welcome dialog
     if [[ "${welcomeReturnCode}" == "2" ]]; then
