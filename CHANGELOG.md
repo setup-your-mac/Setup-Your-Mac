@@ -16,6 +16,7 @@
 - 🔥 **Breaking Change** for users of Setup Your Mac prior to `1.10.0` 🔥 
     - Added `recon` validation, which **must** be used when specifying the `recon` trigger (Addresses [Issue No. 19](https://github.com/dan-snelson/Setup-Your-Mac/issues/19))
 - Standardized formatting of `toggleJamfLaunchDaemon` function
+  - Added logging while waiting for installation of `${jamflaunchDaemon}`
 - Limit the `loggedInUserFirstname` variable to `25` characters and capitalize its first letter (Addresses [Issue No. 20](https://github.com/dan-snelson/Setup-Your-Mac/issues/20); thanks @mani2care!)
 - Added line break to `welcomeTitle` and `welcomeBannerText`
 - Replaced some generic "Mac" instances with hardware-specific model name (thanks, @pico!)
