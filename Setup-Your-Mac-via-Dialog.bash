@@ -24,6 +24,7 @@
 #   - 🔥 **Breaking Change** for users of Setup Your Mac prior to `1.10.0` 🔥 
 #       - Added `recon` validation, which **must** be used when specifying the `recon` trigger (Addresses [Issue No. 19](https://github.com/dan-snelson/Setup-Your-Mac/issues/19))
 #   - Standardized formatting of `toggleJamfLaunchDaemon` function
+#       - Added logging while waiting for installation of ${jamflaunchDaemon}
 #   - Limit the `loggedInUserFirstname` variable to `25` characters and capitalize its first letter (Addresses [Issue No. 20](https://github.com/dan-snelson/Setup-Your-Mac/issues/20); thanks @mani2care!)
 #   - Added line break to `welcomeTitle` and `welcomeBannerText`
 #   - Replaced some generic "Mac" instances with hardware-specific model name (thanks, @pico!)
@@ -46,7 +47,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.10.0-rc9"
+scriptVersion="1.10.0-rc10"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -269,6 +270,7 @@ function toggleJamfLaunchDaemon() {
     else
 
         while [[ ! -f "${jamflaunchDaemon}" ]] ; do
+            updateScriptLog "PRE-FLIGHT CHECK: DEBUG MODE: Waiting for installation of ${jamflaunchDaemon}"
             sleep 0.1
         done
 
