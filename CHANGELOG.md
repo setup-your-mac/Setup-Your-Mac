@@ -22,8 +22,9 @@
 - Replaced some generic "Mac" instances with hardware-specific model name (thanks, @pico!)
 - Replaced `verbose` Debug Mode code with `outputLineNumberInVerboseDebugMode` function (thanks, @bartreardon!)
 - Removed dependency on `dialogApp`
-- Check `bannerImage` and `welcomeBannerImage` ([Pull Request No. 22](https://github.com/dan-snelson/Setup-Your-Mac/pull/22) AND [Pull Request No. 24](https://github.com/dan-snelson/Setup-Your-Mac/pull/24) thanks @amadotejada!)
+- Check `bannerImage` and `welcomeBannerImage` ([Pull Request No. 22](https://github.com/dan-snelson/Setup-Your-Mac/pull/22) **AND** [Pull Request No. 24](https://github.com/dan-snelson/Setup-Your-Mac/pull/24) thanks @amadotejada!)
 - A "raw" unsorted listing of departments — with possible duplicates — is converted to a sorted, unique, JSON-compatible `departmentList` variable (Addresses [Issue No. 23](https://github.com/dan-snelson/Setup-Your-Mac/issues/23); thanks @rougegoat!)
+- The selected Configuration now displays in `helpmessage` (Addresses [Issue No. 17](https://github.com/dan-snelson/Setup-Your-Mac/issues/17); thanks for the idea, @master-vodawagner!)
 
 ## 1.9.0
 ### 01-Apr-2023

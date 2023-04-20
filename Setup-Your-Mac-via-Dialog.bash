@@ -32,6 +32,7 @@
 #   - Removed dependency on `dialogApp`
 #   - Check `bannerImage` and `welcomeBannerImage` ([Pull Request No. 22](https://github.com/dan-snelson/Setup-Your-Mac/pull/22) AND [Pull Request No. 24](https://github.com/dan-snelson/Setup-Your-Mac/pull/24) thanks @amadotejada!)
 #   - A "raw" unsorted listing of departments — with possible duplicates — is converted to a sorted, unique, JSON-compatible `departmentList` variable (Addresses [Issue No. 23](https://github.com/dan-snelson/Setup-Your-Mac/issues/23); thanks @rougegoat!)
+#   - The selected Configuration now displays in `helpmessage` (Addresses [Issue No. 17](https://github.com/dan-snelson/Setup-Your-Mac/issues/17); thanks for the idea, @master-vodawagner!)
 #
 ####################################################################################################
 
@@ -47,7 +48,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.10.0-rc12"
+scriptVersion="1.10.0-rc13"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -2544,6 +2545,28 @@ if [[ -n ${infoboxConfiguration} ]]; then infobox+="**Configuration:**  \n$infob
 if [[ -n ${department} ]]; then infobox+="**Department:**  \n$department  \n\n" ; fi
 
 dialogUpdateSetupYourMac "infobox: ${infobox}"
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Update Setup Your Mac's helpmessage
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+outputLineNumberInVerboseDebugMode
+
+if [[ "${symConfiguration}" != *"Catch-all"* ]]; then
+
+    if [[ -n ${infoboxConfiguration} ]]; then
+
+        updateScriptLog "Update 'helpmessage' with Configuration: ${infoboxConfiguration} …"
+
+        helpmessage="If you need assistance, please contact the Global Service Department:  \n- **Telephone:** +1 (801) 555-1212  \n- **Email:** support@domain.org  \n- **Knowledge Base Article:** KB0057050  \n\n**Configuration:** \n- ${infoboxConfiguration}  \n\n**Computer Information:**  \n- **Operating System:**  ${macOSproductVersion} (${macOSbuildVersion})  \n- **Serial Number:** ${serialNumber}  \n- **Dialog:** ${dialogVersion}  \n- **Started:** ${timestamp}"
+        
+    fi
+
+fi
+
+dialogUpdateSetupYourMac "helpmessage: ${helpmessage}"
 
 
 
