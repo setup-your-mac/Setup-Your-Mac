@@ -443,7 +443,7 @@ welcomeCaption="Please review the above video, then click Continue."
 welcomeVideoID="vimeoid=812753953"
 
 # Check if the custom welcomeBannerImage is available, and if not, use a alternative image
-if curl --output /dev/null --silent --head --fail "$welcomeBannerImage"; then
+if curl --output /dev/null --silent --head --fail "$welcomeBannerImage" || [  -f "$welcomeBannerImage" ]; then
     updateScriptLog "WELCOME DIALOG: welcomeBannerImage is available, using it"
 else
     updateScriptLog "WELCOME DIALOG: welcomeBannerImage is not available, using a default image"
@@ -568,7 +568,7 @@ helpmessage="If you need assistance, please contact the Global Service Departmen
 infobox="Analyzing input …" # Customize at "Update Setup Your Mac's infobox"
 
 # Check if the custom bannerImage is available, and if not, use a alternative image
-if curl --output /dev/null --silent --head --fail "$bannerImage"; then
+if curl --output /dev/null --silent --head --fail "$bannerImage" || [  -f "$bannerImage" ]; then
     updateScriptLog "WELCOME DIALOG: bannerImage is available"
 else
     updateScriptLog "WELCOME DIALOG: bannerImage is not available, using alternative image"
