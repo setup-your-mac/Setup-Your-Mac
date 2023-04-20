@@ -30,7 +30,7 @@
 #   - Replaced some generic "Mac" instances with hardware-specific model name (thanks, @pico!)
 #   - Replaced `verbose` Debug Mode code with `outputLineNumberInVerboseDebugMode` function (thanks, @bartreardon!)
 #   - Removed dependency on `dialogApp`
-#   - Check `bannerImage` and `welcomeBannerImage` ([Pull Request No. 22](https://github.com/dan-snelson/Setup-Your-Mac/pull/22); thanks @amadotejada!)
+#   - Check `bannerImage` and `welcomeBannerImage` ([Pull Request No. 22](https://github.com/dan-snelson/Setup-Your-Mac/pull/22) AND [Pull Request No. 24](https://github.com/dan-snelson/Setup-Your-Mac/pull/24) thanks @amadotejada!)
 #   - A "raw" unsorted listing of departments — with possible duplicates — is converted to a sorted, unique, JSON-compatible `departmentList` variable (Addresses [Issue No. 23](https://github.com/dan-snelson/Setup-Your-Mac/issues/23); thanks @rougegoat!)
 #
 ####################################################################################################
@@ -47,7 +47,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.10.0-rc11"
+scriptVersion="1.10.0-rc12"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
