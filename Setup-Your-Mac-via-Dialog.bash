@@ -67,6 +67,28 @@ outdatedOsAction="${9:-"/System/Library/CoreServices/Software Update.app"}"     
 debugModeSleepAmount="3"    # Delay for various actions when running in Debug Mode
 failureDialog="true"        # Display the so-called "Failure" dialog (after the main SYM dialog) [ true | false ]
 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Welcome Message User Input Customization Choices
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+# These control which user input boxes are added to the first page of Setup Your Mac.  If you do not want to ask about a value, set it to any other value
+promptForAssetTag="yes"
+promptForRoom="yes"
+promptForComputerName="yes"
+promptForDepartment="yes"
+prefillUsername="yes"
+
+# An unsorted, comma-separated list of buildings (with possible duplication).  If empty, this will be hidden from the user info prompt
+buildingsListRaw="Building,Tower,Barn,Castle"
+
+# A sorted, unique, JSON-compatible list of buildings
+buildingsList=$( echo "${buildingsListRaw}" | tr ',' '\n' | sort -f | uniq | sed -e 's/^/\"/' -e 's/$/\",/' -e '$ s/.$//' )
+
+# An unsorted, comma-separated list of departments (with possible duplication).  If empty, this will be hidden from the user info prompt
+departmentListRaw="Asset Management,Sales,Australia Area Office,Purchasing / Sourcing,Board of Directors,Strategic Initiatives & Programs,Operations,Business Development,Marketing,Creative Services,Customer Service / Customer Experience,Risk Management,Engineering,Finance / Accounting,Sales,General Management,Human Resources,Marketing,Investor Relations,Legal,Marketing,Sales,Product Management,Production,Corporate Communications,Information Technology / Technology,Quality Assurance,Project Management Office,Sales,Technology"
+
+# A sorted, unique, JSON-compatible list of departments
+departmentList=$( echo "${departmentListRaw}" | tr ',' '\n' | sort -f | uniq | sed -e 's/^/\"/' -e 's/$/\",/' -e '$ s/.$//' )
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -487,22 +509,46 @@ welcomeVideo="--title \"$welcomeTitle\" \
 --commandfile \"$welcomeCommandFile\" "
 
 
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# "Welcome" Departments (thanks, @rougegoat!)
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
-# An unsorted, comma-separated list of departments (with possible duplication)
-departmentListRaw="Asset Management,Sales,Australia Area Office,Purchasing / Sourcing,Board of Directors,Strategic Initiatives & Programs,Operations,Business Development,Marketing,Creative Services,Customer Service / Customer Experience,Risk Management,Engineering,Finance / Accounting,Sales,General Management,Human Resources,Marketing,Investor Relations,Legal,Marketing,Sales,Product Management,Production,Corporate Communications,Information Technology / Technology,Quality Assurance,Project Management Office,Sales,Technology"
-
-# A sorted, unique, JSON-compatible list of departments
-departmentList=$( echo "${departmentListRaw}" | tr ',' '\n' | sort -f | uniq | sed -e 's/^/\"/' -e 's/$/\",/' -e '$ s/.$//' )
-
-
-
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # "Welcome" JSON for Capturing User Input (thanks, @bartreardon!)
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+if [ "$prefillUsername" == "yes" ]; then usernamePrefil=',"value" : "'${loggedInUser}'"'; fi
+
+if [ "$promptForComputerName" == "yes" ]; then compNameJSON=',{ "title" : "Computer Name","required" : false,"prompt" : "Computer Name" }'; fi
+
+if [ "$promptForAssetTag" == "yes" ]; then
+    assetTagJSON=',{   "title" : "Asset Tag",
+        "required" : true,
+        "prompt" : "Please enter the seven-digit Asset Tag",
+        "regex" : "^(AP|IP|CD)?[0-9]{7,}$",
+        "regexerror" : "Please enter (at least) seven digits for the Asset Tag, optionally preceed by either AP, IP or CD."
+    }'
+fi
+
+if [ "$promptForRoom" == "yes" ]; then roomJSON=',{ "title" : "Room","required" : false,"prompt" : "Optional" }'; fi
+
+if [ -n "$buildingsListRaw" ]; then
+    buildingJSON='{
+            "title" : "Building",
+            "default" : "Please select your building",
+            "values" : [
+                "Please select your building",
+                '${buildingsList}'
+            ]
+        },'
+fi
+
+if [ "$promptForDepartment" == "yes" ]; then
+    departmentJSON='{   "title" : "Department",
+            "default" : "Please select your department",
+            "values" : [
+                "Please select your department",
+                '${departmentList}'
+            ]
+        },'
+fi
+
 
 welcomeJSON='
 {
@@ -522,35 +568,24 @@ welcomeJSON='
     "titlefont" : "shadow=true, size=36, colour=#FFFDF4",
     "messagefont" : "size=14",
     "textfield" : [
-        {   "title" : "Computer Name",
-            "required" : false,
-            "prompt" : "Computer Name"
-        },
         {   "title" : "User Name",
             "required" : false,
             "prompt" : "User Name"
-        },
-        {   "title" : "Asset Tag",
-            "required" : true,
-            "prompt" : "Please enter the seven-digit Asset Tag",
-            "regex" : "^(AP|IP|CD)?[0-9]{7,}$",
-            "regexerror" : "Please enter (at least) seven digits for the Asset Tag, optionally preceed by either AP, IP or CD."
+            '${usernamePrefil}'
         }
+        '${compNameJSON}'
+        '${assetTagJSON}'
+        '${roomJSON}'
     ],
     "selectitems" : [
+        '${buildingJSON}'
+        '${departmentJSON}'
         {   "title" : "Configuration",
             "default" : "Required",
             "values" : [
                 "Required",
                 "Recommended",
                 "Complete"
-            ]
-        },  
-        {   "title" : "Department",
-            "default" : "Please select your department",
-            "values" : [
-                "Please select your department",
-                '${departmentList}'
             ]
         }
     ],
@@ -2320,8 +2355,9 @@ elif [[ "${welcomeDialog}" == "userInput" ]]; then
             userName=$(get_json_value_welcomeDialog "$welcomeResults" "User Name")
             assetTag=$(get_json_value_welcomeDialog "$welcomeResults" "Asset Tag")
             symConfiguration=$(get_json_value_welcomeDialog "$welcomeResults" "Configuration" "selectedValue")
-            department=$(get_json_value_welcomeDialog "$welcomeResults" "Department" "selectedValue")
-
+            department=$(get_json_value_welcomeDialog "$welcomeResults" "Department" "selectedValue" | grep -v "Please select your department" )
+            room=$(get_json_value_welcomeDialog "$welcomeResults" "Room")
+            building=$(get_json_value_welcomeDialog "$welcomeResults" "Building" "selectedValue" | grep -v "Please select your building" )
 
 
             ###
@@ -2333,7 +2369,8 @@ elif [[ "${welcomeDialog}" == "userInput" ]]; then
             updateScriptLog "WELCOME DIALOG: • Asset Tag: $assetTag"
             updateScriptLog "WELCOME DIALOG: • Configuration: $symConfiguration"
             updateScriptLog "WELCOME DIALOG: • Department: $department"
-
+            updateScriptLog "WELCOME DIALOG: • Building: $building"
+            updateScriptLog "WELCOME DIALOG: • Room: $room"
 
 
             ###
@@ -2407,6 +2444,12 @@ elif [[ "${welcomeDialog}" == "userInput" ]]; then
                 # UNTESTED, UNSUPPORTED "YOYO" EXAMPLE
                 reconOptions+="-department \"${department}\" "
             fi
+
+            # Building
+            if [[ -n "${building}" ]]; then reconOptions+="-building \"${building}\" "; fi
+            
+            # Room
+            if [[ -n "${room}" ]]; then reconOptions+="-room \"${room}\" "; fi
 
             # Output `recon` options to log
             updateScriptLog "WELCOME DIALOG: reconOptions: ${reconOptions}"
@@ -2587,6 +2630,8 @@ if [[ -n ${userName} ]]; then infobox+="**Username:**  \n$userName  \n\n" ; fi
 if [[ -n ${assetTag} ]]; then infobox+="**Asset Tag:**  \n$assetTag  \n\n" ; fi
 if [[ -n ${infoboxConfiguration} ]]; then infobox+="**Configuration:**  \n$infoboxConfiguration  \n\n" ; fi
 if [[ -n ${department} ]]; then infobox+="**Department:**  \n$department  \n\n" ; fi
+if [[ -n ${building} ]]; then infobox+="**Building:**  \n$building  \n\n" ; fi
+if [[ -n ${room} ]]; then infobox+="**Room:**  \n$room  \n\n" ; fi
 
 dialogUpdateSetupYourMac "infobox: ${infobox}"
 
