@@ -33,6 +33,7 @@
 #   - Check `bannerImage` and `welcomeBannerImage` ([Pull Request No. 22](https://github.com/dan-snelson/Setup-Your-Mac/pull/22) AND [Pull Request No. 24](https://github.com/dan-snelson/Setup-Your-Mac/pull/24) thanks @amadotejada!)
 #   - A "raw" unsorted listing of departments — with possible duplicates — is converted to a sorted, unique, JSON-compatible `departmentList` variable (Addresses [Issue No. 23](https://github.com/dan-snelson/Setup-Your-Mac/issues/23); thanks @rougegoat!)
 #   - The selected Configuration now displays in `helpmessage` (Addresses [Issue No. 17](https://github.com/dan-snelson/Setup-Your-Mac/issues/17); thanks for the idea, @master-vodawagner!)
+#   - Disable the so-called "Failure" dialog by setting the new `failureDialog` variable to `false` (Addresses [Issue No. 25](https://github.com/dan-snelson/Setup-Your-Mac/issues/25); thanks for the idea, @DevliegereM!)
 #
 ####################################################################################################
 
@@ -48,7 +49,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.10.0-rc13"
+scriptVersion="1.10.0-rc14"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -60,6 +61,15 @@ outdatedOsAction="${9:-"/System/Library/CoreServices/Software Update.app"}"     
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Various Feature Variables
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+debugModeSleepAmount="3"    # Delay for various actions when running in Debug Mode
+failureDialog="true"        # Display the so-called "Failure" dialog (after the main SYM dialog) [ true | false ]
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Operating System, Computer Model Name, etc.
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
@@ -67,7 +77,6 @@ osVersion=$( sw_vers -productVersion )
 osBuild=$( sw_vers -buildVersion )
 osMajorVersion=$( echo "${osVersion}" | awk -F '.' '{print $1}' )
 modelName=$( /usr/libexec/PlistBuddy -c 'Print :0:_items:0:machine_name' /dev/stdin <<< "$(system_profiler -xml SPHardwareDataType)" )
-debugModeSleepAmount="3"
 reconOptions=""
 exitCode="0"
 
@@ -1386,35 +1395,70 @@ function finalise(){
 
     if [[ "${jamfProPolicyTriggerFailure}" == "failed" ]]; then
 
-        killProcess "caffeinate"
-        dialogUpdateSetupYourMac "title: Sorry ${loggedInUserFirstname}, something went sideways"
-        dialogUpdateSetupYourMac "icon: SF=xmark.circle.fill,weight=bold,colour1=#BB1717,colour2=#F31F1F"
-        dialogUpdateSetupYourMac "progresstext: Failures detected. Please click Continue for troubleshooting information."
-        dialogUpdateSetupYourMac "button1text: Continue …"
-        dialogUpdateSetupYourMac "button1: enable"
-        dialogUpdateSetupYourMac "progress: reset"
+        outputLineNumberInVerboseDebugMode
+        updateScriptLog "Failed polcies detected …"
 
-        # Wait for user-acknowledgment due to detected failure
-        wait
+        if [[ "${failureDialog}" == "true" ]]; then
 
-        dialogUpdateSetupYourMac "quit:"
-        eval "${dialogFailureCMD}" & sleep 0.3
+            outputLineNumberInVerboseDebugMode
+            updateScriptLog "Display Failure dialog: ${failureDialog}"
 
-        updateScriptLog "\n\n# # #\n# FAILURE DIALOG\n# # #\n"
-        updateScriptLog "Jamf Pro Policy Name Failures:"
-        updateScriptLog "${jamfProPolicyNameFailures}"
+            killProcess "caffeinate"
+            dialogUpdateSetupYourMac "title: Sorry ${loggedInUserFirstname}, something went sideways"
+            dialogUpdateSetupYourMac "icon: SF=xmark.circle.fill,weight=bold,colour1=#BB1717,colour2=#F31F1F"
+            dialogUpdateSetupYourMac "progresstext: Failures detected. Please click Continue for troubleshooting information."
+            dialogUpdateSetupYourMac "button1text: Continue …"
+            dialogUpdateSetupYourMac "button1: enable"
+            dialogUpdateSetupYourMac "progress: reset"
 
-        dialogUpdateFailure "message: A failure has been detected, ${loggedInUserFirstname}.  \n\nPlease complete the following steps:\n1. Reboot and login to your ${modelName}  \n2. Login to Self Service  \n3. Re-run any failed policy listed below  \n\nThe following failed:  \n${jamfProPolicyNameFailures}  \n\n\n\nIf you need assistance, please contact the Help Desk,  \n+1 (801) 555-1212, and mention [KB86753099](https://servicenow.company.com/support?id=kb_article_view&sysparm_article=KB86753099#Failures). "
-        dialogUpdateFailure "icon: SF=xmark.circle.fill,weight=bold,colour1=#BB1717,colour2=#F31F1F"
-        dialogUpdateFailure "button1text: ${button1textCompletionActionOption}"
+            # Wait for user-acknowledgment due to detected failure
+            wait
 
-        # Wait for user-acknowledgment due to detected failure
-        wait
+            dialogUpdateSetupYourMac "quit:"
+            eval "${dialogFailureCMD}" & sleep 0.3
 
-        dialogUpdateFailure "quit:"
-        quitScript "1"
+            updateScriptLog "\n\n# # #\n# FAILURE DIALOG\n# # #\n"
+            updateScriptLog "Jamf Pro Policy Name Failures:"
+            updateScriptLog "${jamfProPolicyNameFailures}"
+
+            dialogUpdateFailure "message: A failure has been detected, ${loggedInUserFirstname}.  \n\nPlease complete the following steps:\n1. Reboot and login to your ${modelName}  \n2. Login to Self Service  \n3. Re-run any failed policy listed below  \n\nThe following failed:  \n${jamfProPolicyNameFailures}  \n\n\n\nIf you need assistance, please contact the Help Desk,  \n+1 (801) 555-1212, and mention [KB86753099](https://servicenow.company.com/support?id=kb_article_view&sysparm_article=KB86753099#Failures). "
+            dialogUpdateFailure "icon: SF=xmark.circle.fill,weight=bold,colour1=#BB1717,colour2=#F31F1F"
+            dialogUpdateFailure "button1text: ${button1textCompletionActionOption}"
+
+            # Wait for user-acknowledgment due to detected failure
+            wait
+
+            dialogUpdateFailure "quit:"
+            quitScript "1"
+
+        else
+
+            outputLineNumberInVerboseDebugMode
+            updateScriptLog "Display Failure dialog: ${failureDialog}"
+
+            killProcess "caffeinate"
+            dialogUpdateSetupYourMac "title: Sorry ${loggedInUserFirstname}, something went sideways"
+            dialogUpdateSetupYourMac "icon: SF=xmark.circle.fill,weight=bold,colour1=#BB1717,colour2=#F31F1F"
+            dialogUpdateSetupYourMac "progresstext: Failures detected."
+            dialogUpdateSetupYourMac "button1text: ${button1textCompletionActionOption}"
+            dialogUpdateSetupYourMac "button1: enable"
+            dialogUpdateSetupYourMac "progress: reset"
+            dialogUpdateSetupYourMac "progresstext: Errors detected; please ${progressTextCompletionAction// and } your ${modelName}, ${loggedInUserFirstname}."
+
+            # If either "wait" or "sleep" has been specified for `completionActionOption`, honor that behavior
+            if [[ "${completionActionOption}" == "wait" ]] || [[ "${completionActionOption}" == "[Ss]leep"* ]]; then
+                updateScriptLog "Honoring ${completionActionOption} behavior …"
+                eval "${completionActionOption}" "${dialogSetupYourMacProcessID}"
+            fi
+
+            quitScript "1"
+
+        fi
 
     else
+
+        outputLineNumberInVerboseDebugMode
+        updateScriptLog "All polcies executed successfully"
 
         dialogUpdateSetupYourMac "title: ${loggedInUserFirstname}‘s ${modelName} is ready!"
         dialogUpdateSetupYourMac "icon: SF=checkmark.circle.fill,weight=bold,colour1=#00ff44,colour2=#075c1e"
