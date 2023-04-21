@@ -539,7 +539,7 @@ if [ -n "$buildingsListRaw" ]; then
         },'
 fi
 
-if [ "$promptForDepartment" == "yes" ]; then
+if [ -n "$departmentListRaw" ]; then
     departmentJSON='{   "title" : "Department",
             "default" : "Please select your department",
             "values" : [
