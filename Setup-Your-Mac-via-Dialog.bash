@@ -34,7 +34,7 @@
 #   - A "raw" unsorted listing of departments — with possible duplicates — is converted to a sorted, unique, JSON-compatible `departmentList` variable (Addresses [Issue No. 23](https://github.com/dan-snelson/Setup-Your-Mac/issues/23); thanks @rougegoat!)
 #   - The selected Configuration now displays in `helpmessage` (Addresses [Issue No. 17](https://github.com/dan-snelson/Setup-Your-Mac/issues/17); thanks for the idea, @master-vodawagner!)
 #   - Disable the so-called "Failure" dialog by setting the new `failureDialog` variable to `false` (Addresses [Issue No. 25](https://github.com/dan-snelson/Setup-Your-Mac/issues/25); thanks for the idea, @DevliegereM!)
-#
+#   - Added function to send a message to Microsoft Teams
 ####################################################################################################
 
 
@@ -57,6 +57,7 @@ welcomeDialog="${6:-"userInput"}"                                               
 completionActionOption="${7:-"Restart Attended"}"                               # Parameter 7: Completion Action [ wait | sleep (with seconds) | Shut Down | Shut Down Attended | Shut Down Confirm | Restart | Restart Attended (default) | Restart Confirm | Log Out | Log Out Attended | Log Out Confirm ]
 requiredMinimumBuild="${8:-"disabled"}"                                         # Parameter 8: Required Minimum Build [ disabled (default) | 22E ] (i.e., Your organization's required minimum build of macOS to allow users to proceed; use "22E" for macOS 13.3)
 outdatedOsAction="${9:-"/System/Library/CoreServices/Software Update.app"}"     # Parameter 9: Outdated OS Action [ /System/Library/CoreServices/Software Update.app (default) | jamfselfservice://content?entity=policy&id=117&action=view ] (i.e., Jamf Pro Self Service policy ID for operating system ugprades)
+sendWebhookMessage="${10:-"false"}"                                             # Parameter 10: Send Webhook Message [ true | false (default) ] Can be used to send a success or failure message to Microsoft Teams via Webhook. Function could be modified to include other communication tools that support functionality.
 
 
 
@@ -383,6 +384,56 @@ else
     updateScriptLog "PRE-FLIGHT CHECK: swiftDialog version $(/usr/local/bin/dialog --version) found; proceeding..."
 fi
 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Pre-flight Check: Microsoft Teams Message Function
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+function webHookMessage() {
+
+# Modify this section to match your Microsoft Teams webhook URL
+webhookURL="https://company.webhook.office.com/webhookb2/645f8aec-53c4-47da-a2f1-395798f37cef@59762c14-4b58-806e-f6cc47d75b19/IncomingWebhook/df0b0dc7fd6345f7ac0a7b493da5c9fd/521df584-45be-7b73b2c17905"
+# Jamf Pro URL
+jamfProURL=$(/usr/bin/defaults read /Library/Preferences/com.jamfsoftware.jamf.plist jss_url)
+# URL to an image to add to your notification
+activityImage="https://creazilla-store.fra1.digitaloceanspaces.com/cliparts/78010/old-mac-computer-clipart-md.png"
+
+data=$(cat <<EOF
+{
+	"@type": "MessageCard",
+	"@context": "http://schema.org/extensions",
+	"themeColor": "E4002B",
+	"summary": "New Mac Enrollment: '${status}'",
+	"sections": [{
+		"activityTitle": "New Mac Enrollment: '${status}'",
+		"activitySubtitle": '${jamfProURL}',
+		"activityImage": '${activityImage}',
+		"facts": [{
+			"name": "Mac Serial",
+			"value": '${serialNumber}'
+		}, {
+			"name": "Timestamp",
+			"value": '${timestamp}'
+		}, {
+			"name": "User",
+			"value": '${loggedInUser}'
+		}, {
+			"name": "Operating System Version",
+			"value": '${osVersion}'
+}],
+		"markdown": true
+	}]
+}
+EOF
+)
+
+# Send the message to Microsoft Teams
+curl --request POST \
+--url ${webhookURL} \
+--header 'Content-Type: application/json' \
+--data "${data}"
+}
+
+updateScriptLog "PRE-FLIGHT CHECK: Send Webhook Message set to ${sendWebhookMessage}"
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -1397,6 +1448,11 @@ function finalise(){
 
         outputLineNumberInVerboseDebugMode
         updateScriptLog "Failed polcies detected …"
+        if [[ "${sendWebhookMessage}" == "true" ]]; then
+            updateScriptLog "Display Failure dialog: Sending webhook message"
+            status="Failures detected"
+            webHookMessage
+        fi
 
         if [[ "${failureDialog}" == "true" ]]; then
 
@@ -1410,6 +1466,7 @@ function finalise(){
             dialogUpdateSetupYourMac "button1text: Continue …"
             dialogUpdateSetupYourMac "button1: enable"
             dialogUpdateSetupYourMac "progress: reset"
+            
 
             # Wait for user-acknowledgment due to detected failure
             wait
@@ -1459,6 +1516,11 @@ function finalise(){
 
         outputLineNumberInVerboseDebugMode
         updateScriptLog "All polcies executed successfully"
+        if [[ "${sendWebhookMessage}" == "true" ]]; then
+            status="Successful"
+            updateScriptLog "Sending success webhook message"
+            webHookMessage
+        fi
 
         dialogUpdateSetupYourMac "title: ${loggedInUserFirstname}‘s ${modelName} is ready!"
         dialogUpdateSetupYourMac "icon: SF=checkmark.circle.fill,weight=bold,colour1=#00ff44,colour2=#075c1e"
