@@ -36,7 +36,7 @@
 #   - Disable the so-called "Failure" dialog by setting the new `failureDialog` variable to `false` (Addresses [Issue No. 25](https://github.com/dan-snelson/Setup-Your-Mac/issues/25); thanks for the idea, @DevliegereM!)
 #   - Added function to send a message to Microsoft Teams [Pull Request No. 29](https://github.com/dan-snelson/Setup-Your-Mac/pull/29) thanks @robjschroeder!)
 #   - Added Building & Room User Input, Centralize User Input settings in one area [Pull Request No. 26](https://github.com/dan-snelson/Setup-Your-Mac/pull/26) thanks @rougegoat!)
-#
+#.  - Replaced Parameter 10 with webhookURL for Microsoft Teams messaging (@robjschroeder, thanks for the idea @colorenz!!)
 ####################################################################################################
 
 
@@ -51,7 +51,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.10.0-rc16"
+scriptVersion="1.10.0-rc17"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -59,7 +59,7 @@ welcomeDialog="${6:-"userInput"}"                                               
 completionActionOption="${7:-"Restart Attended"}"                               # Parameter 7: Completion Action [ wait | sleep (with seconds) | Shut Down | Shut Down Attended | Shut Down Confirm | Restart | Restart Attended (default) | Restart Confirm | Log Out | Log Out Attended | Log Out Confirm ]
 requiredMinimumBuild="${8:-"disabled"}"                                         # Parameter 8: Required Minimum Build [ disabled (default) | 22E ] (i.e., Your organization's required minimum build of macOS to allow users to proceed; use "22E" for macOS 13.3)
 outdatedOsAction="${9:-"/System/Library/CoreServices/Software Update.app"}"     # Parameter 9: Outdated OS Action [ /System/Library/CoreServices/Software Update.app (default) | jamfselfservice://content?entity=policy&id=117&action=view ] (i.e., Jamf Pro Self Service policy ID for operating system ugprades)
-sendWebhookMessage="${10:-"false"}"                                             # Parameter 10: Send Webhook Message [ true | false (default) ] Can be used to send a success or failure message to Microsoft Teams via Webhook. Function could be modified to include other communication tools that support functionality.
+webhookURL="${10:-""}"                                             		# Parameter 10: Microsoft Teams Webhook URL [ https://microsoftTeams.webhook.com/URL | blank (default) ] Can be used to send a success or failure message to Microsoft Teams via Webhook. Function could be modified to include other communication tools that support functionality.
 
 
 
@@ -1434,7 +1434,7 @@ function finalise(){
 
         outputLineNumberInVerboseDebugMode
         updateScriptLog "Failed polcies detected …"
-        if [[ "${sendWebhookMessage}" == "true" ]]; then
+        if [[ ! -z "${webhookURL}" ]]; then
             updateScriptLog "Display Failure dialog: Sending webhook message"
             webhookStatus="Failures detected"
             webHookMessage
@@ -1502,7 +1502,7 @@ function finalise(){
 
         outputLineNumberInVerboseDebugMode
         updateScriptLog "All polcies executed successfully"
-        if [[ "${sendWebhookMessage}" == "true" ]]; then
+        if [[ ! -z "${webhookURL}" ]]; then
             webhookStatus="Successful"
             updateScriptLog "Sending success webhook message"
             webHookMessage
@@ -2214,10 +2214,6 @@ function webHookMessage() {
     outputLineNumberInVerboseDebugMode
 
     updateScriptLog "Generating Microsoft Teams Message …"
-
-    # Modify this section to match your Microsoft Teams Webhook URL
-    # https://learn.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook?tabs=dotnet#create-incoming-webhooks-1
-    webhookURL="https://company.webhook.office.com/webhookb2/645f8aec-53c4-47da-a2f1-395798f37cef@59762c14-4b58-806e-f6cc47d75b19/IncomingWebhook/df0b0dc7fd6345f7ac0a7b493da5c9fd/521df584-45be-7b73b2c17905"
 
     # Jamf Pro URL
     jamfProURL=$(/usr/bin/defaults read /Library/Preferences/com.jamfsoftware.jamf.plist jss_url)
