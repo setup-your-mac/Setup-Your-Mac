@@ -36,7 +36,8 @@
 #   - Disable the so-called "Failure" dialog by setting the new `failureDialog` variable to `false` (Addresses [Issue No. 25](https://github.com/dan-snelson/Setup-Your-Mac/issues/25); thanks for the idea, @DevliegereM!)
 #   - Added function to send a message to Microsoft Teams [Pull Request No. 29](https://github.com/dan-snelson/Setup-Your-Mac/pull/29) thanks @robjschroeder!)
 #   - Added Building & Room User Input, Centralize User Input settings in one area [Pull Request No. 26](https://github.com/dan-snelson/Setup-Your-Mac/pull/26) thanks @rougegoat!)
-#.  - Replaced Parameter 10 with webhookURL for Microsoft Teams messaging (@robjschroeder, thanks for the idea @colorenz!!)
+#   - Replaced Parameter 10 with webhookURL for Microsoft Teams messaging ([Pull Request No. 31](https://github.com/dan-snelson/Setup-Your-Mac/pull/31) @robjschroeder, thanks for the idea @colorenz!!)
+#
 ####################################################################################################
 
 
@@ -59,7 +60,7 @@ welcomeDialog="${6:-"userInput"}"                                               
 completionActionOption="${7:-"Restart Attended"}"                               # Parameter 7: Completion Action [ wait | sleep (with seconds) | Shut Down | Shut Down Attended | Shut Down Confirm | Restart | Restart Attended (default) | Restart Confirm | Log Out | Log Out Attended | Log Out Confirm ]
 requiredMinimumBuild="${8:-"disabled"}"                                         # Parameter 8: Required Minimum Build [ disabled (default) | 22E ] (i.e., Your organization's required minimum build of macOS to allow users to proceed; use "22E" for macOS 13.3)
 outdatedOsAction="${9:-"/System/Library/CoreServices/Software Update.app"}"     # Parameter 9: Outdated OS Action [ /System/Library/CoreServices/Software Update.app (default) | jamfselfservice://content?entity=policy&id=117&action=view ] (i.e., Jamf Pro Self Service policy ID for operating system ugprades)
-webhookURL="${10:-""}"                                             		# Parameter 10: Microsoft Teams Webhook URL [ https://microsoftTeams.webhook.com/URL | blank (default) ] Can be used to send a success or failure message to Microsoft Teams via Webhook. Function could be modified to include other communication tools that support functionality.
+webhookURL="${10:-""}"                                             		        # Parameter 10: Microsoft Teams Webhook URL [ https://microsoftTeams.webhook.com/URL | blank (default) ] Can be used to send a success or failure message to Microsoft Teams via Webhook. Function could be modified to include other communication tools that support functionality.
 
 
 
@@ -69,6 +70,8 @@ webhookURL="${10:-""}"                                             		# Parameter
 
 debugModeSleepAmount="3"    # Delay for various actions when running in Debug Mode
 failureDialog="true"        # Display the so-called "Failure" dialog (after the main SYM dialog) [ true | false ]
+
+
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Welcome Message User Input Customization Choices
@@ -91,6 +94,7 @@ departmentListRaw="Asset Management,Sales,Australia Area Office,Purchasing / Sou
 
 # A sorted, unique, JSON-compatible list of departments
 departmentList=$( echo "${departmentListRaw}" | tr ',' '\n' | sort -f | uniq | sed -e 's/^/\"/' -e 's/$/\",/' -e '$ s/.$//' )
+
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -1434,7 +1438,7 @@ function finalise(){
 
         outputLineNumberInVerboseDebugMode
         updateScriptLog "Failed polcies detected …"
-        if [[ ! -z "${webhookURL}" ]]; then
+        if [[ -n "${webhookURL}" ]]; then
             updateScriptLog "Display Failure dialog: Sending webhook message"
             webhookStatus="Failures detected"
             webHookMessage
@@ -1502,7 +1506,7 @@ function finalise(){
 
         outputLineNumberInVerboseDebugMode
         updateScriptLog "All polcies executed successfully"
-        if [[ ! -z "${webhookURL}" ]]; then
+        if [[ -n "${webhookURL}" ]]; then
             webhookStatus="Successful"
             updateScriptLog "Sending success webhook message"
             webHookMessage
@@ -2254,11 +2258,9 @@ EOF
     updateScriptLog "Send the message Microsoft Teams …"
 
     curl --request POST \
-    --url ${webhookURL} \
+    --url "${webhookURL}" \
     --header 'Content-Type: application/json' \
     --data "${data}"
-
-    updateScriptLog "Microsoft Teams Webhook Message set to ${sendWebhookMessage}"
 
 }
 
