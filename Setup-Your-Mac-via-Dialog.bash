@@ -35,7 +35,6 @@
 #   - The selected Configuration now displays in `helpmessage` (Addresses [Issue No. 17](https://github.com/dan-snelson/Setup-Your-Mac/issues/17); thanks for the idea, @master-vodawagner!)
 #   - Disable the so-called "Failure" dialog by setting the new `failureDialog` variable to `false` (Addresses [Issue No. 25](https://github.com/dan-snelson/Setup-Your-Mac/issues/25); thanks for the idea, @DevliegereM!)
 #   - Added function to send a message to Microsoft Teams [Pull Request No. 29](https://github.com/dan-snelson/Setup-Your-Mac/pull/29) thanks @robjschroeder!)
-#   - Added Building & Room User Input, Centralize User Input settings in one area [Pull Request No. 26](https://github.com/dan-snelson/Setup-Your-Mac/pull/26) thanks @rougegoat!)
 #
 ####################################################################################################
 
@@ -51,7 +50,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.10.0-rc16"
+scriptVersion="1.10.0-rc15"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -78,6 +77,7 @@ failureDialog="true"        # Display the so-called "Failure" dialog (after the 
 promptForAssetTag="yes"
 promptForRoom="yes"
 promptForComputerName="yes"
+promptForDepartment="yes"
 prefillUsername="yes"
 
 # An unsorted, comma-separated list of buildings (with possible duplication).  If empty, this will be hidden from the user info prompt
@@ -2225,6 +2225,12 @@ function webHookMessage() {
     # URL to an image to add to your notification
     activityImage="https://creazilla-store.fra1.digitaloceanspaces.com/cliparts/78010/old-mac-computer-clipart-md.png"
 
+    # hostname
+    hostname=$(hostname)
+    
+    # A search in jamf with the hostname
+    jamfProComputerURL="$jamfProURL/computers.html?query=$hostname&queryType=COMPUTERS&version="
+
     data=$(cat <<EOF
 {
 	"@type": "MessageCard",
@@ -2242,14 +2248,25 @@ function webHookMessage() {
 			"name": "Timestamp",
 			"value": '${timestamp}'
 		}, {
+			"name": "Computername",
+			"value": "${hostname}"
+		}, {
 			"name": "User",
 			"value": '${loggedInUser}'
 		}, {
 			"name": "Operating System Version",
 			"value": '${osVersion}'
 }],
-		"markdown": true
-	}]
+	"markdown": true,
+        "potentialAction": [{
+            "@type": "OpenUri",
+            "name": "View in Jamf Pro",
+            "targets": [{
+                "os": "default",
+                "uri": "${jamfProComputerURL}"
+            }]
+        }]
+    }]
 }
 EOF
 )
