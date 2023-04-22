@@ -34,7 +34,8 @@
 #   - A "raw" unsorted listing of departments — with possible duplicates — is converted to a sorted, unique, JSON-compatible `departmentList` variable (Addresses [Issue No. 23](https://github.com/dan-snelson/Setup-Your-Mac/issues/23); thanks @rougegoat!)
 #   - The selected Configuration now displays in `helpmessage` (Addresses [Issue No. 17](https://github.com/dan-snelson/Setup-Your-Mac/issues/17); thanks for the idea, @master-vodawagner!)
 #   - Disable the so-called "Failure" dialog by setting the new `failureDialog` variable to `false` (Addresses [Issue No. 25](https://github.com/dan-snelson/Setup-Your-Mac/issues/25); thanks for the idea, @DevliegereM!)
-#   - Added function to send a message to Microsoft Teams
+#   - Added function to send a message to Microsoft Teams [Pull Request No. 29](https://github.com/dan-snelson/Setup-Your-Mac/pull/29) thanks @robjschroeder!)
+#
 ####################################################################################################
 
 
@@ -49,7 +50,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.10.0-rc14"
+scriptVersion="1.10.0-rc15"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -384,56 +385,6 @@ else
     updateScriptLog "PRE-FLIGHT CHECK: swiftDialog version $(/usr/local/bin/dialog --version) found; proceeding..."
 fi
 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Pre-flight Check: Microsoft Teams Message Function
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
-function webHookMessage() {
-
-# Modify this section to match your Microsoft Teams webhook URL
-webhookURL="https://company.webhook.office.com/webhookb2/645f8aec-53c4-47da-a2f1-395798f37cef@59762c14-4b58-806e-f6cc47d75b19/IncomingWebhook/df0b0dc7fd6345f7ac0a7b493da5c9fd/521df584-45be-7b73b2c17905"
-# Jamf Pro URL
-jamfProURL=$(/usr/bin/defaults read /Library/Preferences/com.jamfsoftware.jamf.plist jss_url)
-# URL to an image to add to your notification
-activityImage="https://creazilla-store.fra1.digitaloceanspaces.com/cliparts/78010/old-mac-computer-clipart-md.png"
-
-data=$(cat <<EOF
-{
-	"@type": "MessageCard",
-	"@context": "http://schema.org/extensions",
-	"themeColor": "E4002B",
-	"summary": "New Mac Enrollment: '${status}'",
-	"sections": [{
-		"activityTitle": "New Mac Enrollment: '${status}'",
-		"activitySubtitle": '${jamfProURL}',
-		"activityImage": '${activityImage}',
-		"facts": [{
-			"name": "Mac Serial",
-			"value": '${serialNumber}'
-		}, {
-			"name": "Timestamp",
-			"value": '${timestamp}'
-		}, {
-			"name": "User",
-			"value": '${loggedInUser}'
-		}, {
-			"name": "Operating System Version",
-			"value": '${osVersion}'
-}],
-		"markdown": true
-	}]
-}
-EOF
-)
-
-# Send the message to Microsoft Teams
-curl --request POST \
---url ${webhookURL} \
---header 'Content-Type: application/json' \
---data "${data}"
-}
-
-updateScriptLog "PRE-FLIGHT CHECK: Send Webhook Message set to ${sendWebhookMessage}"
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -1450,7 +1401,7 @@ function finalise(){
         updateScriptLog "Failed polcies detected …"
         if [[ "${sendWebhookMessage}" == "true" ]]; then
             updateScriptLog "Display Failure dialog: Sending webhook message"
-            status="Failures detected"
+            webhookStatus="Failures detected"
             webHookMessage
         fi
 
@@ -1517,7 +1468,7 @@ function finalise(){
         outputLineNumberInVerboseDebugMode
         updateScriptLog "All polcies executed successfully"
         if [[ "${sendWebhookMessage}" == "true" ]]; then
-            status="Successful"
+            webhookStatus="Successful"
             updateScriptLog "Sending success webhook message"
             webHookMessage
         fi
@@ -2214,6 +2165,69 @@ function checkNetworkQualityCatchAllConfiguration() {
 
     updateScriptLog "SETUP YOUR MAC DIALOG: Network Quality Test: Started: $dlStartDate, Ended: $dlEndDate; Download: $mbps Mbps, Responsiveness: $dlResponsiveness"
     dialogUpdateSetupYourMac "infobox: **Connection:**  \n- Download:  \n$mbps Mbps  \n\n**Estimates (beta):**  \n- $(printf '%dh:%dm:%ds\n' $((configurationCatchAllEstimatedSeconds/3600)) $((configurationCatchAllEstimatedSeconds%3600/60)) $((configurationCatchAllEstimatedSeconds%60)))"
+
+}
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Microsoft Teams Message (thanks, @robjschroeder!)
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+function webHookMessage() {
+
+    outputLineNumberInVerboseDebugMode
+
+    updateScriptLog "Generating Microsoft Teams Message …"
+
+    # Modify this section to match your Microsoft Teams Webhook URL
+    # https://learn.microsoft.com/en-us/microsoftteams/platform/webhooks-and-connectors/how-to/add-incoming-webhook?tabs=dotnet#create-incoming-webhooks-1
+    webhookURL="https://company.webhook.office.com/webhookb2/645f8aec-53c4-47da-a2f1-395798f37cef@59762c14-4b58-806e-f6cc47d75b19/IncomingWebhook/df0b0dc7fd6345f7ac0a7b493da5c9fd/521df584-45be-7b73b2c17905"
+
+    # Jamf Pro URL
+    jamfProURL=$(/usr/bin/defaults read /Library/Preferences/com.jamfsoftware.jamf.plist jss_url)
+
+    # URL to an image to add to your notification
+    activityImage="https://creazilla-store.fra1.digitaloceanspaces.com/cliparts/78010/old-mac-computer-clipart-md.png"
+
+    data=$(cat <<EOF
+{
+	"@type": "MessageCard",
+	"@context": "http://schema.org/extensions",
+	"themeColor": "E4002B",
+	"summary": "New Mac Enrollment: '${webhookStatus}'",
+	"sections": [{
+		"activityTitle": "New Mac Enrollment: '${webhookStatus}'",
+		"activitySubtitle": '${jamfProURL}',
+		"activityImage": '${activityImage}',
+		"facts": [{
+			"name": "Mac Serial",
+			"value": '${serialNumber}'
+		}, {
+			"name": "Timestamp",
+			"value": '${timestamp}'
+		}, {
+			"name": "User",
+			"value": '${loggedInUser}'
+		}, {
+			"name": "Operating System Version",
+			"value": '${osVersion}'
+}],
+		"markdown": true
+	}]
+}
+EOF
+)
+
+    # Send the message to Microsoft Teams
+    updateScriptLog "Send the message Microsoft Teams …"
+
+    curl --request POST \
+    --url ${webhookURL} \
+    --header 'Content-Type: application/json' \
+    --data "${data}"
+
+    updateScriptLog "Microsoft Teams Webhook Message set to ${sendWebhookMessage}"
 
 }
 
