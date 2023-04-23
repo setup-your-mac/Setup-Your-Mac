@@ -79,10 +79,11 @@ failureDialog="true"        # Display the so-called "Failure" dialog (after the 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 # These control which user input boxes are added to the first page of Setup Your Mac.  If you do not want to ask about a value, set it to any other value
-promptForAssetTag="yes"
-promptForRoom="yes"
-promptForComputerName="yes"
-prefillUsername="yes"
+promptForAssetTag="true"
+promptForRoom="true"
+promptForComputerName="true"
+prefillUsername="true"
+#moveableInProduction="true"
 
 # An unsorted, comma-separated list of buildings (with possible duplication).  If empty, this will be hidden from the user info prompt
 buildingsListRaw="Building,Tower,Barn,Castle"
@@ -96,7 +97,10 @@ departmentListRaw="Asset Management,Sales,Australia Area Office,Purchasing / Sou
 # A sorted, unique, JSON-compatible list of departments
 departmentList=$( echo "${departmentListRaw}" | tr ',' '\n' | sort -f | uniq | sed -e 's/^/\"/' -e 's/$/\",/' -e '$ s/.$//' )
 
-
+# Branding overrides
+#brandingBanner="/path/to/banner/file"
+#brandingIconLight="/path/to/icon/file"
+#brandingIconDark="/path/to/icon/file"
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Operating System, Computer Model Name, etc.
@@ -476,8 +480,13 @@ jamfBinary="/usr/local/bin/jamf"
 
 welcomeTitle="Happy $( date +'%A' ), ${loggedInUserFirstname}!  \nWelcome to your new ${modelName}"
 welcomeMessage="Please enter your ${modelName}‘s **Asset Tag**, select your preferred **Configuration** then click **Continue** to start applying settings to your new Mac.  \n\nOnce completed, the **Wait** button will be enabled and you‘ll be able to review the results before restarting your ${modelName}.  \n\nIf you need assistance, please contact the Help Desk: +1 (801) 555-1212.  \n\n---  \n\n#### Configurations  \n- **Required:** Minimum organization apps  \n- **Recommended:** Required apps and Microsoft Office  \n- **Complete:** Recommended apps, Adobe Acrobat Reader and Google Chrome"
-welcomeBannerImage="https://img.freepik.com/free-photo/yellow-watercolor-paper_95678-446.jpg"
-welcomeBannerText="Happy $( date +'%A' ), ${loggedInUserFirstname}!  \nWelcome to your new ${modelName}"
+if [[ -n "$brandingBanner" ]]; then
+    welcomeBannerImage="${brandingBanner}"
+    welcomeBannerText=""
+else
+    welcomeBannerImage="https://img.freepik.com/free-photo/yellow-watercolor-paper_95678-446.jpg"
+    welcomeBannerText="Happy $( date +'%A' ), ${loggedInUserFirstname}!  \nWelcome to your new ${modelName}"
+fi
 welcomeCaption="Please review the above video, then click Continue."
 welcomeVideoID="vimeoid=812753953"
 
@@ -492,9 +501,11 @@ fi
 # Welcome icon set to either light or dark, based on user's Apperance setting (thanks, @mm2270!)
 appleInterfaceStyle=$( /usr/bin/defaults read /Users/"${loggedInUser}"/Library/Preferences/.GlobalPreferences.plist AppleInterfaceStyle 2>&1 )
 if [[ "${appleInterfaceStyle}" == "Dark" ]]; then
-    welcomeIcon="https://cdn-icons-png.flaticon.com/512/740/740878.png"
+    if [[ -n "$brandingIconDark" ]]; then welcomeIcon="$brandingIconDark";
+    else welcomeIcon="https://cdn-icons-png.flaticon.com/512/740/740878.png"; fi
 else
-    welcomeIcon="https://cdn-icons-png.flaticon.com/512/979/979585.png"
+    if [[ -n "$brandingIconLight" ]]; then welcomeIcon="$brandingIconLight";
+    else welcomeIcon="https://cdn-icons-png.flaticon.com/512/979/979585.png"; fi
 fi
 
 
@@ -520,11 +531,11 @@ welcomeVideo="--title \"$welcomeTitle\" \
 # "Welcome" JSON for Capturing User Input (thanks, @bartreardon!)
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-if [ "$prefillUsername" == "yes" ]; then usernamePrefil=',"value" : "'${loggedInUser}'"'; fi
+if [ "$prefillUsername" == "true" ]; then usernamePrefil=',"value" : "'${loggedInUser}'"'; fi
 
-if [ "$promptForComputerName" == "yes" ]; then compNameJSON=',{ "title" : "Computer Name","required" : false,"prompt" : "Computer Name" }'; fi
+if [ "$promptForComputerName" == "true" ]; then compNameJSON=',{ "title" : "Computer Name","required" : false,"prompt" : "Computer Name" }'; fi
 
-if [ "$promptForAssetTag" == "yes" ]; then
+if [ "$promptForAssetTag" == "true" ]; then
     assetTagJSON=',{   "title" : "Asset Tag",
         "required" : true,
         "prompt" : "Please enter the seven-digit Asset Tag",
@@ -533,7 +544,7 @@ if [ "$promptForAssetTag" == "yes" ]; then
     }'
 fi
 
-if [ "$promptForRoom" == "yes" ]; then roomJSON=',{ "title" : "Room","required" : false,"prompt" : "Optional" }'; fi
+if [ "$promptForRoom" == "true" ]; then roomJSON=',{ "title" : "Room","required" : false,"prompt" : "Optional" }'; fi
 
 if [ -n "$buildingsListRaw" ]; then
     buildingJSON='{
@@ -614,8 +625,13 @@ welcomeJSON='
 
 title="Setting up ${loggedInUserFirstname}‘s ${modelName}"
 message="Please wait while the following apps are installed …"
-bannerImage="https://img.freepik.com/free-photo/yellow-watercolor-paper_95678-446.jpg"
-bannerText="Setting up ${loggedInUserFirstname}‘s ${modelName}"
+if [[ -n "${brandingBanner}" ]]; then
+    bannerImage="${brandingBanner}"
+    bannerText=""
+else
+    bannerImage="https://img.freepik.com/free-photo/yellow-watercolor-paper_95678-446.jpg"
+    bannerText="Setting up ${loggedInUserFirstname}‘s ${modelName}"
+fi
 helpmessage="If you need assistance, please contact the Global Service Department:  \n- **Telephone:** +1 (801) 555-1212  \n- **Email:** support@domain.org  \n- **Knowledge Base Article:** KB0057050  \n\n**Computer Information:**  \n- **Operating System:**  ${macOSproductVersion} (${macOSbuildVersion})  \n- **Serial Number:** ${serialNumber}  \n- **Dialog:** ${dialogVersion}  \n- **Started:** ${timestamp}"
 infobox="Analyzing input …" # Customize at "Update Setup Your Mac's infobox"
 
@@ -2367,7 +2383,7 @@ fi
 # If Debug Mode is enabled, replace `blurscreen` with `movable`
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-if [[ "${debugMode}" == "true" ]] || [[ "${debugMode}" == "verbose" ]] ; then
+if [[ "${debugMode}" == "true" ]] || [[ "${debugMode}" == "verbose" ]] || "${moveableInProduction}" == "true" ]] ; then
     welcomeJSON=${welcomeJSON//blurscreen/moveable}
     dialogSetupYourMacCMD=${dialogSetupYourMacCMD//blurscreen/moveable}
 fi
