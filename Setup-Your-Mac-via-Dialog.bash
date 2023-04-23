@@ -37,6 +37,7 @@
 #   - Added function to send a message to Microsoft Teams [Pull Request No. 29](https://github.com/dan-snelson/Setup-Your-Mac/pull/29) thanks @robjschroeder!)
 #   - Added Building & Room User Input, Centralize User Input settings in one area [Pull Request No. 26](https://github.com/dan-snelson/Setup-Your-Mac/pull/26) thanks @rougegoat!)
 #   - Replaced Parameter 10 with webhookURL for Microsoft Teams messaging ([Pull Request No. 31](https://github.com/dan-snelson/Setup-Your-Mac/pull/31) @robjschroeder, thanks for the idea @colorenz!!)
+#   - Added an action card to the Microsoft Teams webhook message to view the computer's inventory record in Jamf Pro @robjschroeder
 #
 ####################################################################################################
 
@@ -52,7 +53,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.10.0-rc17"
+scriptVersion="1.10.0-rc18"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -2221,6 +2222,12 @@ function webHookMessage() {
 
     # Jamf Pro URL
     jamfProURL=$(/usr/bin/defaults read /Library/Preferences/com.jamfsoftware.jamf.plist jss_url)
+    
+    # Computer Jamf Pro object ID
+    computerID=$(/usr/local/bin/jamf recon | grep '<computer_id>' | xmllint --xpath xmllint --xpath '/computer_id/text()' -)
+    
+    # URL to computer object
+    jamfProComputerURL="${jamfProURL}computers.html?id=${computerID}&o=r"
 
     # URL to an image to add to your notification
     activityImage="https://creazilla-store.fra1.digitaloceanspaces.com/cliparts/78010/old-mac-computer-clipart-md.png"
@@ -2239,8 +2246,14 @@ function webHookMessage() {
 			"name": "Mac Serial",
 			"value": '${serialNumber}'
 		}, {
+			"name": "Computer Name",
+			"value": '${computerName}'
+		}, {
 			"name": "Timestamp",
 			"value": '${timestamp}'
+		}, {
+			"name": "Configuration",
+			"value": '${symConfiguration}'
 		}, {
 			"name": "User",
 			"value": '${loggedInUser}'
@@ -2248,7 +2261,15 @@ function webHookMessage() {
 			"name": "Operating System Version",
 			"value": '${osVersion}'
 }],
-		"markdown": true
+		"markdown": true,
+        	"potentialAction": [{
+            	"@type": "OpenUri",
+            	"name": "View in Jamf Pro",
+            	"targets": [{
+                	"os": "default",
+                	"uri": "${jamfProComputerURL}"
+            		}]
+        	}]
 	}]
 }
 EOF
