@@ -54,7 +54,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.10.0-rc20"
+scriptVersion="1.10.0-rc21"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -538,8 +538,9 @@ welcomeVideo="--title \"$welcomeTitle\" \
 --commandfile \"$welcomeCommandFile\" "
 
 
+
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# "Welcome" JSON for Capturing User Input (thanks, @bartreardon!)
+#  "Welcome" JSON toggles for quickly disabling unneeded input boxes (thanks, @rougegoat!)
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 if [ "$prefillUsername" == "true" ]; then usernamePrefil=',"value" : "'${loggedInUser}'"'; fi
@@ -578,6 +579,11 @@ if [ -n "$departmentListRaw" ]; then
         },'
 fi
 
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# "Welcome" JSON for Capturing User Input (thanks, @bartreardon!)
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 welcomeJSON='
 {
