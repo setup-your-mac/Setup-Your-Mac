@@ -32,6 +32,8 @@
 - Added an action card to the Microsoft Teams webhook message to view the computer's inventory record in Jamf Pro ([Pull Request No. 32](https://github.com/dan-snelson/Setup-Your-Mac/pull/32); thanks @robjschroeder!)
 - Additional User Input Flags ([Pull Request No. 34](https://github.com/dan-snelson/Setup-Your-Mac/pull/34); thanks @rougegoat!)
 - Corrected Dan's copy-pasta bug: Changed `--webHook` to `--data` ([Pull Request No. 36](https://github.com/dan-snelson/Setup-Your-Mac/pull/36); thanks @colorenz!)
+- Enable or disable any combination of the fields on the Welcome dialog ([Pull Request No. 37](https://github.com/dan-snelson/Setup-Your-Mac/pull/37); thanks big bunches, @rougegoat!!)
+- Moved various `shellcheck disable` codes sprinkled throughout script front-and-center to Line No. `2`
 
 ## 1.9.0
 ### 01-Apr-2023

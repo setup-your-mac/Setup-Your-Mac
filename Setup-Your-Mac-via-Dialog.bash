@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=SC2001,SC1112,SC2143,SC2145,SC2086,SC2089,SC2090
 
 ####################################################################################################
 #
@@ -40,6 +41,8 @@
 #   - Added an action card to the Microsoft Teams webhook message to view the computer's inventory record in Jamf Pro ([Pull Request No. 32](https://github.com/dan-snelson/Setup-Your-Mac/pull/32); thanks @robjschroeder!)
 #   - Additional User Input Flags ([Pull Request No. 34](https://github.com/dan-snelson/Setup-Your-Mac/pull/34); thanks @rougegoat!)
 #   - Corrected Dan's copy-pasta bug: Changed `--webHook` to `--data` ([Pull Request No. 36](https://github.com/dan-snelson/Setup-Your-Mac/pull/36); thanks @colorenz!)
+#   - Enable or disable any combination of the fields on the Welcome dialog ([Pull Request No. 37](https://github.com/dan-snelson/Setup-Your-Mac/pull/37); thanks big bunches, @rougegoat!!)
+#   - Moved various `shellcheck disable` codes sprinkled throughout script front-and-center to Line No. `2`
 #
 ####################################################################################################
 
@@ -55,7 +58,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.10.0-rc23"
+scriptVersion="1.10.0-rc24"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -77,22 +80,22 @@ failureDialog="true"        # Display the so-called "Failure" dialog (after the 
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Welcome Message User Input Customization Choices
+# Welcome Message User Input Customization Choices (thanks, @rougegoat!)
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 # These control which user input boxes are added to the first page of Setup Your Mac. If you do not want to ask about a value, set it to any other value
 promptForUsername="true"
-prefillUsername="true"  # prefills the currently logged in user's username
+prefillUsername="true"          # prefills the currently logged in user's username
 promptForComputerName="true"
 promptForAssetTag="true"
 promptForRoom="true"
-promptForConfiguration="true"  # Removes the Configuration dropdown entirely and goes with the default one.
+promptForConfiguration="true"   # Removes the Configuration dropdown entirely and uses the "Catch-all (i.e., used when `welcomeDialog` is set to `video` or `false`)" policyJSON
 
 # Disables the Blurscreen enabled by default in Production
 moveableInProduction="false"
 
 # An unsorted, comma-separated list of buildings (with possible duplication). If empty, this will be hidden from the user info prompt
-buildingsListRaw="Building,Tower,Barn,Castle"
+buildingsListRaw="Benson (Ezra Taft) Building,Brimhall (George H.) Building,BYU Conference Center,Centennial Carillon Tower,Chemicals Management Building,Clark (Herald R.) Building,Clark (J. Reuben) Building,Clyde (W.W.) Engineering Building,Crabtree (Roland A.) Technology Building,Ellsworth (Leo B.) Building,Engineering Building,Eyring (Carl F.) Science Center,Grant (Heber J.) Building,Harman (Caroline Hemenway) Building,Harris (Franklin S.) Fine Arts Center,Johnson (Doran) House East,Kimball (Spencer W.) Tower,Knight (Jesse) Building,Lee (Harold B.) Library,Life Sciences Building,Life Sciences Greenhouses,Maeser (Karl G.) Building,Martin (Thomas L.) Building,McKay (David O.) Building,Nicholes (Joseph K.) Building,Smith (Joseph F.) Building,Smith (Joseph) Building,Snell (William H.) Building,Talmage (James E.) Math Sciences/Computer Building,Tanner (N. Eldon) Building,Taylor (John) Building,Wells (Daniel H.) Building"
 
 # A sorted, unique, JSON-compatible list of buildings
 buildingsList=$( echo "${buildingsListRaw}" | tr ',' '\n' | sort -f | uniq | sed -e 's/^/\"/' -e 's/$/\",/' -e '$ s/.$//' )
@@ -239,7 +242,6 @@ if [[ "${requiredMinimumBuild}" == "disabled" ]]; then
 else
 
     # Since swiftDialog requires at least macOS 11 Big Sur, first confirm the major OS version
-    # shellcheck disable=SC2086 # purposely use single quotes with osascript
     if [[ "${osMajorVersion}" -ge 11 ]] ; then
 
         updateScriptLog "PRE-FLIGHT CHECK: macOS ${osMajorVersion} installed; checking build version ..."
@@ -311,7 +313,6 @@ updateScriptLog "PRE-FLIGHT CHECK: Current Logged-in User ID: ${loggedInUserID}"
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Pre-flight Check: Toggle `jamf` binary check-in (thanks, @robjschroeder!)
-# shellcheck disable=SC2143
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 function toggleJamfLaunchDaemon() {
@@ -554,7 +555,7 @@ welcomeVideo="--title \"$welcomeTitle\" \
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-#  "Welcome" JSON toggles for quickly disabling unneeded input boxes (thanks, @rougegoat!)
+# "Welcome" JSON Conditionals (thanks, @rougegoat!)
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 # Text Fields
@@ -611,6 +612,7 @@ selectItemsJSON="${buildingJSON}${departmentJSON}${configurationJSON}"
 selectItemsJSON=$( echo $selectItemsJSON | sed 's/,$//' )
 
 
+
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # "Welcome" JSON for Capturing User Input (thanks, @bartreardon!)
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -638,7 +640,7 @@ welcomeJSON='
     "selectitems" : [
         '${selectItemsJSON}'
     ],
-    "height" : "725"
+    "height" : "750"
 }
 '
 
@@ -751,8 +753,6 @@ dialogSetupYourMacCMD="$dialogBinary \
 # policy_array=("$(curl -sL $jsonURL)")
 #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# shellcheck disable=SC1112 # use literal slanted single quotes for typographic reasons
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # The fully qualified domain name of the server which hosts your icons, including any required sub-directories
@@ -764,7 +764,6 @@ setupYourMacPolicyArrayIconPrefixUrl="https://ics.services.jamfcloud.com/icon/ha
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Select `policyJSON` based on Configuration selected in "Welcome" dialog (thanks, @drtaru!)
-# shellcheck disable=SC1112 # use literal slanted single quotes for typographic reasons
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 function policyJSONConfiguration() {
@@ -1403,7 +1402,6 @@ function outputLineNumberInVerboseDebugMode() {
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Run command as logged-in user (thanks, @scriptingosx!)
-# shellcheck disable=SC2145
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 function runAsUser() {
@@ -2272,11 +2270,11 @@ function webHookMessage() {
     jamfProURL=$(/usr/bin/defaults read /Library/Preferences/com.jamfsoftware.jamf.plist jss_url)
     
     # Jamf Pro URL for on-prem, multi-node, clustered environments
-    case ${jamfProURL} in
-        *"beta"*    ) jamfProURL="https://jamfpro-beta.internal.company.com/" ;;
-        *           ) jamfProURL="https://jamfpro-prod.internal.company.com/" ;;
-    esac
-    
+    # case ${jamfProURL} in
+    #     *"beta"*    ) jamfProURL="https://jamfpro-beta.internal.company.com/" ;;
+    #     *           ) jamfProURL="https://jamfpro-prod.internal.company.com/" ;;
+    # esac
+
     # URL to computer object
     jamfProComputerURL="${jamfProURL}computers.html?id=${computerID}&o=r"
 
@@ -2298,7 +2296,7 @@ function webHookMessage() {
 			"value": "${serialNumber}"
 		}, {
 			"name": "Computer Name",
-			"value": "${computerName}"
+			"value": "$( scutil --get ComputerName )"
 		}, {
 			"name": "Timestamp",
 			"value": "${timestamp}"
