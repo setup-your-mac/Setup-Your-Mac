@@ -88,7 +88,7 @@ promptForRoom="true"
 promptForConfiguration="true"  # Removes the Configuration dropdown entirely and goes with the default one.
 
 # Disables the Blurscreen enabled by default in Production
-moveableInProduction="true"
+moveableInProduction="false"
 
 # An unsorted, comma-separated list of buildings (with possible duplication). If empty, this will be hidden from the user info prompt
 buildingsListRaw="Building,Tower,Barn,Castle"
