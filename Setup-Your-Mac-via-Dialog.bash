@@ -39,7 +39,7 @@
 #   - Replaced Parameter 10 with webhookURL for Microsoft Teams messaging ([Pull Request No. 31](https://github.com/dan-snelson/Setup-Your-Mac/pull/31) @robjschroeder, thanks for the idea @colorenz!!)
 #   - Added an action card to the Microsoft Teams webhook message to view the computer's inventory record in Jamf Pro ([Pull Request No. 32](https://github.com/dan-snelson/Setup-Your-Mac/pull/32); thanks @robjschroeder!)
 #   - Additional User Input Flags ([Pull Request No. 34](https://github.com/dan-snelson/Setup-Your-Mac/pull/34); thanks @rougegoat!)
-#   - Corrected Dan's copy-pasta bug: Changed --webHook to --data ([Pull Request No. 36](https://github.com/dan-snelson/Setup-Your-Mac/pull/36); thanks @colorenz!)
+#   - Corrected Dan's copy-pasta bug: Changed `--webHook` to `--data` ([Pull Request No. 36](https://github.com/dan-snelson/Setup-Your-Mac/pull/36); thanks @colorenz!)
 #
 ####################################################################################################
 
@@ -55,7 +55,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.10.0-rc22"
+scriptVersion="1.10.0-rc23"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -85,7 +85,7 @@ promptForAssetTag="true"
 promptForRoom="true"
 promptForComputerName="true"
 prefillUsername="true"
-moveableInProduction="false"
+moveableInProduction="true"
 
 # An unsorted, comma-separated list of buildings (with possible duplication). If empty, this will be hidden from the user info prompt
 buildingsListRaw="Building,Tower,Barn,Castle"
@@ -491,7 +491,7 @@ jamfBinary="/usr/local/bin/jamf"
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 welcomeTitle="Happy $( date +'%A' ), ${loggedInUserFirstname}!  \nWelcome to your new ${modelName}"
-welcomeMessage="Please enter the **required** information for your ${modelName}, select your preferred **Configuration** then click **Continue** to start applying settings to your new Mac. \n\nOnce completed, the **Wait** button will be enabled and you‘ll be able to review the results before restarting your ${modelName}. \n\nIf you need assistance, please contact the ${supportTeamName}: ${supportTeamPhone} and mention ${supportKB}. \n\n---  \n\n#### Configurations  \n- **Required:** Minimum organization apps  \n- **Recommended:** Required apps and Microsoft Office  \n- **Complete:** Recommended apps, Adobe Acrobat Reader and Google Chrome"
+welcomeMessage="Please enter the **required** information for your ${modelName}, select your preferred **Configuration** then click **Continue** to start applying settings to your new Mac. \n\nOnce completed, the **Wait** button will be enabled and you‘ll be able to review the results before restarting your ${modelName}. \n\nIf you need assistance, please contact the ${supportTeamName}:  \n${supportTeamPhone} and mention ${supportKB}. \n\n---  \n\n#### Configurations  \n- **Required:** Minimum organization apps  \n- **Recommended:** Required apps and Microsoft Office  \n- **Complete:** Recommended apps, Adobe Acrobat Reader and Google Chrome"
 if [[ -n "${brandingBanner}" ]]; then
     welcomeBannerImage="${brandingBanner}"
     welcomeBannerText="Happy $( date +'%A' ), ${loggedInUserFirstname}!  \nWelcome to your new ${modelName}"
@@ -2258,8 +2258,11 @@ function webHookMessage() {
     # Jamf Pro URL
     jamfProURL=$(/usr/bin/defaults read /Library/Preferences/com.jamfsoftware.jamf.plist jss_url)
     
-    # Computer Jamf Pro object ID
-    # computerID=$(/usr/local/bin/jamf recon | grep '<computer_id>' | xmllint --xpath xmllint --xpath '/computer_id/text()' -)
+    # Jamf Pro URL for on-prem, multi-node, clustered environments
+    case ${jamfProURL} in
+        *"beta"*    ) jamfProURL="https://jamfpro-beta.internal.company.com/" ;;
+        *           ) jamfProURL="https://jamfpro-prod.internal.company.com/" ;;
+    esac
     
     # URL to computer object
     jamfProComputerURL="${jamfProURL}computers.html?id=${computerID}&o=r"
@@ -2321,6 +2324,9 @@ curl --request POST \
 --url "${webhookURL}" \
 --header 'Content-Type: application/json' \
 --data "${webHookdata}"
+
+webhookResult="$?"
+updateScriptLog "Microsoft Teams Webhook Result: ${webhookResult}"
 
 }
 
