@@ -2316,7 +2316,7 @@ EOF
     curl --request POST \
     --url "${webhookURL}" \
     --header 'Content-Type: application/json' \
-    --webHook "${webHookdata}"
+    --data "${webHookdata}"
 
 }
 
