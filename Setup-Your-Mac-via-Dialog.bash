@@ -39,6 +39,7 @@
 #   - Replaced Parameter 10 with webhookURL for Microsoft Teams messaging ([Pull Request No. 31](https://github.com/dan-snelson/Setup-Your-Mac/pull/31) @robjschroeder, thanks for the idea @colorenz!!)
 #   - Added an action card to the Microsoft Teams webhook message to view the computer's inventory record in Jamf Pro ([Pull Request No. 32](https://github.com/dan-snelson/Setup-Your-Mac/pull/32); thanks @robjschroeder!)
 #   - Additional User Input Flags ([Pull Request No. 34](https://github.com/dan-snelson/Setup-Your-Mac/pull/34); thanks @rougegoat!)
+#   - Corrected Dan's copy-pasta bug: Changed --webHook to --data ([Pull Request No. 36](https://github.com/dan-snelson/Setup-Your-Mac/pull/36); thanks @colorenz!)
 #
 ####################################################################################################
 
@@ -54,7 +55,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.10.0-rc21"
+scriptVersion="1.10.0-rc22"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -84,7 +85,7 @@ promptForAssetTag="true"
 promptForRoom="true"
 promptForComputerName="true"
 prefillUsername="true"
-moveableInProduction="true"
+moveableInProduction="false"
 
 # An unsorted, comma-separated list of buildings (with possible duplication). If empty, this will be hidden from the user info prompt
 buildingsListRaw="Building,Tower,Barn,Castle"
@@ -2268,55 +2269,58 @@ function webHookMessage() {
 
     webHookdata=$(cat <<EOF
 {
-    "@type": "MessageCard",
-    "@context": "http://schema.org/extensions",
-    "themeColor": "E4002B",
-    "summary": "New Mac Enrollment: '${webhookStatus}'",
-    "sections": [{
-        "activityTitle": "New Mac Enrollment: '${webhookStatus}'",
-        "activitySubtitle": '${jamfProURL}',
-        "activityImage": '${activityImage}',
-        "facts": [{
-            "name": "Mac Serial",
-            "value": '${serialNumber}'
+	"@type": "MessageCard",
+	"@context": "http://schema.org/extensions",
+	"themeColor": "E4002B",
+	"summary": "New Mac Enrollment: '${webhookStatus}'",
+	"sections": [{
+		"activityTitle": "New Mac Enrollment: ${webhookStatus}",
+		"activitySubtitle": "${jamfProURL}",
+		"activityImage": "${activityImage}",
+		"facts": [{
+			"name": "Mac Serial",
+			"value": "${serialNumber}"
+		}, {
+			"name": "Computer Name",
+			"value": "${computerName}"
+		}, {
+			"name": "Timestamp",
+			"value": "${timestamp}"
+		}, {
+			"name": "Configuration",
+			"value": "${symConfiguration}"
+		}, {
+			"name": "User",
+			"value": "${loggedInUser}"
+		}, {
+			"name": "Operating System Version",
+			"value": "${osVersion}"
         }, {
-            "name": "Computer Name",
-            "value": '${computerName}'
-        }, {
-            "name": "Timestamp",
-            "value": '${timestamp}'
-        }, {
-            "name": "Configuration",
-            "value": '${symConfiguration}'
-        }, {
-            "name": "User",
-            "value": '${loggedInUser}'
-        }, {
-            "name": "Operating System Version",
-            "value": '${osVersion}'
+            "name": "Additional Comments",
+            "value": "${jamfProPolicyNameFailures}"
 }],
-        "markdown": true,
-            "potentialAction": [{
-                "@type": "OpenUri",
-                "name": "View in Jamf Pro",
-                "targets": [{
-                    "os": "default",
-                    "uri": "${jamfProComputerURL}"
-                    }]
-            }]
-    }]
+		"markdown": true,
+        "potentialAction": [{
+        "@type": "OpenUri",
+        "name": "View in Jamf Pro",
+        "targets": [{
+        	"os": "default",
+            "uri": "${jamfProComputerURL}"
+			}]
+		}]
+	}]
 }
 EOF
 )
 
-    # Send the message to Microsoft Teams
-    updateScriptLog "Send the message Microsoft Teams …"
-    updateScriptLog "${webHookdata}"
+# Send the message to Microsoft Teams
+updateScriptLog "Send the message Microsoft Teams …"
+updateScriptLog "${webHookdata}"
 
-    curl --request POST \
-    --url "${webhookURL}" \
-    --header 'Content-Type: application/json' \
-    --data "${webHookdata}"
+curl --request POST \
+--url "${webhookURL}" \
+--header 'Content-Type: application/json' \
+--data "${webHookdata}"
 
 }
 
