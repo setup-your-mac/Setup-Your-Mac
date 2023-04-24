@@ -38,6 +38,7 @@
 #   - Added Building & Room User Input, Centralize User Input settings in one area [Pull Request No. 26](https://github.com/dan-snelson/Setup-Your-Mac/pull/26) thanks @rougegoat!)
 #   - Replaced Parameter 10 with webhookURL for Microsoft Teams messaging ([Pull Request No. 31](https://github.com/dan-snelson/Setup-Your-Mac/pull/31) @robjschroeder, thanks for the idea @colorenz!!)
 #   - Added an action card to the Microsoft Teams webhook message to view the computer's inventory record in Jamf Pro ([Pull Request No. 32](https://github.com/dan-snelson/Setup-Your-Mac/pull/32); thanks @robjschroeder!)
+#   - Additional User Input Flags ([Pull Request No. 34](https://github.com/dan-snelson/Setup-Your-Mac/pull/34); thanks @rougegoat!)
 #
 ####################################################################################################
 
@@ -53,7 +54,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.10.0-rc18"
+scriptVersion="1.10.0-rc19"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -61,7 +62,7 @@ welcomeDialog="${6:-"userInput"}"                                               
 completionActionOption="${7:-"Restart Attended"}"                               # Parameter 7: Completion Action [ wait | sleep (with seconds) | Shut Down | Shut Down Attended | Shut Down Confirm | Restart | Restart Attended (default) | Restart Confirm | Log Out | Log Out Attended | Log Out Confirm ]
 requiredMinimumBuild="${8:-"disabled"}"                                         # Parameter 8: Required Minimum Build [ disabled (default) | 22E ] (i.e., Your organization's required minimum build of macOS to allow users to proceed; use "22E" for macOS 13.3)
 outdatedOsAction="${9:-"/System/Library/CoreServices/Software Update.app"}"     # Parameter 9: Outdated OS Action [ /System/Library/CoreServices/Software Update.app (default) | jamfselfservice://content?entity=policy&id=117&action=view ] (i.e., Jamf Pro Self Service policy ID for operating system ugprades)
-webhookURL="${10:-""}"                                             		        # Parameter 10: Microsoft Teams Webhook URL [ https://microsoftTeams.webhook.com/URL | blank (default) ] Can be used to send a success or failure message to Microsoft Teams via Webhook. Function could be modified to include other communication tools that support functionality.
+webhookURL="${10:-""}"                                                             # Parameter 10: Microsoft Teams Webhook URL [ https://microsoftTeams.webhook.com/URL | blank (default) ] Can be used to send a success or failure message to Microsoft Teams via Webhook. Function could be modified to include other communication tools that support functionality.
 
 
 
@@ -78,20 +79,20 @@ failureDialog="true"        # Display the so-called "Failure" dialog (after the 
 # Welcome Message User Input Customization Choices
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-# These control which user input boxes are added to the first page of Setup Your Mac.  If you do not want to ask about a value, set it to any other value
+# These control which user input boxes are added to the first page of Setup Your Mac. If you do not want to ask about a value, set it to any other value
 promptForAssetTag="true"
 promptForRoom="true"
 promptForComputerName="true"
 prefillUsername="true"
-#moveableInProduction="true"
+moveableInProduction="true"
 
-# An unsorted, comma-separated list of buildings (with possible duplication).  If empty, this will be hidden from the user info prompt
+# An unsorted, comma-separated list of buildings (with possible duplication). If empty, this will be hidden from the user info prompt
 buildingsListRaw="Building,Tower,Barn,Castle"
 
 # A sorted, unique, JSON-compatible list of buildings
 buildingsList=$( echo "${buildingsListRaw}" | tr ',' '\n' | sort -f | uniq | sed -e 's/^/\"/' -e 's/$/\",/' -e '$ s/.$//' )
 
-# An unsorted, comma-separated list of departments (with possible duplication).  If empty, this will be hidden from the user info prompt
+# An unsorted, comma-separated list of departments (with possible duplication). If empty, this will be hidden from the user info prompt
 departmentListRaw="Asset Management,Sales,Australia Area Office,Purchasing / Sourcing,Board of Directors,Strategic Initiatives & Programs,Operations,Business Development,Marketing,Creative Services,Customer Service / Customer Experience,Risk Management,Engineering,Finance / Accounting,Sales,General Management,Human Resources,Marketing,Investor Relations,Legal,Marketing,Sales,Product Management,Production,Corporate Communications,Information Technology / Technology,Quality Assurance,Project Management Office,Sales,Technology"
 
 # A sorted, unique, JSON-compatible list of departments
@@ -108,6 +109,8 @@ supportTeamPhone="+1 (801) 555-1212"
 supportTeamEmail="support@domain.org"
 supportTeamErrorKB=", and mention [KB86753099](https://servicenow.company.com/support?id=kb_article_view&sysparm_article=KB86753099#Failures)"
 supportTeamHelpKB="\n- **Knowledge Base Article:** KB0057050"
+
+
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Operating System, Computer Model Name, etc.
@@ -486,7 +489,7 @@ jamfBinary="/usr/local/bin/jamf"
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 welcomeTitle="Happy $( date +'%A' ), ${loggedInUserFirstname}!  \nWelcome to your new ${modelName}"
-welcomeMessage="Please enter your ${modelName}‘s **Asset Tag**, select your preferred **Configuration** then click **Continue** to start applying settings to your new Mac.  \n\nOnce completed, the **Wait** button will be enabled and you‘ll be able to review the results before restarting your ${modelName}.  \n\nIf you need assistance, please contact the ${supportTeamName}: ${supportTeamPhone}.  \n\n---  \n\n#### Configurations  \n- **Required:** Minimum organization apps  \n- **Recommended:** Required apps and Microsoft Office  \n- **Complete:** Recommended apps, Adobe Acrobat Reader and Google Chrome"
+welcomeMessage="Please enter your ${modelName}‘s **Asset Tag**, select your preferred **Configuration** then click **Continue** to start applying settings to your new Mac. \n\nOnce completed, the **Wait** button will be enabled and you‘ll be able to review the results before restarting your ${modelName}. \n\nIf you need assistance, please contact the ${supportTeamName}: ${supportTeamPhone}. \n\n---  \n\n#### Configurations  \n- **Required:** Minimum organization apps  \n- **Recommended:** Required apps and Microsoft Office  \n- **Complete:** Recommended apps, Adobe Acrobat Reader and Google Chrome"
 if [[ -n "$brandingBanner" ]]; then
     welcomeBannerImage="${brandingBanner}"
     welcomeBannerText=""
@@ -1492,7 +1495,7 @@ function finalise(){
             updateScriptLog "Jamf Pro Policy Name Failures:"
             updateScriptLog "${jamfProPolicyNameFailures}"
 
-            dialogUpdateFailure "message: A failure has been detected, ${loggedInUserFirstname}.  \n\nPlease complete the following steps:\n1. Reboot and login to your ${modelName}  \n2. Login to Self Service  \n3. Re-run any failed policy listed below  \n\nThe following failed:  \n${jamfProPolicyNameFailures}  \n\n\n\nIf you need assistance, please contact the ${supportTeamName},  \n${supportTeamPhone}${supportTeamErrorKB}. "
+            dialogUpdateFailure "message: A failure has been detected, ${loggedInUserFirstname}. \n\nPlease complete the following steps:\n1. Reboot and login to your ${modelName}  \n2. Login to Self Service  \n3. Re-run any failed policy listed below  \n\nThe following failed:  \n${jamfProPolicyNameFailures}  \n\n\n\nIf you need assistance, please contact the ${supportTeamName},  \n${supportTeamPhone}${supportTeamErrorKB}. "
             dialogUpdateFailure "icon: SF=xmark.circle.fill,weight=bold,colour1=#BB1717,colour2=#F31F1F"
             dialogUpdateFailure "button1text: ${button1textCompletionActionOption}"
 
@@ -1659,7 +1662,8 @@ function confirmPolicyExecution() {
             else
                 updateScriptLog "SETUP YOUR MAC DIALOG: Updating computer inventory with the following 'reconOptions': \"${reconOptions}\" …"
                 dialogUpdateSetupYourMac "listitem: index: $i, status: wait, statustext: Updating …, "
-                eval "${jamfBinary} recon ${reconOptions} -verbose | tee -a ${scriptLog}"
+                reconRaw=$( eval "${jamfBinary} recon ${reconOptions} -verbose | tee -a ${scriptLog}" )
+                computerID=$( echo "${reconRaw}" | grep '<computer_id>' | xmllint --xpath xmllint --xpath '/computer_id/text()' - )
             fi
             ;;
 
@@ -2247,7 +2251,7 @@ function webHookMessage() {
     jamfProURL=$(/usr/bin/defaults read /Library/Preferences/com.jamfsoftware.jamf.plist jss_url)
     
     # Computer Jamf Pro object ID
-    computerID=$(/usr/local/bin/jamf recon | grep '<computer_id>' | xmllint --xpath xmllint --xpath '/computer_id/text()' -)
+    # computerID=$(/usr/local/bin/jamf recon | grep '<computer_id>' | xmllint --xpath xmllint --xpath '/computer_id/text()' -)
     
     # URL to computer object
     jamfProComputerURL="${jamfProURL}computers.html?id=${computerID}&o=r"
@@ -2255,56 +2259,57 @@ function webHookMessage() {
     # URL to an image to add to your notification
     activityImage="https://creazilla-store.fra1.digitaloceanspaces.com/cliparts/78010/old-mac-computer-clipart-md.png"
 
-    data=$(cat <<EOF
+    webHookdata=$(cat <<EOF
 {
-	"@type": "MessageCard",
-	"@context": "http://schema.org/extensions",
-	"themeColor": "E4002B",
-	"summary": "New Mac Enrollment: '${webhookStatus}'",
-	"sections": [{
-		"activityTitle": "New Mac Enrollment: '${webhookStatus}'",
-		"activitySubtitle": '${jamfProURL}',
-		"activityImage": '${activityImage}',
-		"facts": [{
-			"name": "Mac Serial",
-			"value": '${serialNumber}'
-		}, {
-			"name": "Computer Name",
-			"value": '${computerName}'
-		}, {
-			"name": "Timestamp",
-			"value": '${timestamp}'
-		}, {
-			"name": "Configuration",
-			"value": '${symConfiguration}'
-		}, {
-			"name": "User",
-			"value": '${loggedInUser}'
-		}, {
-			"name": "Operating System Version",
-			"value": '${osVersion}'
+    "@type": "MessageCard",
+    "@context": "http://schema.org/extensions",
+    "themeColor": "E4002B",
+    "summary": "New Mac Enrollment: '${webhookStatus}'",
+    "sections": [{
+        "activityTitle": "New Mac Enrollment: '${webhookStatus}'",
+        "activitySubtitle": '${jamfProURL}',
+        "activityImage": '${activityImage}',
+        "facts": [{
+            "name": "Mac Serial",
+            "value": '${serialNumber}'
+        }, {
+            "name": "Computer Name",
+            "value": '${computerName}'
+        }, {
+            "name": "Timestamp",
+            "value": '${timestamp}'
+        }, {
+            "name": "Configuration",
+            "value": '${symConfiguration}'
+        }, {
+            "name": "User",
+            "value": '${loggedInUser}'
+        }, {
+            "name": "Operating System Version",
+            "value": '${osVersion}'
 }],
-		"markdown": true,
-        	"potentialAction": [{
-            	"@type": "OpenUri",
-            	"name": "View in Jamf Pro",
-            	"targets": [{
-                	"os": "default",
-                	"uri": "${jamfProComputerURL}"
-            		}]
-        	}]
-	}]
+        "markdown": true,
+            "potentialAction": [{
+                "@type": "OpenUri",
+                "name": "View in Jamf Pro",
+                "targets": [{
+                    "os": "default",
+                    "uri": "${jamfProComputerURL}"
+                    }]
+            }]
+    }]
 }
 EOF
 )
 
     # Send the message to Microsoft Teams
     updateScriptLog "Send the message Microsoft Teams …"
+    updateScriptLog "${webHookdata}"
 
     curl --request POST \
     --url "${webhookURL}" \
     --header 'Content-Type: application/json' \
-    --data "${data}"
+    --webHook "${webHookdata}"
 
 }
 
