@@ -54,7 +54,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.10.0-rc21"
+scriptVersion="1.10.0-rc22"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -80,10 +80,14 @@ failureDialog="true"        # Display the so-called "Failure" dialog (after the 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 # These control which user input boxes are added to the first page of Setup Your Mac. If you do not want to ask about a value, set it to any other value
+promptForUsername="true"
+prefillUsername="true"  # prefills the currently logged in user's username
+promptForComputerName="true"
 promptForAssetTag="true"
 promptForRoom="true"
-promptForComputerName="true"
-prefillUsername="true"
+promptForConfiguration="true"  # Removes the Configuration dropdown entirely and goes with the default one.
+
+# Disables the Blurscreen enabled by default in Production
 moveableInProduction="true"
 
 # An unsorted, comma-separated list of buildings (with possible duplication). If empty, this will be hidden from the user info prompt
@@ -490,7 +494,14 @@ jamfBinary="/usr/local/bin/jamf"
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 welcomeTitle="Happy $( date +'%A' ), ${loggedInUserFirstname}!  \nWelcome to your new ${modelName}"
-welcomeMessage="Please enter the **required** information for your ${modelName}, select your preferred **Configuration** then click **Continue** to start applying settings to your new Mac. \n\nOnce completed, the **Wait** button will be enabled and you‘ll be able to review the results before restarting your ${modelName}. \n\nIf you need assistance, please contact the ${supportTeamName}: ${supportTeamPhone} and mention ${supportKB}. \n\n---  \n\n#### Configurations  \n- **Required:** Minimum organization apps  \n- **Recommended:** Required apps and Microsoft Office  \n- **Complete:** Recommended apps, Adobe Acrobat Reader and Google Chrome"
+welcomeMessage="Please enter the **required** information for your ${modelName}, select your preferred **Configuration** then click **Continue** to start applying settings to your new Mac. \n\nOnce completed, the **Wait** button will be enabled and you‘ll be able to review the results before restarting your ${modelName}. \n\nIf you need assistance, please contact the ${supportTeamName}: ${supportTeamPhone} and mention ${supportKB}. \n\n---"
+
+if [[ "${promptForConfiguration}" == "true" ]]; then
+    welcomeMessage+="  \n\n#### Configurations  \n- **Required:** Minimum organization apps  \n- **Recommended:** Required apps and Microsoft Office  \n- **Complete:** Recommended apps, Adobe Acrobat Reader and Google Chrome"
+else
+    welcomeMessage=${welcomeMessage//", select your preferred **Configuration**"/}
+fi
+
 if [[ -n "${brandingBanner}" ]]; then
     welcomeBannerImage="${brandingBanner}"
     welcomeBannerText="Happy $( date +'%A' ), ${loggedInUserFirstname}!  \nWelcome to your new ${modelName}"
@@ -543,21 +554,24 @@ welcomeVideo="--title \"$welcomeTitle\" \
 #  "Welcome" JSON toggles for quickly disabling unneeded input boxes (thanks, @rougegoat!)
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
+# Text Fields
 if [ "$prefillUsername" == "true" ]; then usernamePrefil=',"value" : "'${loggedInUser}'"'; fi
-
-if [ "$promptForComputerName" == "true" ]; then compNameJSON=',{ "title" : "Computer Name","required" : false,"prompt" : "Computer Name" }'; fi
-
+if [ "$promptForUsername" == "true" ]; then usernameJSON='{ "title" : "User Name","required" : false,"prompt" : "User Name"'${usernamePrefil}'},'; fi
+if [ "$promptForComputerName" == "true" ]; then compNameJSON='{ "title" : "Computer Name","required" : false,"prompt" : "Computer Name" },'; fi
 if [ "$promptForAssetTag" == "true" ]; then
-    assetTagJSON=',{   "title" : "Asset Tag",
+    assetTagJSON='{   "title" : "Asset Tag",
         "required" : true,
         "prompt" : "Please enter the seven-digit Asset Tag",
         "regex" : "^(AP|IP|CD)?[0-9]{7,}$",
         "regexerror" : "Please enter (at least) seven digits for the Asset Tag, optionally preceed by either AP, IP or CD."
-    }'
+    },'
 fi
+if [ "$promptForRoom" == "true" ]; then roomJSON='{ "title" : "Room","required" : false,"prompt" : "Optional" }'; fi
 
-if [ "$promptForRoom" == "true" ]; then roomJSON=',{ "title" : "Room","required" : false,"prompt" : "Optional" }'; fi
+textFieldJSON="${usernameJSON}${compNameJSON}${assetTagJSON}${roomJSON}"
+textFieldJSON=$( echo ${textFieldJSON} | sed 's/,$//' )
 
+# Dropdowns
 if [ -n "$buildingsListRaw" ]; then
     buildingJSON='{
             "title" : "Building",
@@ -579,7 +593,19 @@ if [ -n "$departmentListRaw" ]; then
         },'
 fi
 
+if [ "$promptForConfiguration" == "true" ]; then
+    configurationJSON='{ "title" : "Configuration",
+            "default" : "Required",
+            "values" : [
+                "Required",
+                "Recommended",
+                "Complete"
+            ]
+        }'
+fi
 
+selectItemsJSON="${buildingJSON}${departmentJSON}${configurationJSON}"
+selectItemsJSON=$( echo $selectItemsJSON | sed 's/,$//' )
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # "Welcome" JSON for Capturing User Input (thanks, @bartreardon!)
@@ -603,26 +629,10 @@ welcomeJSON='
     "titlefont" : "shadow=true, size=36, colour=#FFFDF4",
     "messagefont" : "size=14",
     "textfield" : [
-        {   "title" : "User Name",
-            "required" : false,
-            "prompt" : "User Name"
-            '${usernamePrefil}'
-        }
-        '${compNameJSON}'
-        '${assetTagJSON}'
-        '${roomJSON}'
+        '${textFieldJSON}'
     ],
     "selectitems" : [
-        '${buildingJSON}'
-        '${departmentJSON}'
-        {   "title" : "Configuration",
-            "default" : "Required",
-            "values" : [
-                "Required",
-                "Recommended",
-                "Complete"
-            ]
-        }
+        '${selectItemsJSON}'
     ],
     "height" : "725"
 }
