@@ -54,7 +54,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.10.0-rc19"
+scriptVersion="1.10.0-rc20"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -99,16 +99,17 @@ departmentListRaw="Asset Management,Sales,Australia Area Office,Purchasing / Sou
 departmentList=$( echo "${departmentListRaw}" | tr ',' '\n' | sort -f | uniq | sed -e 's/^/\"/' -e 's/$/\",/' -e '$ s/.$//' )
 
 # Branding overrides
-#brandingBanner="/path/to/banner/file"
-#brandingIconLight="/path/to/icon/file"
-#brandingIconDark="/path/to/icon/file"
+brandingBanner="https://img.freepik.com/free-photo/abstract-grunge-decorative-relief-navy-blue-stucco-wall-texture-wide-angle-rough-colored-background_1258-28311.jpg"
+brandingIconLight="https://cdn-icons-png.flaticon.com/512/979/979585.png"
+brandingIconDark="https://cdn-icons-png.flaticon.com/512/740/740878.png"
 
 # IT Support Variables - Use these if the default text is fine but you want your org's info inserted instead
 supportTeamName="Help Desk"
 supportTeamPhone="+1 (801) 555-1212"
 supportTeamEmail="support@domain.org"
-supportTeamErrorKB=", and mention [KB86753099](https://servicenow.company.com/support?id=kb_article_view&sysparm_article=KB86753099#Failures)"
-supportTeamHelpKB="\n- **Knowledge Base Article:** KB0057050"
+supportKB="KB86753099"
+supportTeamErrorKB=", and mention [${supportKB}](https://servicenow.company.com/support?id=kb_article_view&sysparm_article=${supportKB}#Failures)"
+supportTeamHelpKB="\n- **Knowledge Base Article:** ${supportKB}"
 
 
 
@@ -489,10 +490,10 @@ jamfBinary="/usr/local/bin/jamf"
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 welcomeTitle="Happy $( date +'%A' ), ${loggedInUserFirstname}!  \nWelcome to your new ${modelName}"
-welcomeMessage="Please enter your ${modelName}‘s **Asset Tag**, select your preferred **Configuration** then click **Continue** to start applying settings to your new Mac. \n\nOnce completed, the **Wait** button will be enabled and you‘ll be able to review the results before restarting your ${modelName}. \n\nIf you need assistance, please contact the ${supportTeamName}: ${supportTeamPhone}. \n\n---  \n\n#### Configurations  \n- **Required:** Minimum organization apps  \n- **Recommended:** Required apps and Microsoft Office  \n- **Complete:** Recommended apps, Adobe Acrobat Reader and Google Chrome"
-if [[ -n "$brandingBanner" ]]; then
+welcomeMessage="Please enter the **required** information for your ${modelName}, select your preferred **Configuration** then click **Continue** to start applying settings to your new Mac. \n\nOnce completed, the **Wait** button will be enabled and you‘ll be able to review the results before restarting your ${modelName}. \n\nIf you need assistance, please contact the ${supportTeamName}: ${supportTeamPhone} and mention ${supportKB}. \n\n---  \n\n#### Configurations  \n- **Required:** Minimum organization apps  \n- **Recommended:** Required apps and Microsoft Office  \n- **Complete:** Recommended apps, Adobe Acrobat Reader and Google Chrome"
+if [[ -n "${brandingBanner}" ]]; then
     welcomeBannerImage="${brandingBanner}"
-    welcomeBannerText=""
+    welcomeBannerText="Happy $( date +'%A' ), ${loggedInUserFirstname}!  \nWelcome to your new ${modelName}"
 else
     welcomeBannerImage="https://img.freepik.com/free-photo/yellow-watercolor-paper_95678-446.jpg"
     welcomeBannerText="Happy $( date +'%A' ), ${loggedInUserFirstname}!  \nWelcome to your new ${modelName}"
@@ -637,12 +638,12 @@ title="Setting up ${loggedInUserFirstname}‘s ${modelName}"
 message="Please wait while the following apps are installed …"
 if [[ -n "${brandingBanner}" ]]; then
     bannerImage="${brandingBanner}"
-    bannerText=""
+    bannerText="Setting up ${loggedInUserFirstname}‘s ${modelName}"
 else
     bannerImage="https://img.freepik.com/free-photo/yellow-watercolor-paper_95678-446.jpg"
     bannerText="Setting up ${loggedInUserFirstname}‘s ${modelName}"
 fi
-helpmessage="If you need assistance, please contact the Global Service Department:  \n- **Telephone:** ${supportTeamPhone}  \n- **Email:** ${supportTeamEmail}  ${supportTeamHelpKB}  \n\n**Computer Information:**  \n- **Operating System:**  ${macOSproductVersion} (${macOSbuildVersion})  \n- **Serial Number:** ${serialNumber}  \n- **Dialog:** ${dialogVersion}  \n- **Started:** ${timestamp}"
+helpmessage="If you need assistance, please contact the ${supportTeamName}:  \n- **Telephone:** ${supportTeamPhone}  \n- **Email:** ${supportTeamEmail}  ${supportTeamHelpKB}  \n\n**Computer Information:**  \n- **Operating System:**  ${macOSproductVersion} (${macOSbuildVersion})  \n- **Serial Number:** ${serialNumber}  \n- **Dialog:** ${dialogVersion}  \n- **Started:** ${timestamp}"
 infobox="Analyzing input …" # Customize at "Update Setup Your Mac's infobox"
 
 # Check if the custom bannerImage is available, and if not, use a alternative image
@@ -2772,7 +2773,7 @@ if [[ "${symConfiguration}" != *"Catch-all"* ]]; then
 
         updateScriptLog "Update 'helpmessage' with Configuration: ${infoboxConfiguration} …"
 
-        helpmessage="If you need assistance, please contact the Global Service Department:  \n- **Telephone:** ${supportTeamPhone}  \n- **Email:** ${supportTeamEmail}  \n- **Knowledge Base Article:** KB0057050  \n\n**Configuration:** \n- ${infoboxConfiguration}  \n\n**Computer Information:**  \n- **Operating System:**  ${macOSproductVersion} (${macOSbuildVersion})  \n- **Serial Number:** ${serialNumber}  \n- **Dialog:** ${dialogVersion}  \n- **Started:** ${timestamp}"
+        helpmessage="If you need assistance, please contact the ${supportTeamName}:  \n- **Telephone:** ${supportTeamPhone}  \n- **Email:** ${supportTeamEmail}  \n- **Knowledge Base Article:** ${supportKB}  \n\n**Configuration:** \n- ${infoboxConfiguration}  \n\n**Computer Information:**  \n- **Operating System:**  ${macOSproductVersion} (${macOSbuildVersion})  \n- **Serial Number:** ${serialNumber}  \n- **Dialog:** ${dialogVersion}  \n- **Started:** ${timestamp}"
         
     fi
 
