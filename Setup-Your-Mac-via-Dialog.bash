@@ -1908,8 +1908,6 @@ function validatePolicyResult() {
                 result=$( "${jamfBinary}" policy -trigger "${trigger}" | grep "Script result:" )
                 if [[ "${result}" == *"Running"* ]]; then
                     dialogUpdateSetupYourMac "listitem: index: $i, status: success, statustext: Running"
-                elif [[ "${result}" == *"Installed"* || "${result}" == *"Success"*  ]]; then
-                    dialogUpdateSetupYourMac "listitem: index: $i, status: success, statustext: Installed"
                 else
                     dialogUpdateSetupYourMac "listitem: index: $i, status: fail, statustext: Failed"
                     jamfProPolicyTriggerFailure="failed"
