@@ -10,9 +10,6 @@
 #
 # HISTORY
 #
-#   Version 0.0.1, 06-Mar-2023, Dan K. Snelson (@dan-snelson)
-#   - Original Version
-#
 #   Version 0.0.3, 25-Apr-2023, Andrew Clark (@drtaru)
 #   - Changed Success result to Success to map to new SYM validation status
 #
@@ -23,7 +20,7 @@
 # keyword "NOT", and the script will report a failure.                             #
 #                                                                                  #
 # If all expected apps are installed, the `RESULT` variable will include the       #
-# keyword "Running"; see the following post:                                       #                     
+# keyword "Success"; see the following post:                                       #                     
 # https://snelson.us/2023/01/setup-your-mac-validation/                            #
 ####################################################################################
 

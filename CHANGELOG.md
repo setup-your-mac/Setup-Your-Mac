@@ -34,6 +34,7 @@
 - Corrected Dan's copy-pasta bug: Changed `--webHook` to `--data` ([Pull Request No. 36](https://github.com/dan-snelson/Setup-Your-Mac/pull/36); thanks @colorenz!)
 - Enable or disable any combination of the fields on the Welcome dialog ([Pull Request No. 37](https://github.com/dan-snelson/Setup-Your-Mac/pull/37); thanks big bunches, @rougegoat!!)
 - Moved various `shellcheck disable` codes sprinkled throughout script front-and-center to Line No. `2`
+- Add Remote Validation results of "Success" or "Installed" to update the List Item with "Installed" instead of "Running" ([Pull Request No. 41](https://github.com/dan-snelson/Setup-Your-Mac/pull/41); thanks @drtaru!)
 
 ## 1.9.0
 ### 01-Apr-2023
