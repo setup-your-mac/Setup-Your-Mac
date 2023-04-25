@@ -13,8 +13,8 @@
 #   Version 0.0.1, 06-Mar-2023, Dan K. Snelson (@dan-snelson)
 #   - Original Version
 #
-#   Version 0.0.2, 06-Mar-2023, Andrew Clark (@drtaru)
-#   - Simplified modification
+#   Version 0.0.3, 25-Apr-2023, Andrew Clark (@drtaru)
+#   - Changed Success result to Success to map to new SYM validation status
 #
 ####################################################################################
 # A script to collect the installation status of Microsoft Office 365.             #
@@ -86,7 +86,7 @@ done
 
 case "${appChecks}" in
     *"NOT"* ) RESULT="Failure: ${appChecks}" ;;
-    *       ) RESULT="Running: ${appChecks}" ;;
+    *       ) RESULT="Success: ${appChecks}" ;;
 esac
 
 /bin/echo "<result>${RESULT}</result>"

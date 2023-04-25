@@ -13,6 +13,9 @@
 #   Version 0.0.1, 25-Apr-2023, @drtaru
 #   - Original Version
 #
+#   Version 0.0.2, 25-Apr-2023, @drtaru
+#   - Changed success result to Installed to map to new SYM validation status
+#
 ####################################################################################
 # A script to find printers with lpstat and build an array
 #
@@ -35,5 +38,5 @@ foundPrinters=($(lpstat -p 2>/dev/null | awk '{print $2}' | sed '/^$/d'))
 if [[ ! " ${foundPrinters[*]} " =~ "Printer1" || ! " ${foundPrinters[*]} " =~ "Printer2" ]]; then
     echo "Failure"
 else
-    echo "Running"
+    echo "Installed"
 fi
