@@ -35,6 +35,8 @@
 - Enable or disable any combination of the fields on the Welcome dialog ([Pull Request No. 37](https://github.com/dan-snelson/Setup-Your-Mac/pull/37); thanks big bunches, @rougegoat!!)
 - Moved various `shellcheck disable` codes sprinkled throughout script front-and-center to Line No. `2`
 - Add Remote Validation results of "Success" or "Installed" to update the List Item with "Installed" instead of "Running" ([Pull Request No. 41](https://github.com/dan-snelson/Setup-Your-Mac/pull/41); thanks @drtaru!)
+- Option to disable Banner Text ([Pull Request No. 42](https://github.com/dan-snelson/Setup-Your-Mac/pull/42); thanks, @rougegoat!)
+- Switch `policy -trigger` to `policy -event` (Addresses [Issue No. 38](https://github.com/dan-snelson/Setup-Your-Mac/issues/38); thanks for looking out for us, @delize!)
 
 ## 1.9.0
 ### 01-Apr-2023

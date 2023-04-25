@@ -44,6 +44,8 @@
 #   - Enable or disable any combination of the fields on the Welcome dialog ([Pull Request No. 37](https://github.com/dan-snelson/Setup-Your-Mac/pull/37); thanks big bunches, @rougegoat!!)
 #   - Moved various `shellcheck disable` codes sprinkled throughout script front-and-center to Line No. `2`
 #   - Add Remote Validation results of "Success" or "Installed" to update the List Item with "Installed" instead of "Running" ([Pull Request No. 41](https://github.com/dan-snelson/Setup-Your-Mac/pull/41); thanks @drtaru!)
+#   - Option to disable Banner Text ([Pull Request No. 42](https://github.com/dan-snelson/Setup-Your-Mac/pull/42); thanks, @rougegoat!)
+#   - Switch `policy -trigger` to `policy -event` (Addresses [Issue No. 38](https://github.com/dan-snelson/Setup-Your-Mac/issues/38); thanks for looking out for us, @delize!)
 #
 ####################################################################################################
 
@@ -59,7 +61,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.10.0-rc25"
+scriptVersion="1.10.0-rc26"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -1619,14 +1621,14 @@ function run_jamf_trigger() {
 
     if [[ "${debugMode}" == "true" ]] || [[ "${debugMode}" == "verbose" ]] ; then
 
-        updateScriptLog "SETUP YOUR MAC DIALOG: DEBUG MODE: TRIGGER: $jamfBinary policy -trigger $trigger"
+        updateScriptLog "SETUP YOUR MAC DIALOG: DEBUG MODE: TRIGGER: $jamfBinary policy -event $trigger"
         sleep "${debugModeSleepAmount}"
 
     else
 
-        updateScriptLog "SETUP YOUR MAC DIALOG: RUNNING: $jamfBinary policy -trigger $trigger"
-        eval "${jamfBinary} policy -trigger ${trigger}"                                     # Add comment for policy testing
-        # eval "${jamfBinary} policy -trigger ${trigger} -verbose | tee -a ${scriptLog}"    # Remove comment for policy testing
+        updateScriptLog "SETUP YOUR MAC DIALOG: RUNNING: $jamfBinary policy -event $trigger"
+        eval "${jamfBinary} policy -event ${trigger}"                                     # Add comment for policy testing
+        # eval "${jamfBinary} policy -event ${trigger} -verbose | tee -a ${scriptLog}"    # Remove comment for policy testing
 
     fi
 
@@ -1908,7 +1910,7 @@ function validatePolicyResult() {
             else
                 updateScriptLog "SETUP YOUR MAC DIALOG: Remotely Validate '${trigger}' '${validation}'"
                 dialogUpdateSetupYourMac "listitem: index: $i, status: wait, statustext: Checking …"
-                result=$( "${jamfBinary}" policy -trigger "${trigger}" | grep "Script result:" )
+                result=$( "${jamfBinary}" policy -event "${trigger}" | grep "Script result:" )
                 if [[ "${result}" == *"Running"* ]]; then
                     dialogUpdateSetupYourMac "listitem: index: $i, status: success, statustext: Running"
                 elif [[ "${result}" == *"Installed"* || "${result}" == *"Success"*  ]]; then
