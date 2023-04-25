@@ -109,6 +109,7 @@ departmentList=$( echo "${departmentListRaw}" | tr ',' '\n' | sort -f | uniq | s
 
 # Branding overrides
 brandingBanner="https://img.freepik.com/free-photo/abstract-grunge-decorative-relief-navy-blue-stucco-wall-texture-wide-angle-rough-colored-background_1258-28311.jpg"
+brandingBannerDisplayText="true"
 brandingIconLight="https://cdn-icons-png.flaticon.com/512/979/979585.png"
 brandingIconDark="https://cdn-icons-png.flaticon.com/512/740/740878.png"
 
@@ -509,11 +510,11 @@ fi
 
 if [[ -n "${brandingBanner}" ]]; then
     welcomeBannerImage="${brandingBanner}"
-    welcomeBannerText="Happy $( date +'%A' ), ${loggedInUserFirstname}!  \nWelcome to your new ${modelName}"
 else
     welcomeBannerImage="https://img.freepik.com/free-photo/yellow-watercolor-paper_95678-446.jpg"
-    welcomeBannerText="Happy $( date +'%A' ), ${loggedInUserFirstname}!  \nWelcome to your new ${modelName}"
 fi
+if [[ "${brandingBannerDisplayText}" == "true" ]]; then welcomeBannerText="Happy $( date +'%A' ), ${loggedInUserFirstname}!  \nWelcome to your new ${modelName}";
+else welcomeBannerText=""; fi
 welcomeCaption="Please review the above video, then click Continue."
 welcomeVideoID="vimeoid=812753953"
 
@@ -661,11 +662,12 @@ title="Setting up ${loggedInUserFirstname}‘s ${modelName}"
 message="Please wait while the following apps are installed …"
 if [[ -n "${brandingBanner}" ]]; then
     bannerImage="${brandingBanner}"
-    bannerText="Setting up ${loggedInUserFirstname}‘s ${modelName}"
 else
     bannerImage="https://img.freepik.com/free-photo/yellow-watercolor-paper_95678-446.jpg"
-    bannerText="Setting up ${loggedInUserFirstname}‘s ${modelName}"
 fi
+if [[ "${brandingBannerDisplayText}" == "true" ]] ; then bannerText="Setting up ${loggedInUserFirstname}‘s ${modelName}";
+else bannerText=""; fi
+
 helpmessage="If you need assistance, please contact the ${supportTeamName}:  \n- **Telephone:** ${supportTeamPhone}  \n- **Email:** ${supportTeamEmail}  ${supportTeamHelpKB}  \n\n**Computer Information:**  \n- **Operating System:**  ${macOSproductVersion} (${macOSbuildVersion})  \n- **Serial Number:** ${serialNumber}  \n- **Dialog:** ${dialogVersion}  \n- **Started:** ${timestamp}"
 infobox="Analyzing input …" # Customize at "Update Setup Your Mac's infobox"
 
@@ -1497,7 +1499,7 @@ function finalise(){
             updateScriptLog "Display Failure dialog: ${failureDialog}"
 
             killProcess "caffeinate"
-            dialogUpdateSetupYourMac "title: Sorry ${loggedInUserFirstname}, something went sideways"
+            if [[ "${brandingBannerDisplayText}" == "true" ]] ; then dialogUpdateSetupYourMac "title: Sorry ${loggedInUserFirstname}, something went sideways"; fi
             dialogUpdateSetupYourMac "icon: SF=xmark.circle.fill,weight=bold,colour1=#BB1717,colour2=#F31F1F"
             dialogUpdateSetupYourMac "progresstext: Failures detected. Please click Continue for troubleshooting information."
             dialogUpdateSetupYourMac "button1text: Continue …"
