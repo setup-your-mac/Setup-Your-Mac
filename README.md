@@ -2,9 +2,9 @@
 
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/dan-snelson/Setup-Your-Mac?display_name=tag) ![GitHub issues](https://img.shields.io/github/issues-raw/dan-snelson/Setup-Your-Mac) ![GitHub closed issues](https://img.shields.io/github/issues-closed-raw/dan-snelson/Setup-Your-Mac) ![GitHub pull requests](https://img.shields.io/github/issues-pr-raw/dan-snelson/Setup-Your-Mac) ![GitHub closed pull requests](https://img.shields.io/github/issues-pr-closed-raw/dan-snelson/Setup-Your-Mac)
 
-> For BYOD and user-initiated enrollments, **Setup Your Mac** (1.9.0) now provides more detailed feedback for “Previously Installed” apps
+> Dynamic Download Estimates in Setup Your Mac (1.10.0) help end-users know when their new Macs will be ready
 
-[<img alt="Setup Your Mac (1.9.0)" src="images/Setup_Your_Mac_1.9.0.jpg" />](https://snelson.us/sym)
+[<img alt="Setup Your Mac (1.10.0)" src="images/Setup_Your_Mac_1.10.0_estimates.png" />](https://snelson.us/sym)
 
 ## Introduction
 
