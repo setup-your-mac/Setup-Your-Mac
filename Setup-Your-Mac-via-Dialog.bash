@@ -46,6 +46,7 @@
 #   - Add Remote Validation results of "Success" or "Installed" to update the List Item with "Installed" instead of "Running" ([Pull Request No. 41](https://github.com/dan-snelson/Setup-Your-Mac/pull/41); thanks @drtaru!)
 #   - Option to disable Banner Text ([Pull Request No. 42](https://github.com/dan-snelson/Setup-Your-Mac/pull/42); thanks, @rougegoat!)
 #   - Switch `policy -trigger` to `policy -event` (Addresses [Issue No. 38](https://github.com/dan-snelson/Setup-Your-Mac/issues/38); thanks for looking out for us, @delize!)
+#   - Resolves an issue when `promptForConfiguration` is NOT set to `true`, the `checkNetworkQualityConfigurations` function would display in the "Welcome" dialog (Addresses [Issue No. 46](https://github.com/dan-snelson/Setup-Your-Mac/issues/46); thanks, @jonlonergan!)
 #
 ####################################################################################################
 
@@ -61,7 +62,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.10.0"
+scriptVersion="1.10.0-rc27"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -2465,13 +2466,13 @@ elif [[ "${welcomeDialog}" == "userInput" ]]; then
     outputLineNumberInVerboseDebugMode
 
     # Estimate Configuration Download Times
-    if [[ "${configurationDownloadEstimation}" == "true" ]]; then
+    if [[ "${configurationDownloadEstimation}" == "true" ]] && [[ "${promptForConfiguration}" == "true" ]]; then
 
         outputLineNumberInVerboseDebugMode
 
         calculateFreeDiskSpace "WELCOME DIALOG"
 
-        updateScriptLog "WELCOME DIALOG: Starting networkqualityTest …"
+        updateScriptLog "WELCOME DIALOG: Starting checkNetworkQualityConfigurations …"
         checkNetworkQualityConfigurations &
 
         updateScriptLog "WELCOME DIALOG: Write 'welcomeJSON' to $welcomeJSONFile …"
@@ -2753,15 +2754,13 @@ dialogUpdateWelcome "quit:"
 
 outputLineNumberInVerboseDebugMode
 
-if [[ "${symConfiguration}" == *"Catch-all"* ]]; then
+if [[ "${symConfiguration}" == *"Catch-all"* ]] || [[ -z "${symConfiguration}" ]]; then
 
     if [[ "${configurationDownloadEstimation}" == "true" ]]; then
 
         outputLineNumberInVerboseDebugMode
 
         checkNetworkQualityCatchAllConfiguration &
-
-        outputLineNumberInVerboseDebugMode
 
         updateScriptLog "SETUP YOUR MAC DIALOG: **Connection:**  \n- Download:  \n$mbps Mbps  \n\n**Estimate (beta):**  \n- $(printf '%dh:%dm:%ds\n' $((configurationCatchAllEstimatedSeconds/3600)) $((configurationCatchAllEstimatedSeconds%3600/60)) $((configurationCatchAllEstimatedSeconds%60)))"
 
