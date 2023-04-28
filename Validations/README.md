@@ -2,7 +2,7 @@
 
 > Learn how to implement remote Jamf Pro policy validation with Setup Your Mac (1.6.0 or later)
 
-[<img alt="Setup Your Mac (1.10.0)" src="images/SYM_Remote_Validation.png" />](https://snelson.us/sym)
+[<img alt="Setup Your Mac (1.10.0)" src="images/SYM_Remote_Validation.png" />](https://snelson.us/2023/01/setup-your-mac-validation/)
 
 ## Background
 
