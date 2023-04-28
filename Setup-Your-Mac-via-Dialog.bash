@@ -11,7 +11,7 @@
 # HISTORY
 #
 #   Version 1.10.0, Release Date TBD, Dan K. Snelson (@dan-snelson)
-#   - 🆕 **Configuration Download Estimate** (Addresses [Issue No. 7]((https://github.com/dan-snelson/Setup-Your-Mac/issues/7)); thanks for the idea, @DevliegereM; heavy-lifting provided by @bartreardon!)
+#   - 🆕 **Dynamic Download Estimates** (Addresses [Issue No. 7]((https://github.com/dan-snelson/Setup-Your-Mac/issues/7)); thanks for the idea, @DevliegereM; heavy-lifting provided by @bartreardon!)
 #       - Manually set `configurationDownloadEstimation` within the SYM script to `true` to enable
 #       - New `calculateFreeDiskSpace` function will record free space to `scriptLog` before and after SYM execution
 #           - Compare before and after free space values via: `grep "free" $scriptLog`
@@ -61,7 +61,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.10.0-rc26"
+scriptVersion="1.10.0"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]

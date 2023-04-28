@@ -2,7 +2,7 @@
 
 ## 1.10.0
 ### TBD-May-2023
-- 🆕 **Configuration Download Estimate** (Addresses [Issue No. 7]((https://github.com/dan-snelson/Setup-Your-Mac/issues/7)); thanks for the idea, @DevliegereM; heavy-lifting provided by @bartreardon!)
+- 🆕 **Dynamic Download Estimates** (Addresses [Issue No. 7]((https://github.com/dan-snelson/Setup-Your-Mac/issues/7)); thanks for the idea, @DevliegereM; heavy-lifting provided by @bartreardon!)
     - Manually set `configurationDownloadEstimation` within the SYM script to `true` to enable
     - New `calculateFreeDiskSpace` function will record free space to `scriptLog` before and after SYM execution
         - Compare before and after free space values via: `grep "free" $scriptLog`
