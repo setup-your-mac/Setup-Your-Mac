@@ -47,6 +47,8 @@
 #   - Option to disable Banner Text ([Pull Request No. 42](https://github.com/dan-snelson/Setup-Your-Mac/pull/42); thanks, @rougegoat!)
 #   - Switch `policy -trigger` to `policy -event` (Addresses [Issue No. 38](https://github.com/dan-snelson/Setup-Your-Mac/issues/38); thanks for looking out for us, @delize!)
 #   - Resolves an issue when `promptForConfiguration` is NOT set to `true`, the `checkNetworkQualityConfigurations` function would display in the "Welcome" dialog (Addresses [Issue No. 46](https://github.com/dan-snelson/Setup-Your-Mac/issues/46); thanks, @jonlonergan!)
+#   - Corrected capitalization of networkQuality
+#   - Added `trigger` `validation` to "Elapsed Time" output
 #
 ####################################################################################################
 
@@ -62,7 +64,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.10.0-rc27"
+scriptVersion="1.10.0-rc28"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -143,7 +145,7 @@ exitCode="0"
 # Configuration Download Estimation
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-configurationDownloadEstimation="true"  # [ false (default) | true ]
+configurationDownloadEstimation="true"  # [ true (default) | false ]
 correctionCoefficient="1.01"            # "Fudge factor" (to help estimate match reality)
 configurationCatchAllSize="34"          # Catch-all Configuration in Gibibits (i.e., Total File Size in Gigabytes * 7.451) 
 configurationOneSize="34"               # Configuration One in Gibibits (i.e., Total File Size in Gigabytes * 7.451) 
@@ -519,7 +521,7 @@ fi
 if [[ "${brandingBannerDisplayText}" == "true" ]]; then welcomeBannerText="Happy $( date +'%A' ), ${loggedInUserFirstname}!  \nWelcome to your new ${modelName}";
 else welcomeBannerText=""; fi
 welcomeCaption="Please review the above video, then click Continue."
-welcomeVideoID="vimeoid=812753953"
+welcomeVideoID="vimeoid=821866488"
 
 # Check if the custom welcomeBannerImage is available, and if not, use a alternative image
 if curl --output /dev/null --silent --head --fail "$welcomeBannerImage" || [  -f "$welcomeBannerImage" ]; then
@@ -2165,13 +2167,13 @@ function checkNetworkQualityConfigurations() {
     welcomeDialogInfoboxAnimation "$myPID" &
     welcomeDialogInfoboxAnimationPID="$!"
 
-    networkquality -s -v -c > /var/tmp/networkqualityTest
+    networkQuality -s -v -c > /var/tmp/networkQualityTest
     kill ${welcomeDialogInfoboxAnimationPID}
     outputLineNumberInVerboseDebugMode
 
-    updateScriptLog "WELCOME DIALOG: Completed networkqualityTest …"
-    networkqualityTest=$( < /var/tmp/networkqualityTest )
-    rm /var/tmp/networkqualityTest
+    updateScriptLog "WELCOME DIALOG: Completed networkQualityTest …"
+    networkQualityTest=$( < /var/tmp/networkQualityTest )
+    rm /var/tmp/networkQualityTest
 
     case "${osVersion}" in
 
@@ -2183,10 +2185,10 @@ function checkNetworkQualityConfigurations() {
             ;;
 
         12* | 13* )
-            dlThroughput=$( get_json_value "$networkqualityTest" "dl_throughput")
-            dlResponsiveness=$( get_json_value "$networkqualityTest" "dl_responsiveness" )
-            dlStartDate=$( get_json_value "$networkqualityTest" "start_date" )
-            dlEndDate=$( get_json_value "$networkqualityTest" "end_date" )
+            dlThroughput=$( get_json_value "$networkQualityTest" "dl_throughput")
+            dlResponsiveness=$( get_json_value "$networkQualityTest" "dl_responsiveness" )
+            dlStartDate=$( get_json_value "$networkQualityTest" "start_date" )
+            dlEndDate=$( get_json_value "$networkQualityTest" "end_date" )
             ;;
 
     esac
@@ -2224,13 +2226,13 @@ function checkNetworkQualityCatchAllConfiguration() {
     setupYourMacDialogInfoboxAnimation "$myPID" &
     setupYourMacDialogInfoboxAnimationPID="$!"
 
-    networkquality -s -v -c > /var/tmp/networkqualityTest
+    networkQuality -s -v -c > /var/tmp/networkQualityTest
     kill ${setupYourMacDialogInfoboxAnimationPID}
     outputLineNumberInVerboseDebugMode
 
-    updateScriptLog "SETUP YOUR MAC DIALOG: Completed networkqualityTest …"
-    networkqualityTest=$( < /var/tmp/networkqualityTest )
-    rm /var/tmp/networkqualityTest
+    updateScriptLog "SETUP YOUR MAC DIALOG: Completed networkQualityTest …"
+    networkQualityTest=$( < /var/tmp/networkQualityTest )
+    rm /var/tmp/networkQualityTest
 
     case "${osVersion}" in
 
@@ -2242,10 +2244,10 @@ function checkNetworkQualityCatchAllConfiguration() {
             ;;
 
         12* | 13* )
-            dlThroughput=$( get_json_value "$networkqualityTest" "dl_throughput")
-            dlResponsiveness=$( get_json_value "$networkqualityTest" "dl_responsiveness" )
-            dlStartDate=$( get_json_value "$networkqualityTest" "start_date" )
-            dlEndDate=$( get_json_value "$networkqualityTest" "end_date" )
+            dlThroughput=$( get_json_value "$networkQualityTest" "dl_throughput")
+            dlResponsiveness=$( get_json_value "$networkQualityTest" "dl_responsiveness" )
+            dlStartDate=$( get_json_value "$networkQualityTest" "start_date" )
+            dlEndDate=$( get_json_value "$networkQualityTest" "end_date" )
             ;;
 
     esac
@@ -2866,7 +2868,7 @@ for (( i=0; i<dialog_step_length; i++ )); do
     dialogUpdateSetupYourMac "progress: increment ${progressIncrementValue}"
 
     # Record duration
-    updateScriptLog "SETUP YOUR MAC DIALOG: Elapsed Time: $(printf '%dh:%dm:%ds\n' $((SECONDS/3600)) $((SECONDS%3600/60)) $((SECONDS%60)))"
+    updateScriptLog "SETUP YOUR MAC DIALOG: Elapsed Time for '${trigger}' '${validation}': $(printf '%dh:%dm:%ds\n' $((SECONDS/3600)) $((SECONDS%3600/60)) $((SECONDS%60)))"
 
 done
 
