@@ -38,7 +38,7 @@
 - Option to disable Banner Text ([Pull Request No. 42](https://github.com/dan-snelson/Setup-Your-Mac/pull/42); thanks, @rougegoat!)
 - Switch `policy -trigger` to `policy -event` (Addresses [Issue No. 38](https://github.com/dan-snelson/Setup-Your-Mac/issues/38); thanks for looking out for us, @delize!)
 - Resolves an issue when `promptForConfiguration` is NOT set to `true`, the `checkNetworkQualityConfigurations` function would display in the "Welcome" dialog (Addresses [Issue No. 46](https://github.com/dan-snelson/Setup-Your-Mac/issues/46); thanks, @jonlonergan!)
-- Corrected capitalization of networkQuality
+- Corrected capitalization of `networkQuality`
 - Added `trigger` `validation` to "Elapsed Time" output
 
 ## 1.9.0
