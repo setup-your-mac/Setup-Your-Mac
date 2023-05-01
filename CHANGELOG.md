@@ -40,6 +40,7 @@
 - Resolves an issue when `promptForConfiguration` is NOT set to `true`, the `checkNetworkQualityConfigurations` function would display in the "Welcome" dialog (Addresses [Issue No. 46](https://github.com/dan-snelson/Setup-Your-Mac/issues/46); thanks, @jonlonergan!)
 - Corrected capitalization of `networkQuality`
 - Added `trigger` `validation` to "Elapsed Time" output
+- Updated `webhookMessage` to include Slack functionality ([Pull Request No. 48](https://github.com/dan-snelson/Setup-Your-Mac/pull/48); thanks @iDrewbs!)
 
 ## 1.9.0
 ### 01-Apr-2023
