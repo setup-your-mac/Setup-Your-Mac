@@ -72,7 +72,7 @@ welcomeDialog="${6:-"userInput"}"                                               
 completionActionOption="${7:-"Restart Attended"}"                               # Parameter 7: Completion Action [ wait | sleep (with seconds) | Shut Down | Shut Down Attended | Shut Down Confirm | Restart | Restart Attended (default) | Restart Confirm | Log Out | Log Out Attended | Log Out Confirm ]
 requiredMinimumBuild="${8:-"disabled"}"                                         # Parameter 8: Required Minimum Build [ disabled (default) | 22E ] (i.e., Your organization's required minimum build of macOS to allow users to proceed; use "22E" for macOS 13.3)
 outdatedOsAction="${9:-"/System/Library/CoreServices/Software Update.app"}"     # Parameter 9: Outdated OS Action [ /System/Library/CoreServices/Software Update.app (default) | jamfselfservice://content?entity=policy&id=117&action=view ] (i.e., Jamf Pro Self Service policy ID for operating system ugprades)
-webhookURL="${10:-""}"                                                          # Parameter 10: Microsoft Teams Webhook URL [ https://microsoftTeams.webhook.com/URL | blank (default) ] Can be used to send a success or failure message to Microsoft Teams via Webhook. Function could be modified to include other communication tools that support functionality.
+webhookURL="${10:-""}"                                                          # Parameter 10: Microsoft Teams/Slack Webhook URL [ https://microsoftTeams.webhook.com/URL | blank (default) ] Can be used to send a success or failure message to Microsoft Teams or Slack via Webhook. Function will automatically detect if Webhook URL is for Slack. Function could be modified to include other communication tools that support functionality.
 
 
 
@@ -2267,13 +2267,80 @@ function checkNetworkQualityCatchAllConfiguration() {
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Microsoft Teams Message (thanks, @robjschroeder!)
+# Webhook Message (Slack/MS Teams) (thanks, @robjschroeder!)
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 function webHookMessage() {
 
     outputLineNumberInVerboseDebugMode
 
+    if [[ $webhookURL == *"slack"* ]]; then
+        
+        updateScriptLog "Generating Slack Message …"
+
+        
+        webHookdata=$(cat <<EOF
+        {
+            "blocks": [
+                {
+                    "type": "header",
+                    "text": {
+                        "type": "plain_text",
+                        "text": "New Mac Enrollment: '${webhookStatus}'",
+                        "emoji": true
+                    }
+                },
+                {
+                    "type": "section",
+                    "fields": [
+                        {
+                            "type": "mrkdwn",
+                            "text": "*Computer Name:*\n$( scutil --get ComputerName )"
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": "*Serial:*\n${serialNumber}"
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": "*Timestamp:*\n${timestamp}"
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": "*Configuration:*\n${symConfiguration}"
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": "*User:*\n${loggedInUser}"
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": "*OS Version:*\n${osVersion}"
+                        },
+                        {
+                            "type": "mrkdwn",
+                            "text": "*Additional Comments:*\n${jamfProPolicyNameFailures}"
+                        }
+                    ]
+                }
+            ]
+        }
+EOF
+)
+        
+        
+        # Send the message to Slack
+        updateScriptLog "Send the message to Slack …"
+        updateScriptLog "${webHookdata}"
+        
+        # Submit the data to Slack
+        /usr/bin/curl -sSX POST -H 'Content-type: application/json' --data "${webHookdata}" $webhookURL 2>&1
+        
+        webhookResult="$?"
+        updateScriptLog "Slack Webhook Result: ${webhookResult}"
+        
+    else
+        
     updateScriptLog "Generating Microsoft Teams Message …"
 
     # Jamf Pro URL
@@ -2293,64 +2360,66 @@ function webHookMessage() {
 
     webHookdata=$(cat <<EOF
 {
-	"@type": "MessageCard",
-	"@context": "http://schema.org/extensions",
-	"themeColor": "E4002B",
-	"summary": "New Mac Enrollment: '${webhookStatus}'",
-	"sections": [{
-		"activityTitle": "New Mac Enrollment: ${webhookStatus}",
-		"activitySubtitle": "${jamfProURL}",
-		"activityImage": "${activityImage}",
-		"facts": [{
-			"name": "Mac Serial",
-			"value": "${serialNumber}"
-		}, {
-			"name": "Computer Name",
-			"value": "$( scutil --get ComputerName )"
-		}, {
-			"name": "Timestamp",
-			"value": "${timestamp}"
-		}, {
-			"name": "Configuration",
-			"value": "${symConfiguration}"
-		}, {
-			"name": "User",
-			"value": "${loggedInUser}"
-		}, {
-			"name": "Operating System Version",
-			"value": "${osVersion}"
+    "@type": "MessageCard",
+    "@context": "http://schema.org/extensions",
+    "themeColor": "E4002B",
+    "summary": "New Mac Enrollment: '${webhookStatus}'",
+    "sections": [{
+        "activityTitle": "New Mac Enrollment: ${webhookStatus}",
+        "activitySubtitle": "${jamfProURL}",
+        "activityImage": "${activityImage}",
+        "facts": [{
+            "name": "Mac Serial",
+            "value": "${serialNumber}"
+        }, {
+            "name": "Computer Name",
+            "value": "$( scutil --get ComputerName )"
+        }, {
+            "name": "Timestamp",
+            "value": "${timestamp}"
+        }, {
+            "name": "Configuration",
+            "value": "${symConfiguration}"
+        }, {
+            "name": "User",
+            "value": "${loggedInUser}"
+        }, {
+            "name": "Operating System Version",
+            "value": "${osVersion}"
         }, {
             "name": "Additional Comments",
             "value": "${jamfProPolicyNameFailures}"
 }],
-		"markdown": true,
+        "markdown": true,
         "potentialAction": [{
         "@type": "OpenUri",
         "name": "View in Jamf Pro",
         "targets": [{
-        	"os": "default",
+        "os": "default",
             "uri": "${jamfProComputerURL}"
-			}]
-		}]
-	}]
+            }]
+        }]
+    }]
 }
 EOF
 )
 
-# Send the message to Microsoft Teams
-updateScriptLog "Send the message Microsoft Teams …"
-updateScriptLog "${webHookdata}"
 
-curl --request POST \
---url "${webhookURL}" \
---header 'Content-Type: application/json' \
---data "${webHookdata}"
+    # Send the message to Microsoft Teams
+    updateScriptLog "Send the message Microsoft Teams …"
+    updateScriptLog "${webHookdata}"
 
-webhookResult="$?"
-updateScriptLog "Microsoft Teams Webhook Result: ${webhookResult}"
-
+    curl --request POST \
+    --url "${webhookURL}" \
+    --header 'Content-Type: application/json' \
+    --data "${webHookdata}"
+    
+    webhookResult="$?"
+    updateScriptLog "Microsoft Teams Webhook Result: ${webhookResult}"
+    
+    fi
+    
 }
-
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
