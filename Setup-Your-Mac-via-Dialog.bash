@@ -2274,6 +2274,34 @@ function webHookMessage() {
 
     outputLineNumberInVerboseDebugMode
 
+    if [[ $webhookURL == *"slack"* ]]; then
+        
+        updateScriptLog "Generating Slack Message …"
+        
+        webhookData="/tmp/symWebhookData.txt"
+        
+        /bin/echo "New Mac Enrollment: '${webhookStatus}'" > $webhookData
+        /bin/echo "*Computer Name:* $( scutil --get ComputerName )" >> $webhookData
+        /bin/echo "Serial Num: ${serialNumber}" >> $webhookData
+        /bin/echo "Timestamp: ${timestamp}" >> $webhookData
+        /bin/echo "Configuration: ${symConfiguration}" >> $webhookData
+        /bin/echo "User: ${loggedInUser}" >> $webhookData
+        /bin/echo "OS Version: ${osVersion}" >> $webhookData
+        /bin/echo "Additional Comments: ${jamfProPolicyNameFailures}" >> $webhookData
+        
+        # Send the message to Slack
+        updateScriptLog "Send the message to Slack …"
+        updateScriptLog "${webHookdata}"
+        
+        # Submit the data to Slack
+        /usr/bin/curl -sSX POST -H 'Content-type: application/json' --data '{"text":"'"$(cat $webhookData)"'"}' $webhookURL 2>&1
+        
+        webhookResult="$?"
+        updateScriptLog "Slack Webhook Result: ${webhookResult}"
+        
+        rm -rf $webhookData
+    else
+        
     updateScriptLog "Generating Microsoft Teams Message …"
 
     # Jamf Pro URL
@@ -2293,62 +2321,65 @@ function webHookMessage() {
 
     webHookdata=$(cat <<EOF
 {
-	"@type": "MessageCard",
-	"@context": "http://schema.org/extensions",
-	"themeColor": "E4002B",
-	"summary": "New Mac Enrollment: '${webhookStatus}'",
-	"sections": [{
-		"activityTitle": "New Mac Enrollment: ${webhookStatus}",
-		"activitySubtitle": "${jamfProURL}",
-		"activityImage": "${activityImage}",
-		"facts": [{
-			"name": "Mac Serial",
-			"value": "${serialNumber}"
-		}, {
-			"name": "Computer Name",
-			"value": "$( scutil --get ComputerName )"
-		}, {
-			"name": "Timestamp",
-			"value": "${timestamp}"
-		}, {
-			"name": "Configuration",
-			"value": "${symConfiguration}"
-		}, {
-			"name": "User",
-			"value": "${loggedInUser}"
-		}, {
-			"name": "Operating System Version",
-			"value": "${osVersion}"
+    "@type": "MessageCard",
+    "@context": "http://schema.org/extensions",
+    "themeColor": "E4002B",
+    "summary": "New Mac Enrollment: '${webhookStatus}'",
+    "sections": [{
+        "activityTitle": "New Mac Enrollment: ${webhookStatus}",
+        "activitySubtitle": "${jamfProURL}",
+        "activityImage": "${activityImage}",
+        "facts": [{
+            "name": "Mac Serial",
+            "value": "${serialNumber}"
+        }, {
+            "name": "Computer Name",
+            "value": "$( scutil --get ComputerName )"
+        }, {
+            "name": "Timestamp",
+            "value": "${timestamp}"
+        }, {
+            "name": "Configuration",
+            "value": "${symConfiguration}"
+        }, {
+            "name": "User",
+            "value": "${loggedInUser}"
+        }, {
+            "name": "Operating System Version",
+            "value": "${osVersion}"
         }, {
             "name": "Additional Comments",
             "value": "${jamfProPolicyNameFailures}"
 }],
-		"markdown": true,
+        "markdown": true,
         "potentialAction": [{
         "@type": "OpenUri",
         "name": "View in Jamf Pro",
         "targets": [{
-        	"os": "default",
+        "os": "default",
             "uri": "${jamfProComputerURL}"
-			}]
-		}]
-	}]
+            }]
+        }]
+    }]
 }
 EOF
 )
 
-# Send the message to Microsoft Teams
-updateScriptLog "Send the message Microsoft Teams …"
-updateScriptLog "${webHookdata}"
 
-curl --request POST \
---url "${webhookURL}" \
---header 'Content-Type: application/json' \
---data "${webHookdata}"
+    # Send the message to Microsoft Teams
+    updateScriptLog "Send the message Microsoft Teams …"
+    updateScriptLog "${webHookdata}"
 
-webhookResult="$?"
-updateScriptLog "Microsoft Teams Webhook Result: ${webhookResult}"
-
+    curl --request POST \
+    --url "${webhookURL}" \
+    --header 'Content-Type: application/json' \
+    --data "${webHookdata}"
+    
+    webhookResult="$?"
+    updateScriptLog "Microsoft Teams Webhook Result: ${webhookResult}"
+    
+    fi
+    
 }
 
 
