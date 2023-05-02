@@ -740,12 +740,13 @@ dialogSetupYourMacCMD="$dialogBinary \
 #   - See: https://vimeo.com/772998915
 # - progresstext: The text to be displayed below the progress bar
 # - trigger: The Jamf Pro Policy Custom Event Name
-# - validation: [ {absolute path} | Local | Remote | None ]
+# - validation: [ {absolute path} | Local | Remote | None | Recon ]
 #   See: https://snelson.us/2023/01/setup-your-mac-validation/
 #       - {absolute path} (simulates pre-v1.6.0 behavior, for example: "/Applications/Microsoft Teams.app/Contents/Info.plist")
 #       - Local (for validation within this script, for example: "filevault")
 #       - Remote (for validation via a single-script Jamf Pro policy, for example: "symvGlobalProtect")
 #       - None (for triggers which don't require validation, for example: recon; always evaluates as successful)
+#       - Recon (to update the computer's inventory with your Jamf Pro server)
 #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #
