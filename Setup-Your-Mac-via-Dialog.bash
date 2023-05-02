@@ -745,7 +745,7 @@ dialogSetupYourMacCMD="$dialogBinary \
 #       - {absolute path} (simulates pre-v1.6.0 behavior, for example: "/Applications/Microsoft Teams.app/Contents/Info.plist")
 #       - Local (for validation within this script, for example: "filevault")
 #       - Remote (for validation via a single-script Jamf Pro policy, for example: "symvGlobalProtect")
-#       - None (for triggers which don't require validation, for example: recon; always evaluates as successful)
+#       - None (for triggers which don't require validation; always evaluates as successful)
 #       - Recon (to update the computer's inventory with your Jamf Pro server)
 #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
