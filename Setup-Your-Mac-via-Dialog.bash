@@ -2280,6 +2280,8 @@ function webHookMessage() {
         
         updateScriptLog "Generating Slack Message …"
 
+        jamfProURL=$(/usr/bin/defaults read /Library/Preferences/com.jamfsoftware.jamf.plist jss_url)
+        jamfProComputerURL="${jamfProURL}computers.html?id=${computerID}&o=r"
         
         webHookdata=$(cat <<EOF
         {
@@ -2322,6 +2324,21 @@ function webHookMessage() {
                         {
                             "type": "mrkdwn",
                             "text": "*Additional Comments:*\n${jamfProPolicyNameFailures}"
+                        }
+                    ]
+                },
+                {
+                    "type": "actions",
+                    "elements": [
+                        {
+                            "type": "button",
+                            "text": {
+                                "type": "plain_text",
+                                "text": "View in Jamf Pro"
+                                },
+                            "style": "primary",
+                            "value": "view",
+                            "url": "${jamfProComputerURL}"
                         }
                     ]
                 }
