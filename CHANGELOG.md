@@ -41,6 +41,7 @@
 - Corrected capitalization of `networkQuality`
 - Added `trigger` `validation` to "Elapsed Time" output
 - Updated `webhookMessage` to include Slack functionality ([Pull Request No. 48](https://github.com/dan-snelson/Setup-Your-Mac/pull/48); thanks @iDrewbs!)
+- Add button to computer record for Slack webhook ([Pull Request No. 49](https://github.com/dan-snelson/Setup-Your-Mac/pull/49); thanks @drtaru!)
 
 ## 1.9.0
 ### 01-Apr-2023
