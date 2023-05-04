@@ -2337,7 +2337,6 @@ function webHookMessage() {
                                 "text": "View in Jamf Pro"
                                 },
                             "style": "primary",
-                            "value": "view",
                             "url": "${jamfProComputerURL}"
                         }
                     ]
