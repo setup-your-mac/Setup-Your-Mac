@@ -66,7 +66,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.10.0-rc30"
+scriptVersion="1.10.0-rc31"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -1543,7 +1543,7 @@ function finalise(){
             updateScriptLog "Display Failure dialog: ${failureDialog}"
 
             killProcess "caffeinate"
-            dialogUpdateSetupYourMac "title: Sorry ${loggedInUserFirstname}, something went sideways"
+            if [[ "${brandingBannerDisplayText}" == "true" ]] ; then dialogUpdateSetupYourMac "title: Sorry ${loggedInUserFirstname}, something went sideways"; fi
             dialogUpdateSetupYourMac "icon: SF=xmark.circle.fill,weight=bold,colour1=#BB1717,colour2=#F31F1F"
             dialogUpdateSetupYourMac "progresstext: Failures detected."
             dialogUpdateSetupYourMac "button1text: ${button1textCompletionActionOption}"
@@ -1571,7 +1571,7 @@ function finalise(){
             webHookMessage
         fi
 
-        dialogUpdateSetupYourMac "title: ${loggedInUserFirstname}‘s ${modelName} is ready!"
+        if [[ "${brandingBannerDisplayText}" == "true" ]] ; then dialogUpdateSetupYourMac "title: ${loggedInUserFirstname}‘s ${modelName} is ready!"; fi
         dialogUpdateSetupYourMac "icon: SF=checkmark.circle.fill,weight=bold,colour1=#00ff44,colour2=#075c1e"
         dialogUpdateSetupYourMac "progresstext: Complete! Please ${progressTextCompletionAction}enjoy your new ${modelName}, ${loggedInUserFirstname}!"
         dialogUpdateSetupYourMac "progress: complete"
