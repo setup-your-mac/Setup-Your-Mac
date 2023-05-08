@@ -10,47 +10,9 @@
 #
 # HISTORY
 #
-#   Version 1.10.0, 08-May-2023, Dan K. Snelson (@dan-snelson)
-#   - 🆕 **Dynamic Download Estimates** (Addresses [Issue No. 7](https://github.com/dan-snelson/Setup-Your-Mac/issues/7); thanks for the idea, @DevliegereM; heavy-lifting provided by @bartreardon!)
-#       - Manually set `configurationDownloadEstimation` within the SYM script to `true` to enable
-#       - New `calculateFreeDiskSpace` function will record free space to `scriptLog` before and after SYM execution
-#           - Compare before and after free space values via: `grep "free" $scriptLog`
-#       - Populate the following variables, in Gibibits (i.e., Total File Size in Gigabytes * 7.451), for each Configuration:
-#           - `configurationCatchAllSize`
-#           - `configurationOneSize`
-#           - `configurationTwoSize`
-#           - `configurationThreeSize`
-#       - Specify an arbitrary value for `correctionCoefficient` (i.e., a "fudge factor" to help estimates match reality)
-#           - Validate actual elapsed time with: `grep "Elapsed" $scriptLog`
-#   - 🔥 **Breaking Change** for users of Setup Your Mac prior to `1.10.0` 🔥 
-#       - Added `recon` validation, which **must** be used when specifying the `recon` trigger (Addresses [Issue No. 19](https://github.com/dan-snelson/Setup-Your-Mac/issues/19))
-#   - Standardized formatting of `toggleJamfLaunchDaemon` function
-#       - Added logging while waiting for installation of `${jamflaunchDaemon}`
-#   - Limit the `loggedInUserFirstname` variable to `25` characters and capitalize its first letter (Addresses [Issue No. 20](https://github.com/dan-snelson/Setup-Your-Mac/issues/20); thanks @mani2care!)
-#   - Added line break to `welcomeTitle` and `welcomeBannerText`
-#   - Replaced some generic "Mac" instances with hardware-specific model name (thanks, @pico!)
-#   - Replaced `verbose` Debug Mode code with `outputLineNumberInVerboseDebugMode` function (thanks, @bartreardon!)
-#   - Removed dependency on `dialogApp`
-#   - Check `bannerImage` and `welcomeBannerImage` ([Pull Request No. 22](https://github.com/dan-snelson/Setup-Your-Mac/pull/22) AND [Pull Request No. 24](https://github.com/dan-snelson/Setup-Your-Mac/pull/24) thanks @amadotejada!)
-#   - A "raw" unsorted listing of departments — with possible duplicates — is converted to a sorted, unique, JSON-compatible `departmentList` variable (Addresses [Issue No. 23](https://github.com/dan-snelson/Setup-Your-Mac/issues/23); thanks @rougegoat!)
-#   - The selected Configuration now displays in `helpmessage` (Addresses [Issue No. 17](https://github.com/dan-snelson/Setup-Your-Mac/issues/17); thanks for the idea, @master-vodawagner!)
-#   - Disable the so-called "Failure" dialog by setting the new `failureDialog` variable to `false` (Addresses [Issue No. 25](https://github.com/dan-snelson/Setup-Your-Mac/issues/25); thanks for the idea, @DevliegereM!)
-#   - Added function to send a message to Microsoft Teams [Pull Request No. 29](https://github.com/dan-snelson/Setup-Your-Mac/pull/29); thanks @robjschroeder!)
-#   - Added Building & Room User Input, Centralize User Input settings in one area [Pull Request No. 26](https://github.com/dan-snelson/Setup-Your-Mac/pull/26) thanks @rougegoat!)
-#   - Replaced Parameter 10 with webhookURL for Microsoft Teams messaging ([Pull Request No. 31](https://github.com/dan-snelson/Setup-Your-Mac/pull/31) @robjschroeder, thanks for the idea @colorenz!!)
-#   - Added an action card to the Microsoft Teams webhook message to view the computer's inventory record in Jamf Pro ([Pull Request No. 32](https://github.com/dan-snelson/Setup-Your-Mac/pull/32); thanks @robjschroeder!)
-#   - Additional User Input Flags ([Pull Request No. 34](https://github.com/dan-snelson/Setup-Your-Mac/pull/34); thanks @rougegoat!)
-#   - Corrected Dan's copy-pasta bug: Changed `--webHook` to `--data` ([Pull Request No. 36](https://github.com/dan-snelson/Setup-Your-Mac/pull/36); thanks @colorenz!)
-#   - Enable or disable any combination of the fields on the Welcome dialog ([Pull Request No. 37](https://github.com/dan-snelson/Setup-Your-Mac/pull/37); thanks big bunches, @rougegoat!!)
-#   - Moved various `shellcheck disable` codes sprinkled throughout script front-and-center to Line No. `2`
-#   - Add Remote Validation results of "Success" or "Installed" to update the List Item with "Installed" instead of "Running" ([Pull Request No. 41](https://github.com/dan-snelson/Setup-Your-Mac/pull/41); thanks @drtaru!)
-#   - Option to disable Banner Text ([Pull Request No. 42](https://github.com/dan-snelson/Setup-Your-Mac/pull/42); thanks, @rougegoat!)
-#   - Switch `policy -trigger` to `policy -event` (Addresses [Issue No. 38](https://github.com/dan-snelson/Setup-Your-Mac/issues/38); thanks for looking out for us, @delize!)
-#   - Resolves an issue when `promptForConfiguration` is NOT set to `true`, the `checkNetworkQualityConfigurations` function would display in the "Welcome" dialog (Addresses [Issue No. 46](https://github.com/dan-snelson/Setup-Your-Mac/issues/46); thanks, @jonlonergan!)
-#   - Corrected capitalization of `networkQuality`
-#   - Added `trigger` `validation` to "Elapsed Time" output
-#   - Updated `webhookMessage` to include Slack functionality ([Pull Request No. 48](https://github.com/dan-snelson/Setup-Your-Mac/pull/48); thanks @iDrewbs!)
-#   - Add button to computer record for Slack webhook ([Pull Request No. 49](https://github.com/dan-snelson/Setup-Your-Mac/pull/49); thanks @drtaru!)
+#   Version 1.11.0, TBD, Dan K. Snelson (@dan-snelson)
+#   - Updates for `swiftDialog` `2.2`
+#       - Required `selectitems`
 # 
 ####################################################################################################
 
@@ -66,7 +28,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.10.0"
+scriptVersion="1.11.0-b1"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -588,9 +550,9 @@ textFieldJSON=$( echo ${textFieldJSON} | sed 's/,$//' )
 if [ -n "$buildingsListRaw" ]; then
     buildingJSON='{
             "title" : "Building",
-            "default" : "Please select your building",
+            "default" : "",
+            "required" : true,
             "values" : [
-                "Please select your building",
                 '${buildingsList}'
             ]
         },'
@@ -598,9 +560,9 @@ fi
 
 if [ -n "$departmentListRaw" ]; then
     departmentJSON='{   "title" : "Department",
-            "default" : "Please select your department",
+            "default" : "",
+            "required" : true,
             "values" : [
-                "Please select your department",
                 '${departmentList}'
             ]
         },'
