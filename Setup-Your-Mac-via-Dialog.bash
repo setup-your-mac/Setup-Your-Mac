@@ -10,7 +10,7 @@
 #
 # HISTORY
 #
-#   Version 1.10.0, Release Date TBD, Dan K. Snelson (@dan-snelson)
+#   Version 1.10.0, 08-May-2023, Dan K. Snelson (@dan-snelson)
 #   - 🆕 **Dynamic Download Estimates** (Addresses [Issue No. 7](https://github.com/dan-snelson/Setup-Your-Mac/issues/7); thanks for the idea, @DevliegereM; heavy-lifting provided by @bartreardon!)
 #       - Manually set `configurationDownloadEstimation` within the SYM script to `true` to enable
 #       - New `calculateFreeDiskSpace` function will record free space to `scriptLog` before and after SYM execution
@@ -66,7 +66,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.10.0-rc31"
+scriptVersion="1.10.0"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -2346,8 +2346,7 @@ function webHookMessage() {
         }
 EOF
 )
-        
-        
+
         # Send the message to Slack
         updateScriptLog "Send the message to Slack …"
         updateScriptLog "${webHookdata}"
@@ -2360,24 +2359,24 @@ EOF
         
     else
         
-    updateScriptLog "Generating Microsoft Teams Message …"
+        updateScriptLog "Generating Microsoft Teams Message …"
 
-    # Jamf Pro URL
-    jamfProURL=$(/usr/bin/defaults read /Library/Preferences/com.jamfsoftware.jamf.plist jss_url)
-    
-    # Jamf Pro URL for on-prem, multi-node, clustered environments
-    # case ${jamfProURL} in
-    #     *"beta"*    ) jamfProURL="https://jamfpro-beta.internal.company.com/" ;;
-    #     *           ) jamfProURL="https://jamfpro-prod.internal.company.com/" ;;
-    # esac
+        # Jamf Pro URL
+        jamfProURL=$(/usr/bin/defaults read /Library/Preferences/com.jamfsoftware.jamf.plist jss_url)
+        
+        # Jamf Pro URL for on-prem, multi-node, clustered environments
+        # case ${jamfProURL} in
+        #     *"beta"*    ) jamfProURL="https://jamfpro-beta.internal.company.com/" ;;
+        #     *           ) jamfProURL="https://jamfpro-prod.internal.company.com/" ;;
+        # esac
 
-    # URL to computer object
-    jamfProComputerURL="${jamfProURL}computers.html?id=${computerID}&o=r"
+        # URL to computer object
+        jamfProComputerURL="${jamfProURL}computers.html?id=${computerID}&o=r"
 
-    # URL to an image to add to your notification
-    activityImage="https://creazilla-store.fra1.digitaloceanspaces.com/cliparts/78010/old-mac-computer-clipart-md.png"
+        # URL to an image to add to your notification
+        activityImage="https://creazilla-store.fra1.digitaloceanspaces.com/cliparts/78010/old-mac-computer-clipart-md.png"
 
-    webHookdata=$(cat <<EOF
+        webHookdata=$(cat <<EOF
 {
     "@type": "MessageCard",
     "@context": "http://schema.org/extensions",
@@ -2423,7 +2422,6 @@ EOF
 EOF
 )
 
-
     # Send the message to Microsoft Teams
     updateScriptLog "Send the message Microsoft Teams …"
     updateScriptLog "${webHookdata}"
@@ -2439,6 +2437,7 @@ EOF
     fi
     
 }
+
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
