@@ -5,6 +5,8 @@
 
 - Updates for `swiftDialog` `2.2`
   - Required `selectitems`
+  - New `activate` command to bring swiftDialog to the front
+  - Display Configurations as radio buttons
 
 ## 1.10.0
 ### 08-May-2023
