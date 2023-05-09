@@ -13,6 +13,8 @@
 #   Version 1.11.0, TBD, Dan K. Snelson (@dan-snelson)
 #   - Updates for `swiftDialog` `2.2`
 #       - Required `selectitems`
+#       - New `activate` command to bring swiftDialog to the front
+#       - Display Configurations as radio buttons
 # 
 ####################################################################################################
 
@@ -28,7 +30,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.11.0-b1"
+scriptVersion="1.11.0-b2"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -77,7 +79,7 @@ departmentListRaw="Asset Management,Sales,Australia Area Office,Purchasing / Sou
 departmentList=$( echo "${departmentListRaw}" | tr ',' '\n' | sort -f | uniq | sed -e 's/^/\"/' -e 's/$/\",/' -e '$ s/.$//' )
 
 # Branding overrides
-brandingBanner="https://img.freepik.com/free-photo/abstract-grunge-decorative-relief-navy-blue-stucco-wall-texture-wide-angle-rough-colored-background_1258-28311.jpg"
+brandingBanner="https://img.freepik.com/free-photo/heavy-red-cloud-haze_23-2148102335.jpg"
 brandingBannerDisplayText="true"
 brandingIconLight="https://cdn-icons-png.flaticon.com/512/979/979585.png"
 brandingIconDark="https://cdn-icons-png.flaticon.com/512/740/740878.png"
@@ -570,6 +572,7 @@ fi
 
 if [ "$promptForConfiguration" == "true" ]; then
     configurationJSON='{ "title" : "Configuration",
+            "style" : "radio",
             "default" : "Required",
             "values" : [
                 "Required",
@@ -611,7 +614,7 @@ welcomeJSON='
     "selectitems" : [
         '${selectItemsJSON}'
     ],
-    "height" : "750"
+    "height" : "860"
 }
 '
 
@@ -2502,15 +2505,16 @@ if [[ "${welcomeDialog}" == "video" ]]; then
     symConfiguration="Catch-all (video)"
     policyJSONConfiguration
 
-    eval "${dialogSetupYourMacCMD[*]}" & sleep 0.3
-    dialogSetupYourMacProcessID=$!
-    until pgrep -q -x "Dialog"; do
-        outputLineNumberInVerboseDebugMode
-        updateScriptLog "WELCOME DIALOG: Waiting to display 'Setup Your Mac' dialog; pausing"
-        sleep 0.5
-    done
-    updateScriptLog "WELCOME DIALOG: 'Setup Your Mac' dialog displayed; ensure it's the front-most app"
-    runAsUser osascript -e 'tell application "Dialog" to activate'
+    eval "${dialogSetupYourMacCMD[*]}" # & sleep 0.3
+    # dialogSetupYourMacProcessID=$!
+    # until pgrep -q -x "Dialog"; do
+    #     outputLineNumberInVerboseDebugMode
+    #     updateScriptLog "WELCOME DIALOG: Waiting to display 'Setup Your Mac' dialog; pausing"
+    #     sleep 0.5
+    # done
+    # updateScriptLog "WELCOME DIALOG: 'Setup Your Mac' dialog displayed; ensure it's the front-most app"
+    # runAsUser osascript -e 'tell application "Dialog" to activate'
+    dialogUpdateSetupYourMac "activate:"
 
 elif [[ "${welcomeDialog}" == "userInput" ]]; then
 
