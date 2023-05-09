@@ -96,6 +96,7 @@ promptForUsername="true"
 prefillUsername="true"          # prefills the currently logged in user's username
 promptForComputerName="true"
 promptForAssetTag="true"
+capitalizeAssetTag="true"
 promptForRoom="true"
 promptForConfiguration="true"   # Removes the Configuration dropdown entirely and uses the "Catch-all (i.e., used when `welcomeDialog` is set to `video` or `false`)" policyJSON
 
@@ -2601,7 +2602,11 @@ elif [[ "${welcomeDialog}" == "userInput" ]]; then
 
             computerName=$(get_json_value_welcomeDialog "$welcomeResults" "Computer Name")
             userName=$(get_json_value_welcomeDialog "$welcomeResults" "User Name")
-            assetTag=$(get_json_value_welcomeDialog "$welcomeResults" "Asset Tag")
+			assetTag=$(get_json_value_welcomeDialog "$welcomeResults" "Asset Tag")
+			if [ "$capitalizeAssetTag" == "true" ]; then
+ 			   # Capitalize all alphabetic characters in the asset tag
+				assetTag=$(echo "$assetTag" | tr '[:lower:]' '[:upper:]')
+			fi
             symConfiguration=$(get_json_value_welcomeDialog "$welcomeResults" "Configuration" "selectedValue")
             department=$(get_json_value_welcomeDialog "$welcomeResults" "Department" "selectedValue" | grep -v "Please select your department" )
             room=$(get_json_value_welcomeDialog "$welcomeResults" "Room")
