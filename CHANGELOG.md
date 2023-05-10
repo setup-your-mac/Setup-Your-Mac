@@ -1,13 +1,14 @@
 # CHANGELOG
 
-## 1.11.0-b1
-### TBD
+## 1.11.0-b4
+### 10-May-2023
 
 - Updates for `swiftDialog` `2.2`
   - Required `selectitems`
   - New `activate` command to bring swiftDialog to the front
   - Display Configurations as radio buttons
 - Report on RSR version (if applicable) [Pull Request No. 50](https://github.com/dan-snelson/Setup-Your-Mac/pull/50) thanks @drtaru!)
+- Removed "(beta)" from Dynamic Download Estimates
 
 ## 1.10.0
 ### 08-May-2023
