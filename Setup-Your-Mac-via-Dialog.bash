@@ -54,7 +54,8 @@
 #
 #   Version 1.10.1, 10-May-2023, Dan K. Snelson (@dan-snelson)
 #   - Removed "(beta)" from Dynamic Download Estimates
-# 
+#   - Added `promptForBuilding` and `promptForDepartment` to match other prompts for Welcome Screen ([Pull Request No. 55](https://github.com/dan-snelson/Setup-Your-Mac/pull/55); thanks @robjschroeder!)
+#
 ####################################################################################################
 
 
@@ -69,7 +70,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.10.1-b1"
+scriptVersion="1.10.1-b2"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -245,6 +246,32 @@ updateScriptLog "PRE-FLIGHT CHECK: Finder & Dock are running; proceeding …"
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Pre-flight Check: Validate Logged-in System Accounts
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+updateScriptLog "PRE-FLIGHT CHECK: Check for Logged-in System Accounts …"
+currentLoggedInUser
+
+counter="1"
+
+until { [[ "${loggedInUser}" != "_mbsetupuser" ]] || [[ "${counter}" -gt "180" ]]; } && { [[ "${loggedInUser}" != "loginwindow" ]] || [[ "${counter}" -gt "30" ]]; } ; do
+
+    updateScriptLog "PRE-FLIGHT CHECK: Logged-in User Counter: ${counter}"
+    currentLoggedInUser
+    sleep 2
+    ((counter++))
+
+done
+
+loggedInUserFullname=$( id -F "${loggedInUser}" )
+loggedInUserFirstname=$( echo "$loggedInUserFullname" | sed -E 's/^.*, // ; s/([^ ]*).*/\1/' | sed 's/\(.\{25\}\).*/\1…/' | awk '{print toupper(substr($0,1,1))substr($0,2)}' )
+loggedInUserID=$( id -u "${loggedInUser}" )
+updateScriptLog "PRE-FLIGHT CHECK: Current Logged-in User First Name: ${loggedInUserFirstname}"
+updateScriptLog "PRE-FLIGHT CHECK: Current Logged-in User ID: ${loggedInUserID}"
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Pre-flight Check: Validate Operating System Version and Build
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
@@ -296,32 +323,6 @@ fi
 
 updateScriptLog "PRE-FLIGHT CHECK: Caffeinating this script (PID: $$)"
 caffeinate -dimsu -w $$ &
-
-
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Pre-flight Check: Validate Logged-in System Accounts
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
-updateScriptLog "PRE-FLIGHT CHECK: Check for Logged-in System Accounts …"
-currentLoggedInUser
-
-counter="1"
-
-until { [[ "${loggedInUser}" != "_mbsetupuser" ]] || [[ "${counter}" -gt "180" ]]; } && { [[ "${loggedInUser}" != "loginwindow" ]] || [[ "${counter}" -gt "30" ]]; } ; do
-
-    updateScriptLog "PRE-FLIGHT CHECK: Logged-in User Counter: ${counter}"
-    currentLoggedInUser
-    sleep 2
-    ((counter++))
-
-done
-
-loggedInUserFullname=$( id -F "${loggedInUser}" )
-loggedInUserFirstname=$( echo "$loggedInUserFullname" | sed -E 's/^.*, // ; s/([^ ]*).*/\1/' | sed 's/\(.\{25\}\).*/\1…/' | awk '{print toupper(substr($0,1,1))substr($0,2)}' )
-loggedInUserID=$( id -u "${loggedInUser}" )
-updateScriptLog "PRE-FLIGHT CHECK: Current Logged-in User First Name: ${loggedInUserFirstname}"
-updateScriptLog "PRE-FLIGHT CHECK: Current Logged-in User ID: ${loggedInUserID}"
 
 
 
@@ -2577,7 +2578,6 @@ elif [[ "${welcomeDialog}" == "userInput" ]]; then
         echo "$welcomeJSON" > "$welcomeJSONFile"
 
         updateScriptLog "WELCOME DIALOG: Display 'Welcome' dialog …"
-        # welcomeResults=$( eval "${dialogBinary} --jsonfile ${welcomeJSONFile} --json" )
         welcomeResults=$( eval "${dialogBinary} --jsonfile ${welcomeJSONFile} --json" )
 
     else
