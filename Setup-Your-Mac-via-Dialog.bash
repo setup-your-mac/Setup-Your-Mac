@@ -55,6 +55,7 @@
 #   Version 1.10.1, 10-May-2023, Dan K. Snelson (@dan-snelson)
 #   - Removed "(beta)" from Dynamic Download Estimates
 #   - Added `promptForBuilding` and `promptForDepartment` to match other prompts for Welcome Screen ([Pull Request No. 55](https://github.com/dan-snelson/Setup-Your-Mac/pull/55); thanks @robjschroeder!)
+#   - Rearranged "Pre-flight Check: Validate Logged-in System Accounts"
 #
 ####################################################################################################
 
