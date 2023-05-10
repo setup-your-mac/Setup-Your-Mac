@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.10.1-b1
+### 10-May-2023
+- Removed "(beta)" from Dynamic Download Estimates
+
 ## 1.10.0
 ### 08-May-2023
 [Release-specific Blog Post](https://snelson.us/2023/05/setup-your-mac-1-10-0-via-swiftdialog)
