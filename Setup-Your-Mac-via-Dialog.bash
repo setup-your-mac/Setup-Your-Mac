@@ -100,6 +100,8 @@ prefillUsername="true"          # prefills the currently logged in user's userna
 promptForComputerName="true"
 promptForAssetTag="true"
 promptForRoom="true"
+promptForBuilding="true"
+promptForDepartment="true"
 promptForConfiguration="true"   # Removes the Configuration dropdown entirely and uses the "Catch-all (i.e., used when `welcomeDialog` is set to `video` or `false`)" policyJSON
 
 # Disables the Blurscreen enabled by default in Production
@@ -588,8 +590,9 @@ textFieldJSON="${usernameJSON}${compNameJSON}${assetTagJSON}${roomJSON}"
 textFieldJSON=$( echo ${textFieldJSON} | sed 's/,$//' )
 
 # Dropdowns
-if [ -n "$buildingsListRaw" ]; then
-    buildingJSON='{
+if [ "$promptForBuilding" == "true" ]; then
+    if [ -n "$buildingsListRaw" ]; then
+        buildingJSON='{
             "title" : "Building",
             "default" : "Please select your building",
             "values" : [
@@ -597,16 +600,19 @@ if [ -n "$buildingsListRaw" ]; then
                 '${buildingsList}'
             ]
         },'
+    fi
 fi
 
-if [ -n "$departmentListRaw" ]; then
-    departmentJSON='{   "title" : "Department",
+if [ "$promptForDepartment" == "true" ]; then
+    if [ -n "$departmentListRaw" ]; then
+        departmentJSON='{   "title" : "Department",
             "default" : "Please select your department",
             "values" : [
                 "Please select your department",
                 '${departmentList}'
             ]
         },'
+    fi
 fi
 
 if [ "$promptForConfiguration" == "true" ]; then
