@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 1.11.0-b4
+## 1.11.0-b5
 ### 10-May-2023
 
 - Updates for `swiftDialog` `2.2`
@@ -9,6 +9,8 @@
   - Display Configurations as radio buttons
 - Report on RSR version (if applicable) [Pull Request No. 50](https://github.com/dan-snelson/Setup-Your-Mac/pull/50) thanks @drtaru!)
 - Removed "(beta)" from Dynamic Download Estimates
+- Added `promptForBuilding` and `promptForDepartment` to match other prompts for Welcome Screen ([Pull Request No. 55](https://github.com/dan-snelson/Setup-Your-Mac/pull/55); thanks @robjschroeder!)
+- Rearranged "Pre-flight Check: Validate Logged-in System Accounts"
 
 ## 1.10.0
 ### 08-May-2023

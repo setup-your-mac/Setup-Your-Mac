@@ -17,6 +17,8 @@
 #       - Display Configurations as radio buttons
 #   - Report on RSR version (if applicable) [Pull Request No. 50](https://github.com/dan-snelson/Setup-Your-Mac/pull/50) thanks @drtaru!)
 #   - Removed "(beta)" from Dynamic Download Estimates
+#   - Added `promptForBuilding` and `promptForDepartment` to match other prompts for Welcome Screen ([Pull Request No. 55](https://github.com/dan-snelson/Setup-Your-Mac/pull/55); thanks @robjschroeder!)
+#   - Rearranged "Pre-flight Check: Validate Logged-in System Accounts"
 # 
 ####################################################################################################
 
@@ -32,7 +34,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.11.0-b4"
+scriptVersion="1.11.0-b5"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -63,6 +65,8 @@ prefillUsername="true"          # prefills the currently logged in user's userna
 promptForComputerName="true"
 promptForAssetTag="true"
 promptForRoom="true"
+promptForBuilding="true"
+promptForDepartment="true"
 promptForConfiguration="true"   # Removes the Configuration dropdown entirely and uses the "Catch-all (i.e., used when `welcomeDialog` is set to `video` or `false`)" policyJSON
 
 # Disables the Blurscreen enabled by default in Production
@@ -208,6 +212,32 @@ updateScriptLog "PRE-FLIGHT CHECK: Finder & Dock are running; proceeding …"
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Pre-flight Check: Validate Logged-in System Accounts
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+updateScriptLog "PRE-FLIGHT CHECK: Check for Logged-in System Accounts …"
+currentLoggedInUser
+
+counter="1"
+
+until { [[ "${loggedInUser}" != "_mbsetupuser" ]] || [[ "${counter}" -gt "180" ]]; } && { [[ "${loggedInUser}" != "loginwindow" ]] || [[ "${counter}" -gt "30" ]]; } ; do
+
+    updateScriptLog "PRE-FLIGHT CHECK: Logged-in User Counter: ${counter}"
+    currentLoggedInUser
+    sleep 2
+    ((counter++))
+
+done
+
+loggedInUserFullname=$( id -F "${loggedInUser}" )
+loggedInUserFirstname=$( echo "$loggedInUserFullname" | sed -E 's/^.*, // ; s/([^ ]*).*/\1/' | sed 's/\(.\{25\}\).*/\1…/' | awk '{print toupper(substr($0,1,1))substr($0,2)}' )
+loggedInUserID=$( id -u "${loggedInUser}" )
+updateScriptLog "PRE-FLIGHT CHECK: Current Logged-in User First Name: ${loggedInUserFirstname}"
+updateScriptLog "PRE-FLIGHT CHECK: Current Logged-in User ID: ${loggedInUserID}"
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Pre-flight Check: Validate Operating System Version and Build
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
@@ -259,32 +289,6 @@ fi
 
 updateScriptLog "PRE-FLIGHT CHECK: Caffeinating this script (PID: $$)"
 caffeinate -dimsu -w $$ &
-
-
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Pre-flight Check: Validate Logged-in System Accounts
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
-updateScriptLog "PRE-FLIGHT CHECK: Check for Logged-in System Accounts …"
-currentLoggedInUser
-
-counter="1"
-
-until { [[ "${loggedInUser}" != "_mbsetupuser" ]] || [[ "${counter}" -gt "180" ]]; } && { [[ "${loggedInUser}" != "loginwindow" ]] || [[ "${counter}" -gt "30" ]]; } ; do
-
-    updateScriptLog "PRE-FLIGHT CHECK: Logged-in User Counter: ${counter}"
-    currentLoggedInUser
-    sleep 2
-    ((counter++))
-
-done
-
-loggedInUserFullname=$( id -F "${loggedInUser}" )
-loggedInUserFirstname=$( echo "$loggedInUserFullname" | sed -E 's/^.*, // ; s/([^ ]*).*/\1/' | sed 's/\(.\{25\}\).*/\1…/' | awk '{print toupper(substr($0,1,1))substr($0,2)}' )
-loggedInUserID=$( id -u "${loggedInUser}" )
-updateScriptLog "PRE-FLIGHT CHECK: Current Logged-in User First Name: ${loggedInUserFirstname}"
-updateScriptLog "PRE-FLIGHT CHECK: Current Logged-in User ID: ${loggedInUserID}"
 
 
 
@@ -553,6 +557,7 @@ textFieldJSON="${usernameJSON}${compNameJSON}${assetTagJSON}${roomJSON}"
 textFieldJSON=$( echo ${textFieldJSON} | sed 's/,$//' )
 
 # Dropdowns
+if [ "$promptForBuilding" == "true" ]; then
 if [ -n "$buildingsListRaw" ]; then
     buildingJSON='{
             "title" : "Building",
@@ -562,8 +567,10 @@ if [ -n "$buildingsListRaw" ]; then
                 '${buildingsList}'
             ]
         },'
+    fi
 fi
 
+if [ "$promptForDepartment" == "true" ]; then
 if [ -n "$departmentListRaw" ]; then
     departmentJSON='{   "title" : "Department",
             "default" : "",
@@ -572,6 +579,7 @@ if [ -n "$departmentListRaw" ]; then
                 '${departmentList}'
             ]
         },'
+    fi
 fi
 
 if [ "$promptForConfiguration" == "true" ]; then
@@ -2509,15 +2517,7 @@ if [[ "${welcomeDialog}" == "video" ]]; then
     symConfiguration="Catch-all (video)"
     policyJSONConfiguration
 
-    eval "${dialogSetupYourMacCMD[*]}" # & sleep 0.3
-    # dialogSetupYourMacProcessID=$!
-    # until pgrep -q -x "Dialog"; do
-    #     outputLineNumberInVerboseDebugMode
-    #     updateScriptLog "WELCOME DIALOG: Waiting to display 'Setup Your Mac' dialog; pausing"
-    #     sleep 0.5
-    # done
-    # updateScriptLog "WELCOME DIALOG: 'Setup Your Mac' dialog displayed; ensure it's the front-most app"
-    # runAsUser osascript -e 'tell application "Dialog" to activate'
+    eval "${dialogSetupYourMacCMD[*]}" & sleep 0.3
     dialogUpdateSetupYourMac "activate:"
 
 elif [[ "${welcomeDialog}" == "userInput" ]]; then
@@ -2538,7 +2538,6 @@ elif [[ "${welcomeDialog}" == "userInput" ]]; then
         echo "$welcomeJSON" > "$welcomeJSONFile"
 
         updateScriptLog "WELCOME DIALOG: Display 'Welcome' dialog …"
-        # welcomeResults=$( eval "${dialogBinary} --jsonfile ${welcomeJSONFile} --json" )
         welcomeResults=$( eval "${dialogBinary} --jsonfile ${welcomeJSONFile} --json" )
 
     else

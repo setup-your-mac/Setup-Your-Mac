@@ -6,7 +6,7 @@
 > 
 > Additionally, Mac Admins will appreciate the newly added **Slack** and **Microsoft Teams** integration, **Streamlined Customization** and more, making SYM (1.10.0) one of the most significant upgrades yet.
 > 
-> > Setup Your Mac (1.11.0) includes bug fixes and leverages several new features of `swiftDialog` `2.2`.
+> > Setup Your Mac (1.11.0) includes bug fixes (see [CHANGELOG](CHANGELOG.md) and leverages several new features of `swiftDialog` `2.2`.
 
 [<img alt="Setup Your Mac (1.10.0)" src="images/Setup_Your_Mac_1.11.0.png" />](https://snelson.us/sym)
 
