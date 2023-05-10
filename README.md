@@ -8,7 +8,7 @@
 > 
 > > Setup Your Mac (1.11.0) includes bug fixes and leverages several new features of `swiftDialog` `2.2`.
 
-[<img alt="Setup Your Mac (1.10.0)" src="images/Setup_Your_Mac_1.10.0_estimates.png" />](https://snelson.us/sym)
+[<img alt="Setup Your Mac (1.10.0)" src="images/Setup_Your_Mac_1.11.0.png" />](https://snelson.us/sym)
 
 ## Introduction
 
