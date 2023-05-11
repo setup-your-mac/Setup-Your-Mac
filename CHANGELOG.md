@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 1.11.0-b5
+## 1.11.0-b6
 ### 10-May-2023
 
 - Updates for `swiftDialog` `2.2`
@@ -11,6 +11,8 @@
 - Removed "(beta)" from Dynamic Download Estimates
 - Added `promptForBuilding` and `promptForDepartment` to match other prompts for Welcome Screen ([Pull Request No. 55](https://github.com/dan-snelson/Setup-Your-Mac/pull/55); thanks @robjschroeder!)
 - Rearranged "Pre-flight Check: Validate Logged-in System Accounts"
+- Eliminated a visual "glitch" when `promptForConfiguration` is `false` and `configurationDownloadEstimation` is `true` (_Sort of_ addresses [Issue No. 56](https://github.com/dan-snelson/Setup-Your-Mac/issues/56); thanks for the heads-up, @rougegoat!)
+
 
 ## 1.10.0
 ### 08-May-2023
