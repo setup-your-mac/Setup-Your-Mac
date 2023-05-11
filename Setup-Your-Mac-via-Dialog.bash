@@ -56,6 +56,7 @@
 #   - Removed "(beta)" from Dynamic Download Estimates
 #   - Added `promptForBuilding` and `promptForDepartment` to match other prompts for Welcome Screen ([Pull Request No. 55](https://github.com/dan-snelson/Setup-Your-Mac/pull/55); thanks @robjschroeder!)
 #   - Rearranged "Pre-flight Check: Validate Logged-in System Accounts"
+#   - Eliminated a visual "glitch" when `promptForConfiguration` is `false` and `configurationDownloadEstimation` is `true` (_Sort of_ addresses [Issue No. 56](https://github.com/dan-snelson/Setup-Your-Mac/issues/56); thanks for the heads-up, @rougegoat!)
 #
 ####################################################################################################
 
@@ -71,7 +72,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.10.1-b2"
+scriptVersion="1.10.1-b3"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -142,8 +143,10 @@ supportTeamHelpKB="\n- **Knowledge Base Article:** ${supportKB}"
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 osVersion=$( sw_vers -productVersion )
+osVersionExtra=$( sw_vers -productVersionExtra ) 
 osBuild=$( sw_vers -buildVersion )
 osMajorVersion=$( echo "${osVersion}" | awk -F '.' '{print $1}' )
+if [[ -n $osVersionExtra ]] && [[ "${osMajorVersion}" -ge 13 ]]; then osVersion="${osVersion} ${osVersionExtra}"; fi # Report RSR sub version if applicable
 modelName=$( /usr/libexec/PlistBuddy -c 'Print :0:_items:0:machine_name' /dev/stdin <<< "$(system_profiler -xml SPHardwareDataType)" )
 reconOptions=""
 exitCode="0"
@@ -2889,7 +2892,12 @@ if [[ -n ${department} ]]; then infobox+="**Department:**  \n$department  \n\n" 
 if [[ -n ${building} ]]; then infobox+="**Building:**  \n$building  \n\n" ; fi
 if [[ -n ${room} ]]; then infobox+="**Room:**  \n$room  \n\n" ; fi
 
-dialogUpdateSetupYourMac "infobox: ${infobox}"
+if [[ "${promptForConfiguration}" != "true" ]]; then
+    updateScriptLog "SETUP YOUR MAC DIALOG: Purposely NOT updating 'infobox'"
+else
+    updateScriptLog "SETUP YOUR MAC DIALOG: Updating 'infobox'"
+    dialogUpdateSetupYourMac "infobox: ${infobox}"
+fi
 
 
 
