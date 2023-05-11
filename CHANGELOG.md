@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 1.11.0-b7
+## 1.11.0-b8
 ### 11-May-2023
 - Updates for `swiftDialog` `2.2`
   - Required `selectitems`
@@ -11,6 +11,7 @@
 - Added `promptForBuilding` and `promptForDepartment` to match other prompts for Welcome Screen ([Pull Request No. 55](https://github.com/dan-snelson/Setup-Your-Mac/pull/55); thanks @robjschroeder!)
 - Rearranged "Pre-flight Check: Validate Logged-in System Accounts"
 - Eliminated a visual "glitch" when `promptForConfiguration` is `false` and `configurationDownloadEstimation` is `true` (_Sort of_ addresses [Issue No. 56](https://github.com/dan-snelson/Setup-Your-Mac/issues/56); thanks for the heads-up, @rougegoat!)
+- Eliminated the visual "glitch" when `welcomeDialog` is `false`
 
 ## 1.10.0
 ### 08-May-2023
