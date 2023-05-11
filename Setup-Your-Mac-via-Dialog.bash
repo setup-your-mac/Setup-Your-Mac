@@ -35,7 +35,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.11.0-b6"
+scriptVersion="1.11.0-b7"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -559,7 +559,7 @@ textFieldJSON=$( echo ${textFieldJSON} | sed 's/,$//' )
 
 # Dropdowns
 if [ "$promptForBuilding" == "true" ]; then
-if [ -n "$buildingsListRaw" ]; then
+    if [ -n "$buildingsListRaw" ]; then
     buildingJSON='{
             "title" : "Building",
             "default" : "",
@@ -572,7 +572,7 @@ if [ -n "$buildingsListRaw" ]; then
 fi
 
 if [ "$promptForDepartment" == "true" ]; then
-if [ -n "$departmentListRaw" ]; then
+    if [ -n "$departmentListRaw" ]; then
     departmentJSON='{   "title" : "Department",
             "default" : "",
             "required" : true,
@@ -2855,6 +2855,7 @@ else
     updateScriptLog "SETUP YOUR MAC DIALOG: Updating 'infobox'"
     dialogUpdateSetupYourMac "infobox: ${infobox}"
 fi
+
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
