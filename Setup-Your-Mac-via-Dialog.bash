@@ -162,7 +162,7 @@ correctionCoefficient="1.01"            # "Fudge factor" (to help estimate match
 configurationCatchAllSize="34"          # Catch-all Configuration in Gibibits (i.e., Total File Size in Gigabytes * 7.451) 
 configurationOneSize="34"               # Configuration One in Gibibits (i.e., Total File Size in Gigabytes * 7.451) 
 configurationTwoSize="62"               # Configuration Two in Gibibits (i.e., Total File Size in Gigabytes * 7.451) 
-configurationThreeSize="106"            # Configuration Three in Gibibits (i.e., Total File Size in Gigabytes * 7.451) 
+configurationThreeSize="106"            # Configuration Three in Gibibits (i.e., Total File Size in Gigabytes * 7.451)
 
 
 
@@ -2213,74 +2213,32 @@ function checkNetworkQualityConfigurations() {
     mbps=$( echo "scale=2; ( $dlThroughput / 1000000 )" | bc )
     updateScriptLog "WELCOME DIALOG: $mbps (Mbps)"
 
-    configurationOneEstimatedSeconds=$( echo "scale=2; (((( $configurationOneSize / $mbps ) * 60 ) * 60 ) * $correctionCoefficient )" | bc | sed 's/\.[0-9]*//' )
-    updateScriptLog "WELCOME DIALOG: Configuration One Estimated Seconds: $configurationOneEstimatedSeconds"
-    updateScriptLog "WELCOME DIALOG: Configuration One Estimate: $(printf '%dh:%dm:%ds\n' $((configurationOneEstimatedSeconds/3600)) $((configurationOneEstimatedSeconds%3600/60)) $((configurationOneEstimatedSeconds%60)))"
+    if [[ "${promptForConfiguration}" == "true" ]]; then
 
-    configurationTwoEstimatedSeconds=$( echo "scale=2; (((( $configurationTwoSize / $mbps ) * 60 ) * 60 ) * $correctionCoefficient )" | bc | sed 's/\.[0-9]*//' )
-    updateScriptLog "WELCOME DIALOG: Configuration Two Estimated Seconds: $configurationTwoEstimatedSeconds"
-    updateScriptLog "WELCOME DIALOG: Configuration Two Estimate: $(printf '%dh:%dm:%ds\n' $((configurationTwoEstimatedSeconds/3600)) $((configurationTwoEstimatedSeconds%3600/60)) $((configurationTwoEstimatedSeconds%60)))"
+        configurationOneEstimatedSeconds=$( echo "scale=2; (((( $configurationOneSize / $mbps ) * 60 ) * 60 ) * $correctionCoefficient )" | bc | sed 's/\.[0-9]*//' )
+        updateScriptLog "WELCOME DIALOG: Configuration One Estimated Seconds: $configurationOneEstimatedSeconds"
+        updateScriptLog "WELCOME DIALOG: Configuration One Estimate: $(printf '%dh:%dm:%ds\n' $((configurationOneEstimatedSeconds/3600)) $((configurationOneEstimatedSeconds%3600/60)) $((configurationOneEstimatedSeconds%60)))"
 
-    configurationThreeEstimatedSeconds=$( echo "scale=2; (((( $configurationThreeSize / $mbps ) * 60 ) * 60 ) * $correctionCoefficient )" | bc | sed 's/\.[0-9]*//' )
-    updateScriptLog "WELCOME DIALOG: Configuration Three Estimated Seconds: $configurationThreeEstimatedSeconds"
-    updateScriptLog "WELCOME DIALOG: Configuration Three Estimate: $(printf '%dh:%dm:%ds\n' $((configurationThreeEstimatedSeconds/3600)) $((configurationThreeEstimatedSeconds%3600/60)) $((configurationThreeEstimatedSeconds%60)))"
+        configurationTwoEstimatedSeconds=$( echo "scale=2; (((( $configurationTwoSize / $mbps ) * 60 ) * 60 ) * $correctionCoefficient )" | bc | sed 's/\.[0-9]*//' )
+        updateScriptLog "WELCOME DIALOG: Configuration Two Estimated Seconds: $configurationTwoEstimatedSeconds"
+        updateScriptLog "WELCOME DIALOG: Configuration Two Estimate: $(printf '%dh:%dm:%ds\n' $((configurationTwoEstimatedSeconds/3600)) $((configurationTwoEstimatedSeconds%3600/60)) $((configurationTwoEstimatedSeconds%60)))"
 
-    updateScriptLog "WELCOME DIALOG: Network Quality Test: Started: $dlStartDate, Ended: $dlEndDate; Download: $mbps Mbps, Responsiveness: $dlResponsiveness"
-    dialogUpdateWelcome "infobox: **Connection:**  \n- Download:  \n$mbps Mbps  \n\n**Estimates:**  \n- Required:  \n$(printf '%dh:%dm:%ds\n' $((configurationOneEstimatedSeconds/3600)) $((configurationOneEstimatedSeconds%3600/60)) $((configurationOneEstimatedSeconds%60)))  \n\n- Recommended:  \n$(printf '%dh:%dm:%ds\n' $((configurationTwoEstimatedSeconds/3600)) $((configurationTwoEstimatedSeconds%3600/60)) $((configurationTwoEstimatedSeconds%60)))  \n\n- Complete:  \n$(printf '%dh:%dm:%ds\n' $((configurationThreeEstimatedSeconds/3600)) $((configurationThreeEstimatedSeconds%3600/60)) $((configurationThreeEstimatedSeconds%60)))"
+        configurationThreeEstimatedSeconds=$( echo "scale=2; (((( $configurationThreeSize / $mbps ) * 60 ) * 60 ) * $correctionCoefficient )" | bc | sed 's/\.[0-9]*//' )
+        updateScriptLog "WELCOME DIALOG: Configuration Three Estimated Seconds: $configurationThreeEstimatedSeconds"
+        updateScriptLog "WELCOME DIALOG: Configuration Three Estimate: $(printf '%dh:%dm:%ds\n' $((configurationThreeEstimatedSeconds/3600)) $((configurationThreeEstimatedSeconds%3600/60)) $((configurationThreeEstimatedSeconds%60)))"
 
+        updateScriptLog "WELCOME DIALOG: Network Quality Test: Started: $dlStartDate, Ended: $dlEndDate; Download: $mbps Mbps, Responsiveness: $dlResponsiveness"
+        dialogUpdateWelcome "infobox: **Connection:**  \n- Download:  \n$mbps Mbps  \n\n**Estimates:**  \n- Required:  \n$(printf '%dh:%dm:%ds\n' $((configurationOneEstimatedSeconds/3600)) $((configurationOneEstimatedSeconds%3600/60)) $((configurationOneEstimatedSeconds%60)))  \n\n- Recommended:  \n$(printf '%dh:%dm:%ds\n' $((configurationTwoEstimatedSeconds/3600)) $((configurationTwoEstimatedSeconds%3600/60)) $((configurationTwoEstimatedSeconds%60)))  \n\n- Complete:  \n$(printf '%dh:%dm:%ds\n' $((configurationThreeEstimatedSeconds/3600)) $((configurationThreeEstimatedSeconds%3600/60)) $((configurationThreeEstimatedSeconds%60)))"
+        
+    else
+        configurationCatchAllEstimatedSeconds=$( echo "scale=2; (((( $configurationCatchAllSize / $mbps ) * 60 ) * 60 ) * $correctionCoefficient )" | bc | sed 's/\.[0-9]*//' )
+        updateScriptLog "SETUP YOUR MAC DIALOG: Catch-all Configuration Estimated Seconds: $configurationCatchAllEstimatedSeconds"
+        updateScriptLog "SETUP YOUR MAC DIALOG: Catch-all Configuration Estimate: $(printf '%dh:%dm:%ds\n' $((configurationCatchAllEstimatedSeconds/3600)) $((configurationCatchAllEstimatedSeconds%3600/60)) $((configurationCatchAllEstimatedSeconds%60)))"
+
+        updateScriptLog "SETUP YOUR MAC DIALOG: Network Quality Test: Started: $dlStartDate, Ended: $dlEndDate; Download: $mbps Mbps, Responsiveness: $dlResponsiveness"
+        dialogUpdateWelcome "infobox: **Connection:**  \n- Download:  \n$mbps Mbps  \n\n**Estimate:**  \n- $(printf '%dh:%dm:%ds\n' $((configurationCatchAllEstimatedSeconds/3600)) $((configurationCatchAllEstimatedSeconds%3600/60)) $((configurationCatchAllEstimatedSeconds%60)))"
+    fi
 }
-
-
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Check Network Quality for Catch-all Configuration (thanks, @bartreadon!)
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
-function checkNetworkQualityCatchAllConfiguration() {
-    
-    myPID="$$"
-    updateScriptLog "SETUP YOUR MAC DIALOG: Display Welcome dialog 'infobox' animation …"
-    setupYourMacDialogInfoboxAnimation "$myPID" &
-    setupYourMacDialogInfoboxAnimationPID="$!"
-
-    networkQuality -s -v -c > /var/tmp/networkQualityTest
-    kill ${setupYourMacDialogInfoboxAnimationPID}
-    outputLineNumberInVerboseDebugMode
-
-    updateScriptLog "SETUP YOUR MAC DIALOG: Completed networkQualityTest …"
-    networkQualityTest=$( < /var/tmp/networkQualityTest )
-    rm /var/tmp/networkQualityTest
-
-    case "${osVersion}" in
-
-        11* ) 
-            dlThroughput="N/A; macOS ${osVersion}"
-            dlResponsiveness="N/A; macOS ${osVersion}"
-            dlStartDate="N/A; macOS ${osVersion}"
-            dlEndDate="N/A; macOS ${osVersion}"
-            ;;
-
-        12* | 13* )
-            dlThroughput=$( get_json_value "$networkQualityTest" "dl_throughput")
-            dlResponsiveness=$( get_json_value "$networkQualityTest" "dl_responsiveness" )
-            dlStartDate=$( get_json_value "$networkQualityTest" "start_date" )
-            dlEndDate=$( get_json_value "$networkQualityTest" "end_date" )
-            ;;
-
-    esac
-
-    mbps=$( echo "scale=2; ( $dlThroughput / 1000000 )" | bc )
-    updateScriptLog "SETUP YOUR MAC DIALOG: $mbps (Mbps)"
-
-    configurationCatchAllEstimatedSeconds=$( echo "scale=2; (((( $configurationCatchAllSize / $mbps ) * 60 ) * 60 ) * $correctionCoefficient )" | bc | sed 's/\.[0-9]*//' )
-    updateScriptLog "SETUP YOUR MAC DIALOG: Catch-all Configuration Estimated Seconds: $configurationCatchAllEstimatedSeconds"
-    updateScriptLog "SETUP YOUR MAC DIALOG: Catch-all Configuration Estimate: $(printf '%dh:%dm:%ds\n' $((configurationCatchAllEstimatedSeconds/3600)) $((configurationCatchAllEstimatedSeconds%3600/60)) $((configurationCatchAllEstimatedSeconds%60)))"
-
-    updateScriptLog "SETUP YOUR MAC DIALOG: Network Quality Test: Started: $dlStartDate, Ended: $dlEndDate; Download: $mbps Mbps, Responsiveness: $dlResponsiveness"
-    dialogUpdateSetupYourMac "infobox: **Connection:**  \n- Download:  \n$mbps Mbps  \n\n**Estimates:**  \n- $(printf '%dh:%dm:%ds\n' $((configurationCatchAllEstimatedSeconds/3600)) $((configurationCatchAllEstimatedSeconds%3600/60)) $((configurationCatchAllEstimatedSeconds%60)))"
-
-}
-
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -2569,7 +2527,7 @@ elif [[ "${welcomeDialog}" == "userInput" ]]; then
     outputLineNumberInVerboseDebugMode
 
     # Estimate Configuration Download Times
-    if [[ "${configurationDownloadEstimation}" == "true" ]] && [[ "${promptForConfiguration}" == "true" ]]; then
+    if [[ "${configurationDownloadEstimation}" == "true" ]]; then
 
         outputLineNumberInVerboseDebugMode
 
@@ -2857,29 +2815,12 @@ dialogUpdateWelcome "quit:"
 outputLineNumberInVerboseDebugMode
 
 if [[ "${symConfiguration}" == *"Catch-all"* ]] || [[ -z "${symConfiguration}" ]]; then
-
-    if [[ "${configurationDownloadEstimation}" == "true" ]]; then
-
-        outputLineNumberInVerboseDebugMode
-
-        checkNetworkQualityCatchAllConfiguration &
-
-        updateScriptLog "SETUP YOUR MAC DIALOG: **Connection:**  \n- Download:  \n$mbps Mbps  \n\n**Estimate:**  \n- $(printf '%dh:%dm:%ds\n' $((configurationCatchAllEstimatedSeconds/3600)) $((configurationCatchAllEstimatedSeconds%3600/60)) $((configurationCatchAllEstimatedSeconds%60)))"
-
-        infoboxConfiguration="**Connection:**  \n- Download:  \n$mbps Mbps  \n\n**Estimate:**  \n- $(printf '%dh:%dm:%ds\n' $((configurationCatchAllEstimatedSeconds/3600)) $((configurationCatchAllEstimatedSeconds%3600/60)) $((configurationCatchAllEstimatedSeconds%60)))"
-
-    else
-
-        # When `welcomeDialog` is set to `false` or `video`, set the value of `infoboxConfiguration` to null (thanks for the idea, @Manikandan!)
-        infoboxConfiguration=""
-
-    fi
-
+    # When `welcomeDialog` is set to `false` or `video`, set the value of `infoboxConfiguration` to null (thanks for the idea, @Manikandan!)
+    infoboxConfiguration=""
 else
-
     infoboxConfiguration="${symConfiguration}"
-
 fi
+
 
 infobox=""
 
@@ -2892,12 +2833,8 @@ if [[ -n ${department} ]]; then infobox+="**Department:**  \n$department  \n\n" 
 if [[ -n ${building} ]]; then infobox+="**Building:**  \n$building  \n\n" ; fi
 if [[ -n ${room} ]]; then infobox+="**Room:**  \n$room  \n\n" ; fi
 
-if [[ "${promptForConfiguration}" != "true" ]]; then
-    updateScriptLog "SETUP YOUR MAC DIALOG: Purposely NOT updating 'infobox'"
-else
-    updateScriptLog "SETUP YOUR MAC DIALOG: Updating 'infobox'"
-    dialogUpdateSetupYourMac "infobox: ${infobox}"
-fi
+updateScriptLog "SETUP YOUR MAC DIALOG: Updating 'infobox'"
+dialogUpdateSetupYourMac "infobox: ${infobox}"
 
 
 
