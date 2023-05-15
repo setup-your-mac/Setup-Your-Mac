@@ -1,7 +1,7 @@
 # CHANGELOG
 
-## 1.11.0-b8
-### 11-May-2023
+## 1.11.0-b9
+### 15-May-2023
 - Updates for `swiftDialog` `2.2`
   - Required `selectitems`
   - New `activate` command to bring swiftDialog to the front
@@ -12,6 +12,7 @@
 - Rearranged "Pre-flight Check: Validate Logged-in System Accounts"
 - Eliminated a visual "glitch" when `promptForConfiguration` is `false` and `configurationDownloadEstimation` is `true` (_Sort of_ addresses [Issue No. 56](https://github.com/dan-snelson/Setup-Your-Mac/issues/56); thanks for the heads-up, @rougegoat!)
 - Eliminated the visual "glitch" when `welcomeDialog` is `false`
+- Specify a Configuration as Parameter `11` ([Pull Request No. 59](https://github.com/dan-snelson/Setup-Your-Mac/pull/59); thanks big bunches, @drtaru!. Addresses [Issue No. 58](https://github.com/dan-snelson/Setup-Your-Mac/issues/58); thanks for the idea, @nunoidev!)
 
 ## 1.10.0
 ### 08-May-2023

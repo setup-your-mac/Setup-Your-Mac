@@ -21,6 +21,7 @@
 #   - Rearranged "Pre-flight Check: Validate Logged-in System Accounts"
 #   - Eliminated a visual "glitch" when `promptForConfiguration` is `false` and `configurationDownloadEstimation` is `true` (_Sort of_ addresses [Issue No. 56](https://github.com/dan-snelson/Setup-Your-Mac/issues/56); thanks for the heads-up, @rougegoat!)
 #   - Eliminated the visual "glitch" when `welcomeDialog` is `false`
+#   - Specify a Configuration as Parameter `11` ([Pull Request No. 59](https://github.com/dan-snelson/Setup-Your-Mac/pull/59); thanks big bunches, @drtaru!. Addresses [Issue No. 58](https://github.com/dan-snelson/Setup-Your-Mac/issues/58); thanks for the idea, @nunoidev!)
 # 
 ####################################################################################################
 
@@ -36,7 +37,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.11.0-b8"
+scriptVersion="1.11.0-b9"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -45,7 +46,7 @@ completionActionOption="${7:-"Restart Attended"}"                               
 requiredMinimumBuild="${8:-"disabled"}"                                         # Parameter 8: Required Minimum Build [ disabled (default) | 22E ] (i.e., Your organization's required minimum build of macOS to allow users to proceed; use "22E" for macOS 13.3)
 outdatedOsAction="${9:-"/System/Library/CoreServices/Software Update.app"}"     # Parameter 9: Outdated OS Action [ /System/Library/CoreServices/Software Update.app (default) | jamfselfservice://content?entity=policy&id=117&action=view ] (i.e., Jamf Pro Self Service policy ID for operating system ugprades)
 webhookURL="${10:-""}"                                                          # Parameter 10: Microsoft Teams or Slack Webhook URL [ Leave blank to disable (default) | https://microsoftTeams.webhook.com/URL | https://hooks.slack.com/services/URL ] Can be used to send a success or failure message to Microsoft Teams or Slack via Webhook. (Function will automatically detect if Webhook URL is for Slack or Teams; can be modified to include other communication tools that support functionality.)
-presetConfiguration="${11:-""}"                                                  # Parameter 11: Pre set a configuration via Jamf parameter (NOTE: Only use when welcomeDialog set to Video or False)
+presetConfiguration="${11:-""}"                                                 # Parameter 11: Specify a Configuration (i.e., `policyJSON`; NOTE: Only used when `welcomeDialog` is set to `video` or `false`)
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -2512,15 +2513,16 @@ fi
 
 if [[ "${welcomeDialog}" == "video" ]]; then
 
-    updateScriptLog "WELCOME DIALOG: Displaying "
+    updateScriptLog "WELCOME DIALOG: Displaying ${welcomeVideoID} …"
     eval "${dialogBinary} --args ${welcomeVideo}"
 
     outputLineNumberInVerboseDebugMode
-    if [[ -n "$presetConfiguration" ]]; then
-        symConfiguration="$presetConfiguration"
+    if [[ -n "${presetConfiguration}" ]]; then
+        symConfiguration="${presetConfiguration}"
     else
         symConfiguration="Catch-all (video)"
     fi
+    updateScriptLog "WELCOME DIALOG: Using ${symConfiguration} Configuration …"
     policyJSONConfiguration
 
     eval "${dialogSetupYourMacCMD[*]}" & sleep 0.3
@@ -2724,10 +2726,11 @@ else
 
     outputLineNumberInVerboseDebugMode
     if [[ -n "$presetConfiguration" ]]; then
-        symConfiguration="$presetConfiguration"
+        symConfiguration="${presetConfiguration}"
     else
         symConfiguration="Catch-all ('Welcome' dialog disabled)"
     fi
+    updateScriptLog "WELCOME DIALOG: Using ${symConfiguration} Configuration …"
     policyJSONConfiguration
 
 
