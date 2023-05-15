@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 1.11.0-b10
+## 1.11.0-b11
 ### 15-May-2023
 - Updates for `swiftDialog` `2.2`
   - Required `selectitems`
@@ -14,6 +14,7 @@
 - Eliminated the visual "glitch" when `welcomeDialog` is `false`
 - Specify a Configuration as Parameter `11` ([Pull Request No. 59](https://github.com/dan-snelson/Setup-Your-Mac/pull/59); thanks big bunches, @drtaru!. Addresses [Issue No. 58](https://github.com/dan-snelson/Setup-Your-Mac/issues/58); thanks for the idea, @nunoidev!)
 - Configuration Names and Descriptions as variables ([Pull Request No. 60](https://github.com/dan-snelson/Setup-Your-Mac/pull/60); great idea! thanks, @theadamcraig!)
+- Consolidated Jamf Pro-related webHookMessage variables; Set "Additional Comments" to "None" when there aren't any failures
 
 ## 1.10.0
 ### 08-May-2023

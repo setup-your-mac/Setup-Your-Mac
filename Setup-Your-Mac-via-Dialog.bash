@@ -23,6 +23,7 @@
 #   - Eliminated the visual "glitch" when `welcomeDialog` is `false`
 #   - Specify a Configuration as Parameter `11` ([Pull Request No. 59](https://github.com/dan-snelson/Setup-Your-Mac/pull/59); thanks big bunches, @drtaru!. Addresses [Issue No. 58](https://github.com/dan-snelson/Setup-Your-Mac/issues/58); thanks for the idea, @nunoidev!)
 #   - Configuration Names and Descriptions as variables ([Pull Request No. 60](https://github.com/dan-snelson/Setup-Your-Mac/pull/60); great idea! thanks, @theadamcraig!)
+#   - Consolidated Jamf Pro-related webHookMessage variables; Set "Additional Comments" to "None" when there aren't any failures 
 # 
 ####################################################################################################
 
@@ -38,7 +39,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.11.0-b10"
+scriptVersion="1.11.0-b11"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -585,7 +586,8 @@ fi
 
 if [ "$promptForDepartment" == "true" ]; then
     if [ -n "$departmentListRaw" ]; then
-    departmentJSON='{   "title" : "Department",
+    departmentJSON='{
+            "title" : "Department",
             "default" : "",
             "required" : true,
             "values" : [
@@ -596,8 +598,8 @@ if [ "$promptForDepartment" == "true" ]; then
 fi
 
 if [ "$promptForConfiguration" == "true" ]; then
-    configurationJSON='{ "title" : "Configuration",
-
+    configurationJSON='{
+            "title" : "Configuration",
             "style" : "radio",
             "default" : "'"${configurationOneName}"'",
             "values" : [
@@ -2203,7 +2205,6 @@ function checkNetworkQualityConfigurations() {
     updateScriptLog "WELCOME DIALOG: Configuration Three Estimate: $(printf '%dh:%dm:%ds\n' $((configurationThreeEstimatedSeconds/3600)) $((configurationThreeEstimatedSeconds%3600/60)) $((configurationThreeEstimatedSeconds%60)))"
 
     updateScriptLog "WELCOME DIALOG: Network Quality Test: Started: $dlStartDate, Ended: $dlEndDate; Download: $mbps Mbps, Responsiveness: $dlResponsiveness"
-
     dialogUpdateWelcome "infobox: **Connection:**  \n- Download:  \n$mbps Mbps  \n\n**Estimates:**  \n- ${configurationOneName}:  \n$(printf '%dh:%dm:%ds\n' $((configurationOneEstimatedSeconds/3600)) $((configurationOneEstimatedSeconds%3600/60)) $((configurationOneEstimatedSeconds%60)))  \n\n- ${configurationTwoName}:  \n$(printf '%dh:%dm:%ds\n' $((configurationTwoEstimatedSeconds/3600)) $((configurationTwoEstimatedSeconds%3600/60)) $((configurationTwoEstimatedSeconds%60)))  \n\n- ${configurationThreeName}:  \n$(printf '%dh:%dm:%ds\n' $((configurationThreeEstimatedSeconds/3600)) $((configurationThreeEstimatedSeconds%3600/60)) $((configurationThreeEstimatedSeconds%60)))"
 
 }
@@ -2269,12 +2270,24 @@ function webHookMessage() {
 
     outputLineNumberInVerboseDebugMode
 
+    jamfProURL=$(/usr/bin/defaults read /Library/Preferences/com.jamfsoftware.jamf.plist jss_url)
+
+    # # Jamf Pro URL for on-prem, multi-node, clustered environments
+    # case ${jamfProURL} in
+    #     *"beta"*    ) jamfProURL="https://jamfpro-beta.internal.company.com/" ;;
+    #     *           ) jamfProURL="https://jamfpro-prod.internal.company.com/" ;;
+    # esac
+
+    jamfProComputerURL="${jamfProURL}computers.html?id=${computerID}&o=r"
+
+    # If there aren't any failures, use "None" for the value of `jamfProPolicyNameFailures`
+    if [[ -z "${jamfProPolicyNameFailures}" ]]; then
+        jamfProPolicyNameFailures="None"
+    fi
+
     if [[ $webhookURL == *"slack"* ]]; then
         
         updateScriptLog "Generating Slack Message …"
-
-        jamfProURL=$(/usr/bin/defaults read /Library/Preferences/com.jamfsoftware.jamf.plist jss_url)
-        jamfProComputerURL="${jamfProURL}computers.html?id=${computerID}&o=r"
         
         webHookdata=$(cat <<EOF
         {
@@ -2352,18 +2365,6 @@ EOF
     else
         
         updateScriptLog "Generating Microsoft Teams Message …"
-
-        # Jamf Pro URL
-        jamfProURL=$(/usr/bin/defaults read /Library/Preferences/com.jamfsoftware.jamf.plist jss_url)
-        
-        # Jamf Pro URL for on-prem, multi-node, clustered environments
-        # case ${jamfProURL} in
-        #     *"beta"*    ) jamfProURL="https://jamfpro-beta.internal.company.com/" ;;
-        #     *           ) jamfProURL="https://jamfpro-prod.internal.company.com/" ;;
-        # esac
-
-        # URL to computer object
-        jamfProComputerURL="${jamfProURL}computers.html?id=${computerID}&o=r"
 
         # URL to an image to add to your notification
         activityImage="https://creazilla-store.fra1.digitaloceanspaces.com/cliparts/78010/old-mac-computer-clipart-md.png"
