@@ -2822,7 +2822,7 @@ dialogUpdateWelcome "quit:"
 
 outputLineNumberInVerboseDebugMode
 
-if [[ "${symConfiguration}" == *"Catch-all"* || -n "${presetConfiguration}" ]] || [[ -z "${symConfiguration}" ]]; then
+if [[ "${symConfiguration}" == *"Catch-all"* ]] || [[ -z "${symConfiguration}" ]] || [[ "${welcomeDialog}" != "userInput" ]]; then
 
     if [[ "${configurationDownloadEstimation}" == "true" ]]; then
 
