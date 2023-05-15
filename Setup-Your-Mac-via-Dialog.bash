@@ -144,14 +144,23 @@ exitCode="0"
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Configuration Download Estimation
+# Configuration Variables
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 configurationDownloadEstimation="true"  # [ true (default) | false ]
 correctionCoefficient="1.01"            # "Fudge factor" (to help estimate match reality)
 configurationCatchAllSize="34"          # Catch-all Configuration in Gibibits (i.e., Total File Size in Gigabytes * 7.451) 
+
+configurationOneName="Required"
+configurtaionOneDescription="Minimum organization apps"
 configurationOneSize="34"               # Configuration One in Gibibits (i.e., Total File Size in Gigabytes * 7.451) 
+
+configurationTwoName="Recommended"
+configurationTwoDescription="Required apps and Microsoft Office"
 configurationTwoSize="62"               # Configuration Two in Gibibits (i.e., Total File Size in Gigabytes * 7.451) 
+
+configurationThreeName="Complete"
+configurationThreeDescription="Recommended apps, Adobe Acrobat Reader and Google Chrome"
 configurationThreeSize="106"            # Configuration Three in Gibibits (i.e., Total File Size in Gigabytes * 7.451) 
 
 
@@ -509,7 +518,7 @@ welcomeTitle="Happy $( date +'%A' ), ${loggedInUserFirstname}!  \nWelcome to you
 welcomeMessage="Please enter the **required** information for your ${modelName}, select your preferred **Configuration** then click **Continue** to start applying settings to your new Mac. \n\nOnce completed, the **Wait** button will be enabled and you‘ll be able to review the results before restarting your ${modelName}. \n\nIf you need assistance, please contact the ${supportTeamName}: ${supportTeamPhone} and mention ${supportKB}. \n\n---"
 
 if [[ "${promptForConfiguration}" == "true" ]]; then
-    welcomeMessage+="  \n\n#### Configurations  \n- **Required:** Minimum organization apps  \n- **Recommended:** Required apps and Microsoft Office  \n- **Complete:** Recommended apps, Adobe Acrobat Reader and Google Chrome"
+    welcomeMessage+="  \n\n#### Configurations  \n- **${configurationOneName}:** ${configurtaionOneDescription}  \n- **${configurationTwoName}:** ${configurationTwoDescription}  \n- **${configurationThreeName}:** ${configurationThreeDescription}"
 else
     welcomeMessage=${welcomeMessage//", select your preferred **Configuration**"/}
 fi
@@ -608,11 +617,11 @@ fi
 
 if [ "$promptForConfiguration" == "true" ]; then
     configurationJSON='{ "title" : "Configuration",
-            "default" : "Required",
+            "default" : "'"${configurationOneName}"'",
             "values" : [
-                "Required",
-                "Recommended",
-                "Complete"
+                "'"${configurationOneName}"'",
+                "'"${configurationTwoName}"'",
+                "'"${configurationThreeName}"'"
             ]
         }'
 fi
@@ -785,7 +794,7 @@ function policyJSONConfiguration() {
 
     case ${symConfiguration} in
 
-        "Required" )
+        "${configurationOneName}" )
 
             policyJSON='
             {
@@ -891,7 +900,7 @@ function policyJSONConfiguration() {
             '
             ;;
 
-        "Recommended" )
+        "${configurationTwoName}" )
 
             policyJSON='
             {
@@ -1023,7 +1032,7 @@ function policyJSONConfiguration() {
             '
             ;;
 
-        "Complete" )
+        "configurationThreeName" )
 
             policyJSON='
             {
@@ -2213,6 +2222,7 @@ function checkNetworkQualityConfigurations() {
 
     updateScriptLog "WELCOME DIALOG: Network Quality Test: Started: $dlStartDate, Ended: $dlEndDate; Download: $mbps Mbps, Responsiveness: $dlResponsiveness"
     dialogUpdateWelcome "infobox: **Connection:**  \n- Download:  \n$mbps Mbps  \n\n**Estimates (beta):**  \n- Required:  \n$(printf '%dh:%dm:%ds\n' $((configurationOneEstimatedSeconds/3600)) $((configurationOneEstimatedSeconds%3600/60)) $((configurationOneEstimatedSeconds%60)))  \n\n- Recommended:  \n$(printf '%dh:%dm:%ds\n' $((configurationTwoEstimatedSeconds/3600)) $((configurationTwoEstimatedSeconds%3600/60)) $((configurationTwoEstimatedSeconds%60)))  \n\n- Complete:  \n$(printf '%dh:%dm:%ds\n' $((configurationThreeEstimatedSeconds/3600)) $((configurationThreeEstimatedSeconds%3600/60)) $((configurationThreeEstimatedSeconds%60)))"
+    dialogUpdateWelcome "infobox: **Connection:**  \n- Download:  \n$mbps Mbps  \n\n**Estimates (beta):**  \n- ${configurationOneName}:  \n$(printf '%dh:%dm:%ds\n' $((configurationOneEstimatedSeconds/3600)) $((configurationOneEstimatedSeconds%3600/60)) $((configurationOneEstimatedSeconds%60)))  \n\n- ${configurationTwoName}:  \n$(printf '%dh:%dm:%ds\n' $((configurationTwoEstimatedSeconds/3600)) $((configurationTwoEstimatedSeconds%3600/60)) $((configurationTwoEstimatedSeconds%60)))  \n\n- ${configurationThreeName}  \n$(printf '%dh:%dm:%ds\n' $((configurationThreeEstimatedSeconds/3600)) $((configurationThreeEstimatedSeconds%3600/60)) $((configurationThreeEstimatedSeconds%60)))"
 
 }
 
