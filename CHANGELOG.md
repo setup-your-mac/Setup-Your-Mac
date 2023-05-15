@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 1.11.0-b9
+## 1.11.0-b10
 ### 15-May-2023
 - Updates for `swiftDialog` `2.2`
   - Required `selectitems`
@@ -13,6 +13,7 @@
 - Eliminated a visual "glitch" when `promptForConfiguration` is `false` and `configurationDownloadEstimation` is `true` (_Sort of_ addresses [Issue No. 56](https://github.com/dan-snelson/Setup-Your-Mac/issues/56); thanks for the heads-up, @rougegoat!)
 - Eliminated the visual "glitch" when `welcomeDialog` is `false`
 - Specify a Configuration as Parameter `11` ([Pull Request No. 59](https://github.com/dan-snelson/Setup-Your-Mac/pull/59); thanks big bunches, @drtaru!. Addresses [Issue No. 58](https://github.com/dan-snelson/Setup-Your-Mac/issues/58); thanks for the idea, @nunoidev!)
+- Configuration Names and Descriptions as variables ([Pull Request No. 60](https://github.com/dan-snelson/Setup-Your-Mac/pull/60); great idea! thanks, @theadamcraig!)
 
 ## 1.10.0
 ### 08-May-2023
