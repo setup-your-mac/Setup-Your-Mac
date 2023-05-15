@@ -1013,7 +1013,7 @@ function policyJSONConfiguration() {
             '
             ;;
 
-        "configurationThreeName" )
+        "${configurationThreeName}" )
 
             policyJSON='
             {
