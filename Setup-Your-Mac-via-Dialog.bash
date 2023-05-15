@@ -45,7 +45,7 @@ completionActionOption="${7:-"Restart Attended"}"                               
 requiredMinimumBuild="${8:-"disabled"}"                                         # Parameter 8: Required Minimum Build [ disabled (default) | 22E ] (i.e., Your organization's required minimum build of macOS to allow users to proceed; use "22E" for macOS 13.3)
 outdatedOsAction="${9:-"/System/Library/CoreServices/Software Update.app"}"     # Parameter 9: Outdated OS Action [ /System/Library/CoreServices/Software Update.app (default) | jamfselfservice://content?entity=policy&id=117&action=view ] (i.e., Jamf Pro Self Service policy ID for operating system ugprades)
 webhookURL="${10:-""}"                                                          # Parameter 10: Microsoft Teams or Slack Webhook URL [ Leave blank to disable (default) | https://microsoftTeams.webhook.com/URL | https://hooks.slack.com/services/URL ] Can be used to send a success or failure message to Microsoft Teams or Slack via Webhook. (Function will automatically detect if Webhook URL is for Slack or Teams; can be modified to include other communication tools that support functionality.)
-
+presetConfiguration="${11:-""}"                                                  # Parameter 11: Pre set a configuration via Jamf parameter (NOTE: Only use when welcomeDialog set to Video or False)
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -2516,7 +2516,11 @@ if [[ "${welcomeDialog}" == "video" ]]; then
     eval "${dialogBinary} --args ${welcomeVideo}"
 
     outputLineNumberInVerboseDebugMode
-    symConfiguration="Catch-all (video)"
+    if [[ -n "$presetConfiguration" ]]; then
+        symConfiguration="$presetConfiguration"
+    else
+        symConfiguration="Catch-all (video)"
+    fi
     policyJSONConfiguration
 
     eval "${dialogSetupYourMacCMD[*]}" & sleep 0.3
@@ -2719,7 +2723,11 @@ else
     ###
 
     outputLineNumberInVerboseDebugMode
-    symConfiguration="Catch-all ('Welcome' dialog disabled)"
+    if [[ -n "$presetConfiguration" ]]; then
+        symConfiguration="$presetConfiguration"
+    else
+        symConfiguration="Catch-all ('Welcome' dialog disabled)"
+    fi
     policyJSONConfiguration
 
 
@@ -2814,7 +2822,7 @@ dialogUpdateWelcome "quit:"
 
 outputLineNumberInVerboseDebugMode
 
-if [[ "${symConfiguration}" == *"Catch-all"* ]] || [[ -z "${symConfiguration}" ]]; then
+if [[ "${symConfiguration}" == *"Catch-all"* || -n "${presetConfiguration}" ]] || [[ -z "${symConfiguration}" ]]; then
 
     if [[ "${configurationDownloadEstimation}" == "true" ]]; then
 
