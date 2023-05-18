@@ -74,6 +74,14 @@ promptForBuilding="true"
 promptForDepartment="true"
 promptForConfiguration="true"   # Removes the Configuration dropdown entirely and uses the "Catch-all (i.e., used when `welcomeDialog` is set to `video` or `false`)" policyJSON
 
+# If all the user prompts are disabled and there is no video, skip the user input page entirely
+if [[ "${welcomeDialog}" == "userInput" ]] && [[ "${promptForUsername}" != "true" ]] && \
+    [[ "${promptForComputerName}" != "true" ]] && [[ "${promptForAssetTag}" != "true" ]] && \
+    [[ "${promptForRoom}" != "true" ]] && [[ "${promptForBuilding}" != "true" ]] && \
+    [[ "${promptForDepartment}" != "true" ]] && [[ "${promptForConfiguration}" != "true" ]]; then
+    welcomeDialog="false"
+fi
+
 # Disables the Blurscreen enabled by default in Production
 moveableInProduction="false"
 
