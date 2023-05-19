@@ -52,7 +52,7 @@
 #   - Updated `webhookMessage` to include Slack functionality ([Pull Request No. 48](https://github.com/dan-snelson/Setup-Your-Mac/pull/48); thanks @iDrewbs!)
 #   - Add button to computer record for Slack webhook ([Pull Request No. 49](https://github.com/dan-snelson/Setup-Your-Mac/pull/49); thanks @drtaru!)
 #
-#   Version 1.10.1, 18-May-2023, Dan K. Snelson (@dan-snelson)
+#   Version 1.10.1, 22-May-2023, Dan K. Snelson (@dan-snelson)
 #   - Removed "(beta)" from Dynamic Download Estimates
 #   - Added `promptForBuilding` and `promptForDepartment` to match other prompts for Welcome Screen ([Pull Request No. 55](https://github.com/dan-snelson/Setup-Your-Mac/pull/55); thanks @robjschroeder!)
 #   - Rearranged "Pre-flight Check: Validate Logged-in System Accounts"
@@ -73,7 +73,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.10.1-rc1"
+scriptVersion="1.10.1"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
