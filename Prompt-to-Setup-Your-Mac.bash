@@ -2,7 +2,7 @@
 
 #################################################################################
 #
-# Prompt to Setup Your Mac
+# MARK: Prompt to Setup Your Mac
 #
 # Purpose: Prompts users to login to Self Service / run the Setup Your Mac policy
 #
@@ -22,21 +22,23 @@
 #   Exit if odd-ball user is logged-in
 #   Added "--ignorednd" and "--blurscreen" to Dialog command
 #
+# Additions, 22-May-2023, Søren Theilgaard (@theilgaard, GitHub: @Theile)
+#
 #################################################################################
 
 
 
 #################################################################################
 #
-# Environmental Checks
+# MARK: Environmental Checks
 #
 #################################################################################
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Exit gracefully if odd-ball users are logged in
+# NOTE: Exit gracefully if odd-ball users are logged in
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-loggedInUser=$( /bin/echo "show State:/Users/ConsoleUser" | /usr/sbin/scutil | /usr/bin/awk '/Name :/ { print $3 }' )
+loggedInUser=$( stat -f "%Su" /dev/console ) # @theilgaard
 
 if [[ -z "${loggedInUser}" ]] \
 || [[ ${loggedInUser} == "loginwindow" ]] \
@@ -49,12 +51,12 @@ fi
 
 #################################################################################
 #
-# Variables
+# MARK: Variables
 #
 #################################################################################
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Global variables
+# NOTE: Global variables
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 scriptVersion="0.0.3"
@@ -69,7 +71,7 @@ dialogCommandFile=$( /usr/bin/mktemp "/var/tmp/Prompt-to-Setup-Your-Mac.XXXXXXX"
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Check for a specified "secondsToWait" setting (Parameter 4); defaults to "2700"
+# NOTE: Check for a specified "secondsToWait" setting (Parameter 4); defaults to "2700"
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 if [[ "${4}" != "" ]] && [[ "${secondsToWait}" == "" ]]; then
@@ -84,7 +86,7 @@ fi
 
 #################################################################################
 #
-# Functions
+# MARK: Functions
 #
 #################################################################################
 
@@ -153,7 +155,7 @@ function promptUser() {
 
 
 
-#--------------------- Edits below this line are optional ---------------------#
+# MARK: -------------- Edits below this line are optional ---------------------#
 
 
 
@@ -353,12 +355,12 @@ function selfServicePolicyCompletionValidation() {
 
 #################################################################################
 #
-# Program
+# MARK: Program
 #
 #################################################################################
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Check 1. Gracefully exit for new enrollments
+# NOTE: Check 1. Gracefully exit for new enrollments
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 gracefullyExitForNewEnrollments
@@ -366,7 +368,7 @@ gracefullyExitForNewEnrollments
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Check 2. Validate Self Service installation
+# NOTE: Check 2. Validate Self Service installation
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 selfServiceValidation
@@ -392,7 +394,7 @@ fi
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Check 3. Validate Logged-in User's Self Service Log
+# NOTE: Check 3. Validate Logged-in User's Self Service Log
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 selfServiceLogValidation
@@ -416,7 +418,7 @@ fi
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Check 4. Validate the number of times Self Service has been launched
+# NOTE: Check 4. Validate the number of times Self Service has been launched
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 selfServiceLaunchValidation
@@ -426,7 +428,7 @@ scriptResult+="\"${selfServiceAppPath}\" has been launched for ${loggedInUser} $
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Check 5. Validate the number of times the user has logged into Self Service
+# NOTE: Check 5. Validate the number of times the user has logged into Self Service
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 selfServiceLoginValidation
@@ -450,7 +452,7 @@ fi
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Check 6. Validate Jamf's log
+# NOTE: Check 6. Validate Jamf's log
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 jamfLogValidation
@@ -476,7 +478,7 @@ fi
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Check 7. Validate Self Service Policy execution
+# NOTE: Check 7. Validate Self Service Policy execution
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 selfServicePolicyValidation
@@ -500,7 +502,7 @@ fi
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Check 8. Validate Self Service Policy completion
+# NOTE: Check 8. Validate Self Service Policy completion
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 selfServicePolicyCompletionValidation
@@ -532,7 +534,7 @@ fi
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Exit
+# MARK: Exit
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 scriptResult+="Catch-all exit; thank you!"
