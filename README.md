@@ -5,7 +5,7 @@
 > New in Setup Your Mac (1.10.0), **Dynamic Download Estimates** leverage the built-in macOS `networkQuality` binary to provide end-users with approximate Configuration durations, based on the _actual speed_ of _their_ specific Internet connection, which can aid end-users in selecting their preferred Configuration.
 > 
 > Additionally, Mac Admins will appreciate the newly added **Slack** and **Microsoft Teams** integration, **Streamlined Customization** and more, making SYM (1.10.0) one of the most significant upgrades yet.
-> > Setup Your Mac (1.10.1) addresses a few bugs discovered after the release of `1.10.1`; see [CHANGELOG](CHANGELOG.md).
+> > Setup Your Mac (1.10.1) addresses a few bugs discovered after the release of `1.10.0`; see [CHANGELOG](CHANGELOG.md).
 
 [<img alt="Setup Your Mac (1.10.0)" src="images/Setup_Your_Mac_1.10.0_estimates.png" />](https://snelson.us/sym)
 
