@@ -328,7 +328,7 @@ updateScriptLog "[LOG-BEGIN] ${start_log}"
 
 function currentLoggedInUser() {
     #loggedInUser=$( echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ { print $3 }' )
-    loggedInUser=$( stat -f "%Su" /dev/console ) # @Theile
+    loggedInUser=$( stat -f "%Su" /dev/console ) # @theilgaard
     updateScriptLog "PRE-FLIGHT CHECK: Current Logged-in User: ${loggedInUser}"
 }
 
