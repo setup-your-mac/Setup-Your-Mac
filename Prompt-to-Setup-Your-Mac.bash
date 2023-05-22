@@ -23,6 +23,8 @@
 #   Added "--ignorednd" and "--blurscreen" to Dialog command
 #
 # Additions, 22-May-2023, Søren Theilgaard (@theilgaard, GitHub: @Theile)
+#   Markings
+#   Changed loggedInUser
 #
 #################################################################################
 
