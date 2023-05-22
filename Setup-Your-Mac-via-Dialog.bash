@@ -80,12 +80,12 @@ label="SYM"
 
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 
-# Parameter 4: Company Name of support contact [ ENVO IT support ]
-supportTeamName="${4:-"ENVO IT support"}"
-# Parameter 5: Support phone [ +45 42 59 01 01 ]
-supportTeamPhone="${5:-"+45 42 59 01 01"}"
-# Parameter 6: Support email [support@envo-it.dk ]
-supportTeamEmail="${6:-"support@envo-it.dk"}"
+# Parameter 4: Company Name of support contact [ Company support ]
+supportTeamName="${4:-"Company Support"}"
+# Parameter 5: Support phone [  ]
+supportTeamPhone="${5:-""}"
+# Parameter 6: Support email [support@company.com ]
+supportTeamEmail="${6:-"support@company.com"}"
 
 # Parameter 7: Debug Mode [ verbose (default) | true | false ]
 debugMode="${7:-"verbose"}"
