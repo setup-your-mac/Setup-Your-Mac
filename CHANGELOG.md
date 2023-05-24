@@ -1,7 +1,8 @@
 # CHANGELOG
 
-## 1.11.0-b12
-### 19-May-2023
+## 1.11.0
+### 24-May-2023
+[Release-specific Blog Post](https://snelson.us/2023/05/setup-your-mac-1-11-0-via-swiftdialog-2-2/)
 - Updates for `swiftDialog` `2.2`
   - Required `selectitems`
   - New `activate` command to bring swiftDialog to the front
@@ -13,6 +14,7 @@
 
 ## 1.10.1
 ### 22-May-2023
+[Release-specific Blog Post](https://snelson.us/2023/05/setup-your-mac-1-10-0-via-swiftdialog)
 - Removed "(beta)" from Dynamic Download Estimates
 - Added `promptForBuilding` and `promptForDepartment` to match other prompts for Welcome Screen ([Pull Request No. 55](https://github.com/dan-snelson/Setup-Your-Mac/pull/55); thanks @robjschroeder!)
 - Rearranged "Pre-flight Check: Validate Logged-in System Accounts"

@@ -10,7 +10,7 @@
 #
 # HISTORY
 #
-#   Version 1.11.0, TBD, Dan K. Snelson (@dan-snelson)
+#   Version 1.11.0, 24-May-2023, Dan K. Snelson (@dan-snelson)
 #   - Updates for `swiftDialog` `2.2`
 #       - Required `selectitems`
 #       - New `activate` command to bring swiftDialog to the front
@@ -34,7 +34,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.11.0-b12"
+scriptVersion="1.11.0"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -1502,7 +1502,6 @@ function finalise(){
             dialogUpdateSetupYourMac "button1: enable"
             dialogUpdateSetupYourMac "progress: reset"
             
-
             # Wait for user-acknowledgment due to detected failure
             wait
 
