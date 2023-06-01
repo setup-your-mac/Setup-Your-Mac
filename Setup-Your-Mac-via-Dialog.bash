@@ -828,13 +828,6 @@ welcomeJSON='
 }
 '
 
-# !!!: Welcome JSON to file, in debug mode
-if [[ "$debugMode" == "false" ]]; then
-    echo "$welcomeJSON" > "/var/tmp/welcome.json"
-    open "/var/tmp"
-fi
-
-
 
 
 ####################################################################################################
@@ -1913,7 +1906,7 @@ function confirmPolicyExecution() {
             if [[ "${debugMode}" == "true" ]] || [[ "${debugMode}" == "verbose" ]] ; then
                 updateScriptLog "SETUP YOUR MAC DIALOG: Confirm Policy Execution: DEBUG MODE: Skipping 'run_jamf_trigger ${trigger}'"
                 sleep "${debugModeSleepAmount}"
-            elif [[ -f "${validation}" ]]; then
+            elif [[ -e "${validation}" ]]; then
                 updateScriptLog "SETUP YOUR MAC DIALOG: Confirm Policy Execution: ${validation} exists; skipping 'run_jamf_trigger ${trigger}'"
                 previouslyInstalled="true"
             else
@@ -1988,7 +1981,7 @@ function validatePolicyResult() {
             updateScriptLog "SETUP YOUR MAC DIALOG: Validate Policy Result: Testing for \"$validation\" …"
             if [[ "${previouslyInstalled}" == "true" ]]; then
                 dialogUpdateSetupYourMac "listitem: index: $i, status: success, statustext: Previously Installed"
-            elif [[ -f "${validation}" ]]; then
+            elif [[ -e "${validation}" ]]; then
                 dialogUpdateSetupYourMac "listitem: index: $i, status: success, statustext: Installed"
             else
                 dialogUpdateSetupYourMac "listitem: index: $i, status: fail, statustext: Failed"
