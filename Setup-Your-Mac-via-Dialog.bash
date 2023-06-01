@@ -2868,7 +2868,7 @@ if [[ -n ${department} ]]; then infobox+="**Department:**  \n$department  \n\n" 
 if [[ -n ${building} ]]; then infobox+="**Building:**  \n$building  \n\n" ; fi
 if [[ -n ${room} ]]; then infobox+="**Room:**  \n$room  \n\n" ; fi
 
-if [[ "${promptForConfiguration}" != "true" ]] || [[ "${welcomeDialog}" == "false" ]]; then
+if ( [[ "${promptForConfiguration}" != "true" ]] && [[ "${configurationDownloadEstimation}" == "true" ]] ) || [[ "${welcomeDialog}" == "false" ]]; then
     updateScriptLog "SETUP YOUR MAC DIALOG: Purposely NOT updating 'infobox'"
 else
     updateScriptLog "SETUP YOUR MAC DIALOG: Updating 'infobox'"
