@@ -1,8 +1,9 @@
 # CHANGELOG
 
-## 1.12.0-b1
-### DD-Jun-2023
+## 1.12.0-b2
+### 05-Jun-2023
 - Add version check to `dialogCheck` ([Pull Request No. 67](https://github.com/dan-snelson/Setup-Your-Mac/pull/67); thanks yet again, @drtaru!)
+- Make `presetConfiguration` also apply to `userInput` ([Pull Request No. 63](https://github.com/dan-snelson/Setup-Your-Mac/pull/63); thanks for another one, @rougegoat!)
 
 ## 1.11.0
 ### 24-May-2023
