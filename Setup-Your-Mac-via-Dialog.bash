@@ -10,15 +10,9 @@
 #
 # HISTORY
 #
-#   Version 1.11.0, 24-May-2023, Dan K. Snelson (@dan-snelson)
-#   - Updates for `swiftDialog` `2.2`
-#       - Required `selectitems`
-#       - New `activate` command to bring swiftDialog to the front
-#       - Display Configurations as radio buttons
-#   - Report on RSR version (if applicable) [Pull Request No. 50](https://github.com/dan-snelson/Setup-Your-Mac/pull/50) thanks @drtaru!)
-#   - Specify a Configuration as Parameter `11` ([Pull Request No. 59](https://github.com/dan-snelson/Setup-Your-Mac/pull/59); thanks big bunches, @drtaru!. Addresses [Issue No. 58](https://github.com/dan-snelson/Setup-Your-Mac/issues/58); thanks for the idea, @nunoidev!)
-#   - Configuration Names and Descriptions as variables ([Pull Request No. 60](https://github.com/dan-snelson/Setup-Your-Mac/pull/60); great idea! thanks, @theadamcraig!)
-#   - Consolidated Jamf Pro-related webHookMessage variables; Set "Additional Comments" to "None" when there aren't any failures 
+#   Version 1.12.0, 05-Jun-2023, Dan K. Snelson (@dan-snelson)
+#   - Add version check to `dialogCheck` ([Pull Request No. 67](https://github.com/dan-snelson/Setup-Your-Mac/pull/67); thanks yet again, @drtaru!)
+#   - Make `presetConfiguration` also apply to `userInput` ([Pull Request No. 63](https://github.com/dan-snelson/Setup-Your-Mac/pull/63); thanks for another one, @rougegoat!)
 # 
 ####################################################################################################
 
@@ -34,7 +28,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.11.0"
+scriptVersion="1.12.0-b2"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -43,7 +37,7 @@ completionActionOption="${7:-"Restart Attended"}"                               
 requiredMinimumBuild="${8:-"disabled"}"                                         # Parameter 8: Required Minimum Build [ disabled (default) | 22E ] (i.e., Your organization's required minimum build of macOS to allow users to proceed; use "22E" for macOS 13.3)
 outdatedOsAction="${9:-"/System/Library/CoreServices/Software Update.app"}"     # Parameter 9: Outdated OS Action [ /System/Library/CoreServices/Software Update.app (default) | jamfselfservice://content?entity=policy&id=117&action=view ] (i.e., Jamf Pro Self Service policy ID for operating system ugprades)
 webhookURL="${10:-""}"                                                          # Parameter 10: Microsoft Teams or Slack Webhook URL [ Leave blank to disable (default) | https://microsoftTeams.webhook.com/URL | https://hooks.slack.com/services/URL ] Can be used to send a success or failure message to Microsoft Teams or Slack via Webhook. (Function will automatically detect if Webhook URL is for Slack or Teams; can be modified to include other communication tools that support functionality.)
-presetConfiguration="${11:-""}"                                                 # Parameter 11: Specify a Configuration (i.e., `policyJSON`; NOTE: Only used when `welcomeDialog` is set to `video` or `false`)
+presetConfiguration="${11:-""}"                                                 # Parameter 11: Specify a Configuration (i.e., `policyJSON`; NOTE: If set, `promptForConfiguration` will be automatically suppressed and the preselected configuration will be used instead)
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -67,7 +61,7 @@ promptForAssetTag="true"
 promptForRoom="true"
 promptForBuilding="true"
 promptForDepartment="true"
-promptForConfiguration="true"   # Removes the Configuration dropdown entirely and uses the "Catch-all (i.e., used when `welcomeDialog` is set to `video` or `false`)" policyJSON
+promptForConfiguration="true"   # Removes the Configuration dropdown entirely and uses the "Catch-all (i.e., used when `welcomeDialog` is set to `video` or `false`)" or presetConfiguration policyJSON
 
 # Disables the Blurscreen enabled by default in Production
 moveableInProduction="false"
@@ -85,7 +79,7 @@ departmentListRaw="Asset Management,Sales,Australia Area Office,Purchasing / Sou
 departmentList=$( echo "${departmentListRaw}" | tr ',' '\n' | sort -f | uniq | sed -e 's/^/\"/' -e 's/$/\",/' -e '$ s/.$//' )
 
 # Branding overrides
-brandingBanner="https://img.freepik.com/free-photo/heavy-red-cloud-haze_23-2148102335.jpg"
+brandingBanner="https://img.freepik.com/free-vector/abstract-orange-background-with-lines-halftone-effect_1017-32107.jpg"
 brandingBannerDisplayText="true"
 brandingIconLight="https://cdn-icons-png.flaticon.com/512/979/979585.png"
 brandingIconDark="https://cdn-icons-png.flaticon.com/512/740/740878.png"
@@ -362,10 +356,7 @@ toggleJamfLaunchDaemon
 # Pre-flight Check: Validate / install swiftDialog (Thanks big bunches, @acodega!)
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-function dialogCheck() {
-
-    # Output Line Number in `verbose` Debug Mode
-    if [[ "${debugMode}" == "verbose" ]]; then updateScriptLog "PRE-FLIGHT CHECK: # # # SETUP YOUR MAC VERBOSE DEBUG MODE: Line No. ${LINENO} # # #" ; fi
+function dialogInstall() {
 
     # Get the URL of the latest PKG From the Dialog GitHub repo
     dialogURL=$(curl --silent --fail "https://api.github.com/repos/bartreardon/swiftDialog/releases/latest" | awk -F '"' "/browser_download_url/ && /pkg\"/ { print \$4; exit }")
@@ -373,12 +364,9 @@ function dialogCheck() {
     # Expected Team ID of the downloaded PKG
     expectedDialogTeamID="PWA5E9TQ59"
 
-    # Check for Dialog and install if not found
-    if [ ! -e "/Library/Application Support/Dialog/Dialog.app" ]; then
+    updateScriptLog "PRE-FLIGHT CHECK: Installing SwiftDialog..."
 
-        updateScriptLog "PRE-FLIGHT CHECK: Dialog not found. Installing..."
-
-        # Create temporary working directory
+    # Create temporary working directory
         workDirectory=$( /usr/bin/basename "$0" )
         tempDirectory=$( /usr/bin/mktemp -d "/private/tmp/$workDirectory.XXXXXX" )
 
@@ -409,19 +397,40 @@ function dialogCheck() {
         # Remove the temporary working directory when done
         /bin/rm -Rf "$tempDirectory"
 
+}
+
+
+
+function dialogCheck() {
+
+    # Output Line Number in `verbose` Debug Mode
+    if [[ "${debugMode}" == "verbose" ]]; then updateScriptLog "PRE-FLIGHT CHECK: # # # SETUP YOUR MAC VERBOSE DEBUG MODE: Line No. ${LINENO} # # #" ; fi
+
+    # Check for Dialog and install if not found
+    if [ ! -e "/Library/Application Support/Dialog/Dialog.app" ]; then
+
+        updateScriptLog "PRE-FLIGHT CHECK: swiftDialog not found. Installing..."
+        dialogInstall
+
     else
 
-        updateScriptLog "PRE-FLIGHT CHECK: swiftDialog version $(/usr/local/bin/dialog --version) found; proceeding..."
+        dialogVersion=$(/usr/local/bin/dialog --version)
+        if [[ "${dialogVersion}" < "2.2.0.4535" ]]; then
+            
+            updateScriptLog "PRE-FLIGHT CHECK: swiftDialog version ${dialogVersion} found but swiftDialog 2.2 or newer is required; updating..."
+            dialogInstall
+            
+        else
 
+        updateScriptLog "PRE-FLIGHT CHECK: swiftDialog version ${dialogVersion} found; proceeding..."
+
+        fi
+    
     fi
 
 }
 
-if [[ ! -e "/Library/Application Support/Dialog/Dialog.app" ]]; then
-    dialogCheck
-else
-    updateScriptLog "PRE-FLIGHT CHECK: swiftDialog version $(/usr/local/bin/dialog --version) found; proceeding..."
-fi
+dialogCheck
 
 
 
@@ -592,7 +601,7 @@ if [ "$promptForDepartment" == "true" ]; then
     fi
 fi
 
-if [ "$promptForConfiguration" == "true" ]; then
+if [ "$promptForConfiguration" == "true" ] && [ -z "${presetConfiguration}" ]; then
     configurationJSON='{
             "title" : "Configuration",
             "style" : "radio",
@@ -637,7 +646,7 @@ welcomeJSON='
     "selectitems" : [
         '${selectItemsJSON}'
     ],
-    "height" : "860"
+    "height" : "870"
 }
 '
 
@@ -2587,6 +2596,7 @@ elif [[ "${welcomeDialog}" == "userInput" ]]; then
             userName=$(get_json_value_welcomeDialog "$welcomeResults" "User Name")
             assetTag=$(get_json_value_welcomeDialog "$welcomeResults" "Asset Tag")
             symConfiguration=$(get_json_value_welcomeDialog "$welcomeResults" "Configuration" "selectedValue")
+            if [ -n "$presetConfiguration" ]; then symConfiguration="${presetConfiguration}"; fi
             department=$(get_json_value_welcomeDialog "$welcomeResults" "Department" "selectedValue" | grep -v "Please select your department" )
             room=$(get_json_value_welcomeDialog "$welcomeResults" "Room")
             building=$(get_json_value_welcomeDialog "$welcomeResults" "Building" "selectedValue" | grep -v "Please select your building" )
