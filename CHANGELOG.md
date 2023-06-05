@@ -1,8 +1,8 @@
 # CHANGELOG
 
-## 1.12.0-b0
+## 1.12.0-b1
 ### DD-Jun-2023
-- 
+- Add version check to `dialogCheck` ([Pull Request No. 67](https://github.com/dan-snelson/Setup-Your-Mac/pull/67); thanks yet again, @drtaru!)
 
 ## 1.11.0
 ### 24-May-2023
