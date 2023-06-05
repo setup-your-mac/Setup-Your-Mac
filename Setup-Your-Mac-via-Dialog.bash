@@ -355,10 +355,7 @@ toggleJamfLaunchDaemon
 # Pre-flight Check: Validate / install swiftDialog (Thanks big bunches, @acodega!)
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-function dialogCheck() {
-
-    # Output Line Number in `verbose` Debug Mode
-    if [[ "${debugMode}" == "verbose" ]]; then updateScriptLog "PRE-FLIGHT CHECK: # # # SETUP YOUR MAC VERBOSE DEBUG MODE: Line No. ${LINENO} # # #" ; fi
+function dialogInstall() {
 
     # Get the URL of the latest PKG From the Dialog GitHub repo
     dialogURL=$(curl --silent --fail "https://api.github.com/repos/bartreardon/swiftDialog/releases/latest" | awk -F '"' "/browser_download_url/ && /pkg\"/ { print \$4; exit }")
@@ -366,12 +363,9 @@ function dialogCheck() {
     # Expected Team ID of the downloaded PKG
     expectedDialogTeamID="PWA5E9TQ59"
 
-    # Check for Dialog and install if not found
-    if [ ! -e "/Library/Application Support/Dialog/Dialog.app" ]; then
+    updateScriptLog "PRE-FLIGHT CHECK: Installing SwiftDialog..."
 
-        updateScriptLog "PRE-FLIGHT CHECK: Dialog not found. Installing..."
-
-        # Create temporary working directory
+    # Create temporary working directory
         workDirectory=$( /usr/bin/basename "$0" )
         tempDirectory=$( /usr/bin/mktemp -d "/private/tmp/$workDirectory.XXXXXX" )
 
@@ -402,19 +396,40 @@ function dialogCheck() {
         # Remove the temporary working directory when done
         /bin/rm -Rf "$tempDirectory"
 
+}
+
+
+
+function dialogCheck() {
+
+    # Output Line Number in `verbose` Debug Mode
+    if [[ "${debugMode}" == "verbose" ]]; then updateScriptLog "PRE-FLIGHT CHECK: # # # SETUP YOUR MAC VERBOSE DEBUG MODE: Line No. ${LINENO} # # #" ; fi
+
+    # Check for Dialog and install if not found
+    if [ ! -e "/Library/Application Support/Dialog/Dialog.app" ]; then
+
+        updateScriptLog "PRE-FLIGHT CHECK: swiftDialog not found. Installing..."
+        dialogInstall
+
     else
 
-        updateScriptLog "PRE-FLIGHT CHECK: swiftDialog version $(/usr/local/bin/dialog --version) found; proceeding..."
+        dialogVersion=$(/usr/local/bin/dialog --version)
+        if [[ "${dialogVersion}" < "2.2.0.4535" ]]; then
+            
+            updateScriptLog "PRE-FLIGHT CHECK: swiftDialog version ${dialogVersion} found but swiftDialog 2.2 or newer is required; updating..."
+            dialogInstall
+            
+        else
 
+        updateScriptLog "PRE-FLIGHT CHECK: swiftDialog version ${dialogVersion} found; proceeding..."
+
+        fi
+    
     fi
 
 }
 
-if [[ ! -e "/Library/Application Support/Dialog/Dialog.app" ]]; then
-    dialogCheck
-else
-    updateScriptLog "PRE-FLIGHT CHECK: swiftDialog version $(/usr/local/bin/dialog --version) found; proceeding..."
-fi
+dialogCheck
 
 
 
