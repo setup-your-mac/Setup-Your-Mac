@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.12.0-b0
+### DD-Jun-2023
+- 
+
 ## 1.11.0
 ### 24-May-2023
 [Release-specific Blog Post](https://snelson.us/2023/05/setup-your-mac-1-11-0-via-swiftdialog-2-2/)
