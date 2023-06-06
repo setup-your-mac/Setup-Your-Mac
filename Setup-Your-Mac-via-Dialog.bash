@@ -14,6 +14,7 @@
 #   - Add version check to `dialogCheck` ([Pull Request No. 67](https://github.com/dan-snelson/Setup-Your-Mac/pull/67); thanks yet again, @drtaru!)
 #   - Make `presetConfiguration` also apply to `userInput` ([Pull Request No. 63](https://github.com/dan-snelson/Setup-Your-Mac/pull/63); thanks for another one, @rougegoat!)
 #   - Fix for visual hiccup where `infobox` displays "Analyzing input …" if `configurationDownloadEstimation` and `promptForConfiguration` are both set to `false` ([Pull Request No. 69](https://github.com/dan-snelson/Setup-Your-Mac/pull/69); thanks yet again, @rougegoat!)
+#   - Added networkQuality check for macOS Sonoma 14
 #
 ####################################################################################################
 
@@ -29,7 +30,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.12.0-b3"
+scriptVersion="1.12.0-b4"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -2184,7 +2185,7 @@ function checkNetworkQualityConfigurations() {
             dlEndDate="N/A; macOS ${osVersion}"
             ;;
 
-        12* | 13* )
+        12* | 13* | 14*)
             dlThroughput=$( get_json_value "$networkQualityTest" "dl_throughput")
             dlResponsiveness=$( get_json_value "$networkQualityTest" "dl_responsiveness" )
             dlStartDate=$( get_json_value "$networkQualityTest" "start_date" )
@@ -2243,7 +2244,7 @@ function checkNetworkQualityCatchAllConfiguration() {
             dlEndDate="N/A; macOS ${osVersion}"
             ;;
 
-        12* | 13* )
+        12* | 13* | 14*)
             dlThroughput=$( get_json_value "$networkQualityTest" "dl_throughput")
             dlResponsiveness=$( get_json_value "$networkQualityTest" "dl_responsiveness" )
             dlStartDate=$( get_json_value "$networkQualityTest" "start_date" )
