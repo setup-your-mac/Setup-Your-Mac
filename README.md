@@ -1,8 +1,8 @@
-# Setup Your Mac (1.12.0-b4) via swiftDialog (2.2)
+# Setup Your Mac (1.12.0-b5) via swiftDialog (2.2)
 
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/dan-snelson/Setup-Your-Mac?display_name=tag) ![GitHub issues](https://img.shields.io/github/issues-raw/dan-snelson/Setup-Your-Mac) ![GitHub closed issues](https://img.shields.io/github/issues-closed-raw/dan-snelson/Setup-Your-Mac) ![GitHub pull requests](https://img.shields.io/github/issues-pr-raw/dan-snelson/Setup-Your-Mac) ![GitHub closed pull requests](https://img.shields.io/github/issues-pr-closed-raw/dan-snelson/Setup-Your-Mac)
 
-> Setup Your Mac (1.12.0) blah, blah, blah and includes bug fixes (see [CHANGELOG](CHANGELOG.md)).
+> Setup Your Mac (1.12.0) blah, blah, blah, blah and includes bug fixes (see [CHANGELOG](CHANGELOG.md)).
 
 [<img alt="Setup Your Mac (1.12.0)" src="images/Setup_Your_Mac_1.12.0.png" />](https://snelson.us/sym)
 

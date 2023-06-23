@@ -10,11 +10,12 @@
 #
 # HISTORY
 #
-#   Version 1.12.0, 05-Jun-2023, Dan K. Snelson (@dan-snelson)
+#   Version 1.12.0, 23-Jun-2023, Dan K. Snelson (@dan-snelson)
 #   - Add version check to `dialogCheck` ([Pull Request No. 67](https://github.com/dan-snelson/Setup-Your-Mac/pull/67); thanks yet again, @drtaru!)
 #   - Make `presetConfiguration` also apply to `userInput` ([Pull Request No. 63](https://github.com/dan-snelson/Setup-Your-Mac/pull/63); thanks for another one, @rougegoat!)
 #   - Fix for visual hiccup where `infobox` displays "Analyzing input …" if `configurationDownloadEstimation` and `promptForConfiguration` are both set to `false` ([Pull Request No. 69](https://github.com/dan-snelson/Setup-Your-Mac/pull/69); thanks yet again, @rougegoat!)
 #   - Added networkQuality check for macOS Sonoma 14
+#   - Formatting updates
 #
 ####################################################################################################
 
@@ -30,7 +31,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.12.0-b4"
+scriptVersion="1.12.0-b5"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -369,35 +370,35 @@ function dialogInstall() {
     updateScriptLog "PRE-FLIGHT CHECK: Installing SwiftDialog..."
 
     # Create temporary working directory
-        workDirectory=$( /usr/bin/basename "$0" )
-        tempDirectory=$( /usr/bin/mktemp -d "/private/tmp/$workDirectory.XXXXXX" )
+    workDirectory=$( /usr/bin/basename "$0" )
+    tempDirectory=$( /usr/bin/mktemp -d "/private/tmp/$workDirectory.XXXXXX" )
 
-        # Download the installer package
-        /usr/bin/curl --location --silent "$dialogURL" -o "$tempDirectory/Dialog.pkg"
+    # Download the installer package
+    /usr/bin/curl --location --silent "$dialogURL" -o "$tempDirectory/Dialog.pkg"
 
-        # Verify the download
-        teamID=$(/usr/sbin/spctl -a -vv -t install "$tempDirectory/Dialog.pkg" 2>&1 | awk '/origin=/ {print $NF }' | tr -d '()')
+    # Verify the download
+    teamID=$(/usr/sbin/spctl -a -vv -t install "$tempDirectory/Dialog.pkg" 2>&1 | awk '/origin=/ {print $NF }' | tr -d '()')
 
-        # Install the package if Team ID validates
-        if [[ "$expectedDialogTeamID" == "$teamID" ]]; then
+    # Install the package if Team ID validates
+    if [[ "$expectedDialogTeamID" == "$teamID" ]]; then
 
-            /usr/sbin/installer -pkg "$tempDirectory/Dialog.pkg" -target /
-            sleep 2
-            dialogVersion=$( /usr/local/bin/dialog --version )
-            updateScriptLog "PRE-FLIGHT CHECK: swiftDialog version ${dialogVersion} installed; proceeding..."
+        /usr/sbin/installer -pkg "$tempDirectory/Dialog.pkg" -target /
+        sleep 2
+        dialogVersion=$( /usr/local/bin/dialog --version )
+        updateScriptLog "PRE-FLIGHT CHECK: swiftDialog version ${dialogVersion} installed; proceeding..."
 
-        else
+    else
 
-            # Display a so-called "simple" dialog if Team ID fails to validate
-            osascript -e 'display dialog "Please advise your Support Representative of the following error:\r\r• Dialog Team ID verification failed\r\r" with title "Setup Your Mac: Error" buttons {"Close"} with icon caution'
-            completionActionOption="Quit"
-            exitCode="1"
-            quitScript
+        # Display a so-called "simple" dialog if Team ID fails to validate
+        osascript -e 'display dialog "Please advise your Support Representative of the following error:\r\r• Dialog Team ID verification failed\r\r" with title "Setup Your Mac: Error" buttons {"Close"} with icon caution'
+        completionActionOption="Quit"
+        exitCode="1"
+        quitScript
 
-        fi
+    fi
 
-        # Remove the temporary working directory when done
-        /bin/rm -Rf "$tempDirectory"
+    # Remove the temporary working directory when done
+    /bin/rm -Rf "$tempDirectory"
 
 }
 
@@ -2880,7 +2881,7 @@ if [[ -n ${department} ]]; then infobox+="**Department:**  \n$department  \n\n" 
 if [[ -n ${building} ]]; then infobox+="**Building:**  \n$building  \n\n" ; fi
 if [[ -n ${room} ]]; then infobox+="**Room:**  \n$room  \n\n" ; fi
 
-if ( [[ "${promptForConfiguration}" != "true" ]] && [[ "${configurationDownloadEstimation}" == "true" ]] ) || [[ "${welcomeDialog}" == "false" ]]; then
+if { [[ "${promptForConfiguration}" != "true" ]] && [[ "${configurationDownloadEstimation}" == "true" ]]; } || [[ "${welcomeDialog}" == "false" ]]; then
     updateScriptLog "SETUP YOUR MAC DIALOG: Purposely NOT updating 'infobox'"
 else
     updateScriptLog "SETUP YOUR MAC DIALOG: Updating 'infobox'"
