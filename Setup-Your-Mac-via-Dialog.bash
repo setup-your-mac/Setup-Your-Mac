@@ -18,7 +18,6 @@
 #   - Formatting updates
 #   - Updated Palo Alto GlobalProtect icon hash
 #   - Changed "Restart Attended" Completion Action one-liner (Addresses [Issue No. 71](https://github.com/dan-snelson/Setup-Your-Mac/issues/71); thanks, @master-vodawagner!)
-
 #
 ####################################################################################################
 
