@@ -16,6 +16,9 @@
 #   - Fix for visual hiccup where `infobox` displays "Analyzing input …" if `configurationDownloadEstimation` and `promptForConfiguration` are both set to `false` ([Pull Request No. 69](https://github.com/dan-snelson/Setup-Your-Mac/pull/69); thanks yet again, @rougegoat!)
 #   - Added networkQuality check for macOS Sonoma 14
 #   - Formatting updates
+#   - Updated Palo Alto GlobalProtect icon hash
+#   - Changed "Restart Attended" Completion Action one-liner (Addresses [Issue No. 71](https://github.com/dan-snelson/Setup-Your-Mac/issues/71); thanks, @master-vodawagner!)
+
 #
 ####################################################################################################
 
@@ -31,7 +34,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.12.0-b5"
+scriptVersion="1.12.0-b6"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -294,8 +297,9 @@ fi
 # Pre-flight Check: Ensure computer does not go to sleep during SYM (thanks, @grahampugh!)
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-updateScriptLog "PRE-FLIGHT CHECK: Caffeinating this script (PID: $$)"
-caffeinate -dimsu -w $$ &
+symPID="$$"
+updateScriptLog "PRE-FLIGHT CHECK: Caffeinating this script (PID: $symPID)"
+caffeinate -dimsu -w $symPID &
 
 
 
@@ -841,7 +845,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "Palo Alto GlobalProtect",
-                        "icon": "ea794c5a1850e735179c7c60919e3b51ed3ed2b301fe3f0f27ad5ebd394a2e4b",
+                        "icon": "acbf39d8904ad1a772cf71c45d93e373626d379a24f8b1283b88134880acb8ef",
                         "progresstext": "Use Palo Alto GlobalProtect to establish a Virtual Private Network (VPN) connection to Church headquarters.",
                         "trigger_list": [
                             {
@@ -947,7 +951,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "Palo Alto GlobalProtect",
-                        "icon": "ea794c5a1850e735179c7c60919e3b51ed3ed2b301fe3f0f27ad5ebd394a2e4b",
+                        "icon": "acbf39d8904ad1a772cf71c45d93e373626d379a24f8b1283b88134880acb8ef",
                         "progresstext": "Use Palo Alto GlobalProtect to establish a Virtual Private Network (VPN) connection to Church headquarters.",
                         "trigger_list": [
                             {
@@ -1090,7 +1094,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "Palo Alto GlobalProtect",
-                        "icon": "ea794c5a1850e735179c7c60919e3b51ed3ed2b301fe3f0f27ad5ebd394a2e4b",
+                        "icon": "acbf39d8904ad1a772cf71c45d93e373626d379a24f8b1283b88134880acb8ef",
                         "progresstext": "Use Palo Alto GlobalProtect to establish a Virtual Private Network (VPN) connection to Church headquarters.",
                         "trigger_list": [
                             {
@@ -1248,7 +1252,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "Palo Alto GlobalProtect",
-                        "icon": "ea794c5a1850e735179c7c60919e3b51ed3ed2b301fe3f0f27ad5ebd394a2e4b",
+                        "icon": "acbf39d8904ad1a772cf71c45d93e373626d379a24f8b1283b88134880acb8ef",
                         "progresstext": "Use Palo Alto GlobalProtect to establish a Virtual Private Network (VPN) connection to Church headquarters.",
                         "trigger_list": [
                             {
@@ -2048,12 +2052,14 @@ function completionAction() {
                 ;;
 
             "Restart Attended" )
+                set -xv
                 updateScriptLog "Restart, requiring user-interaction"
                 killProcess "Self Service"
-                wait
-                # runAsUser osascript -e 'tell app "System Events" to restart'
+                wait # "${symPID}"
+                runAsUser osascript -e 'tell app "System Events" to restart'
                 # sleep 5 && runAsUser osascript -e 'tell app "System Events" to restart' &
-                sleep 5 && shutdown -r now &
+                # sleep 5 && shutdown -r now &
+                set +xv
                 ;;
 
             "Restart Confirm" )
