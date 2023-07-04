@@ -1,7 +1,7 @@
 # CHANGELOG
 
-## 1.12.0-b7
-### 26-Jun-2023
+## 1.12.0-b8
+### 04-Jul-2023
 - Add version check to `dialogCheck` ([Pull Request No. 67](https://github.com/dan-snelson/Setup-Your-Mac/pull/67); thanks yet again, @drtaru!)
 - Make `presetConfiguration` also apply to `userInput` ([Pull Request No. 63](https://github.com/dan-snelson/Setup-Your-Mac/pull/63); thanks for another one, @rougegoat!)
 - Fix for visual hiccup where `infobox` displays "Analyzing input …" if `configurationDownloadEstimation` and `promptForConfiguration` are both set to `false` ([Pull Request No. 69](https://github.com/dan-snelson/Setup-Your-Mac/pull/69); thanks yet again, @rougegoat!)
@@ -10,6 +10,8 @@
 - Updated Palo Alto GlobalProtect icon hash
 - Changed "Restart Attended" Completion Action one-liner (Addresses [Issue No. 71](https://github.com/dan-snelson/Setup-Your-Mac/issues/71); thanks, @master-vodawagner!)
 - Delay the removal of `overlayicon` (Addresses [Issue No. 73](https://github.com/dan-snelson/Setup-Your-Mac/issues/73); thanks, @mani2care!)
+- Added `reconOption` prompts for `realname` and `email` (Addresses [Issue No. 52](https://github.com/dan-snelson/Setup-Your-Mac/issues/52); thanks for the suggestion @brianhm; thanks for the code, @Siggloo!)
+- Changed dialog heights to percentages
 
 ## 1.11.0
 ### 24-May-2023

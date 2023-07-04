@@ -10,7 +10,7 @@
 #
 # HISTORY
 #
-#   Version 1.12.0, 26-Jun-2023, Dan K. Snelson (@dan-snelson)
+#   Version 1.12.0, 04-Jul-2023, Dan K. Snelson (@dan-snelson)
 #   - Add version check to `dialogCheck` ([Pull Request No. 67](https://github.com/dan-snelson/Setup-Your-Mac/pull/67); thanks yet again, @drtaru!)
 #   - Make `presetConfiguration` also apply to `userInput` ([Pull Request No. 63](https://github.com/dan-snelson/Setup-Your-Mac/pull/63); thanks for another one, @rougegoat!)
 #   - Fix for visual hiccup where `infobox` displays "Analyzing input …" if `configurationDownloadEstimation` and `promptForConfiguration` are both set to `false` ([Pull Request No. 69](https://github.com/dan-snelson/Setup-Your-Mac/pull/69); thanks yet again, @rougegoat!)
@@ -19,6 +19,8 @@
 #   - Updated Palo Alto GlobalProtect icon hash
 #   - Changed "Restart Attended" Completion Action one-liner (Addresses [Issue No. 71](https://github.com/dan-snelson/Setup-Your-Mac/issues/71); thanks, @master-vodawagner!)
 #   - Delay the removal of `overlayicon` (Addresses [Issue No. 73](https://github.com/dan-snelson/Setup-Your-Mac/issues/73); thanks, @mani2care!)
+#   - Added `reconOption` prompts for `realname` and `email` (Addresses [Issue No. 52](https://github.com/dan-snelson/Setup-Your-Mac/issues/52); thanks for the suggestion @brianhm; thanks for the code, @Siggloo!)
+#   - Changed dialog heights to percentages
 #
 ####################################################################################################
 
@@ -34,7 +36,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.12.0-b7"
+scriptVersion="1.12.0-b8"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -63,6 +65,8 @@ failureDialog="true"        # Display the so-called "Failure" dialog (after the 
 # These control which user input boxes are added to the first page of Setup Your Mac. If you do not want to ask about a value, set it to any other value
 promptForUsername="true"
 prefillUsername="true"          # prefills the currently logged in user's username
+promptForRealName="true"
+promptForEmail="true"
 promptForComputerName="true"
 promptForAssetTag="true"
 promptForRoom="true"
@@ -568,6 +572,8 @@ welcomeVideo="--title \"$welcomeTitle\" \
 # Text Fields
 if [ "$prefillUsername" == "true" ]; then usernamePrefil=',"value" : "'${loggedInUser}'"'; fi
 if [ "$promptForUsername" == "true" ]; then usernameJSON='{ "title" : "User Name","required" : false,"prompt" : "User Name"'${usernamePrefil}'},'; fi
+if [ "$promptForRealName" == "true" ]; then realNameJSON='{ "title" : "Full Name","required" : false,"prompt" : "Full Name" },'; fi
+if [ "$promptForEmail" == "true" ]; then emailJSON='{ "title" : "E-mail","required" : false,"prompt" : "E-mail" },'; fi
 if [ "$promptForComputerName" == "true" ]; then compNameJSON='{ "title" : "Computer Name","required" : false,"prompt" : "Computer Name" },'; fi
 if [ "$promptForAssetTag" == "true" ]; then
     assetTagJSON='{   "title" : "Asset Tag",
@@ -579,7 +585,7 @@ if [ "$promptForAssetTag" == "true" ]; then
 fi
 if [ "$promptForRoom" == "true" ]; then roomJSON='{ "title" : "Room","required" : false,"prompt" : "Optional" }'; fi
 
-textFieldJSON="${usernameJSON}${compNameJSON}${assetTagJSON}${roomJSON}"
+textFieldJSON="${usernameJSON}${realNameJSON}${emailJSON}${compNameJSON}${assetTagJSON}${roomJSON}"
 textFieldJSON=$( echo ${textFieldJSON} | sed 's/,$//' )
 
 # Dropdowns
@@ -654,7 +660,7 @@ welcomeJSON='
     "selectitems" : [
         '${selectItemsJSON}'
     ],
-    "height" : "870"
+    "height" : "95%"
 }
 '
 
@@ -726,7 +732,7 @@ dialogSetupYourMacCMD="$dialogBinary \
 --infotext \"$scriptVersion\" \
 --titlefont 'shadow=true, size=36, colour=#FFFDF4' \
 --messagefont 'size=14' \
---height '780' \
+--height '85%' \
 --position 'centre' \
 --blurscreen \
 --ontop \
@@ -1329,7 +1335,7 @@ dialogFailureCMD="$dialogBinary \
 --icon \"$failureIcon\" \
 --iconsize 125 \
 --width 625 \
---height 525 \
+--height 45% \
 --position topright \
 --button1text \"Close\" \
 --infotext \"$scriptVersion\" \
@@ -2604,6 +2610,8 @@ elif [[ "${welcomeDialog}" == "userInput" ]]; then
 
             computerName=$(get_json_value_welcomeDialog "$welcomeResults" "Computer Name")
             userName=$(get_json_value_welcomeDialog "$welcomeResults" "User Name")
+            realName=$(get_json_value_welcomeDialog "$welcomeResults" "Full Name")
+            email=$(get_json_value_welcomeDialog "$welcomeResults" "E-mail")
             assetTag=$(get_json_value_welcomeDialog "$welcomeResults" "Asset Tag")
             symConfiguration=$(get_json_value_welcomeDialog "$welcomeResults" "Configuration" "selectedValue")
             if [ -n "$presetConfiguration" ]; then symConfiguration="${presetConfiguration}"; fi
@@ -2618,6 +2626,8 @@ elif [[ "${welcomeDialog}" == "userInput" ]]; then
 
             updateScriptLog "WELCOME DIALOG: • Computer Name: $computerName"
             updateScriptLog "WELCOME DIALOG: • User Name: $userName"
+            updateScriptLog "WELCOME DIALOG: • Real Name: $realName"
+            updateScriptLog "WELCOME DIALOG: • E-mail: $email"
             updateScriptLog "WELCOME DIALOG: • Asset Tag: $assetTag"
             updateScriptLog "WELCOME DIALOG: • Configuration: $symConfiguration"
             updateScriptLog "WELCOME DIALOG: • Department: $department"
@@ -2691,6 +2701,18 @@ elif [[ "${welcomeDialog}" == "userInput" ]]; then
                 reconOptions+="-assetTag \"${assetTag}\" "
             fi
 
+            # Real Name
+            if [[ -n "${realName}" ]]; then
+                # UNTESTED, UNSUPPORTED "YOYO" EXAMPLE
+                reconOptions+="-realname \"${realName}\" "
+            fi
+            
+            # E-mail
+            if [[ -n "${email}" ]]; then
+                # UNTESTED, UNSUPPORTED "YOYO" EXAMPLE
+                reconOptions+="-email \"${email}\" "
+            fi
+            
             # Department
             if [[ -n "${department}" ]]; then
                 # UNTESTED, UNSUPPORTED "YOYO" EXAMPLE
