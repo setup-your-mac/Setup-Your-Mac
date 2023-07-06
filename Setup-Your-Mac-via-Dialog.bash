@@ -21,6 +21,7 @@
 #   - Delay the removal of `overlayicon` (Addresses [Issue No. 73](https://github.com/dan-snelson/Setup-Your-Mac/issues/73); thanks, @mani2care!)
 #   - Added `reconOption` prompts for `realname` and `email` (Addresses [Issue No. 52](https://github.com/dan-snelson/Setup-Your-Mac/issues/52); thanks for the suggestion @brianhm; thanks for the code, @Siggloo!)
 #   - Changed dialog heights to percentages
+#   - Auto-cache / auto-remove a hosted welcomeBannerImage (Addresses [Issue No. 74](https://github.com/dan-snelson/Setup-Your-Mac/issues/74)
 #
 ####################################################################################################
 
@@ -36,7 +37,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.12.0-b8"
+scriptVersion="1.12.0-b9"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -528,11 +529,19 @@ welcomeCaption="Please review the above video, then click Continue."
 welcomeVideoID="vimeoid=821866488"
 
 # Check if the custom welcomeBannerImage is available, and if not, use a alternative image
-if curl --output /dev/null --silent --head --fail "$welcomeBannerImage" || [  -f "$welcomeBannerImage" ]; then
+if curl --output /dev/null --silent --head --fail "$welcomeBannerImage" || [ -f "$welcomeBannerImage" ]; then
     updateScriptLog "WELCOME DIALOG: welcomeBannerImage is available, using it"
 else
     updateScriptLog "WELCOME DIALOG: welcomeBannerImage is not available, using a default image"
     welcomeBannerImage="https://img.freepik.com/free-photo/yellow-watercolor-paper_95678-448.jpg"
+fi
+
+# Cache the hosted custom welcomeBannerImage
+if [[ $welcomeBannerImage == *"http"* ]]; then
+    welcomeBannerImageFileName=$( echo ${welcomeBannerImage} | awk -F '/' '{print $NF}' )
+    updateScriptLog "WELCOME DIALOG: Auto-caching hosted '$welcomeBannerImageFileName' …"
+    curl --location --silent "$welcomeBannerImage" -o "/var/tmp/${welcomeBannerImageFileName}"
+    welcomeBannerImage="/var/tmp/${welcomeBannerImageFileName}"
 fi
 
 # Welcome icon set to either light or dark, based on user's Apperance setting (thanks, @mm2270!)
@@ -660,7 +669,7 @@ welcomeJSON='
     "selectitems" : [
         '${selectItemsJSON}'
     ],
-    "height" : "95%"
+    "height" : "85%"
 }
 '
 
@@ -690,7 +699,7 @@ helpmessage="If you need assistance, please contact the ${supportTeamName}:  \n-
 infobox="Analyzing input …" # Customize at "Update Setup Your Mac's infobox"
 
 # Check if the custom bannerImage is available, and if not, use a alternative image
-if curl --output /dev/null --silent --head --fail "$bannerImage" || [  -f "$bannerImage" ]; then
+if curl --output /dev/null --silent --head --fail "$bannerImage" || [ -f "$bannerImage" ]; then
     updateScriptLog "WELCOME DIALOG: bannerImage is available"
 else
     updateScriptLog "WELCOME DIALOG: bannerImage is not available, using alternative image"
@@ -2119,6 +2128,12 @@ function completionAction() {
 
     fi
 
+    # Remove custom welcomeBannerImage
+    if [[ -e ${welcomeBannerImage} ]]; then
+        updateScriptLog "COMPLETION ACTION: Removing ${welcomeBannerImage} …"
+        rm "${welcomeBannerImage}"
+    fi
+
     # Remove overlayicon
     if [[ -e ${overlayicon} ]]; then
         updateScriptLog "COMPLETION ACTION: Removing ${overlayicon} …"
@@ -2501,11 +2516,27 @@ function quitScript() {
 
     # Check for user clicking "Quit" at Welcome dialog
     if [[ "${welcomeReturnCode}" == "2" ]]; then
+        
+        # Remove custom welcomeBannerImage
+        if [[ -e ${welcomeBannerImage} ]]; then
+            updateScriptLog "COMPLETION ACTION: Removing ${welcomeBannerImage} …"
+            rm "${welcomeBannerImage}"
+        fi
+
+        # Remove overlayicon
+        if [[ -e ${overlayicon} ]]; then
+            updateScriptLog "COMPLETION ACTION: Removing ${overlayicon} …"
+            rm "${overlayicon}"
+        fi
+        
         exitCode="1"
         exit "${exitCode}"
+    
     else
+    
         updateScriptLog "QUIT SCRIPT: Executing Completion Action Option: '${completionActionOption}' …"
         completionAction "${completionActionOption}"
+    
     fi
 
 }
