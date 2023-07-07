@@ -669,7 +669,7 @@ welcomeJSON='
     "selectitems" : [
         '${selectItemsJSON}'
     ],
-    "height" : "85%"
+    "height" : "73%"
 }
 '
 
