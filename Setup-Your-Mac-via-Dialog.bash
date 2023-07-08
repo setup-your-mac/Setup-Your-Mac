@@ -22,6 +22,7 @@
 #   - Added `reconOption` prompts for `realname` and `email` (Addresses [Issue No. 52](https://github.com/dan-snelson/Setup-Your-Mac/issues/52); thanks for the suggestion @brianhm; thanks for the code, @Siggloo!)
 #   - Changed dialog heights to percentages
 #   - Auto-cache / auto-remove a hosted welcomeBannerImage (Addresses [Issue No. 74](https://github.com/dan-snelson/Setup-Your-Mac/issues/74)
+#   - Added a `welcomeDialog` option of `messageOnly` (Addresses [Issue No. 66](https://github.com/dan-snelson/Setup-Your-Mac/issues/66); thanks for the suggestion, @ryanasik)
 #
 ####################################################################################################
 
@@ -37,11 +38,11 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.12.0-b9"
+scriptVersion="1.12.0-b10"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
-welcomeDialog="${6:-"userInput"}"                                               # Parameter 6: Welcome dialog [ userInput (default) | video | false ]
+welcomeDialog="${6:-"userInput"}"                                               # Parameter 6: Welcome dialog [ userInput (default) | video | messageOnly | false ]
 completionActionOption="${7:-"Restart Attended"}"                               # Parameter 7: Completion Action [ wait | sleep (with seconds) | Shut Down | Shut Down Attended | Shut Down Confirm | Restart | Restart Attended (default) | Restart Confirm | Log Out | Log Out Attended | Log Out Confirm ]
 requiredMinimumBuild="${8:-"disabled"}"                                         # Parameter 8: Required Minimum Build [ disabled (default) | 22E ] (i.e., Your organization's required minimum build of macOS to allow users to proceed; use "22E" for macOS 13.3)
 outdatedOsAction="${9:-"/System/Library/CoreServices/Software Update.app"}"     # Parameter 9: Outdated OS Action [ /System/Library/CoreServices/Software Update.app (default) | jamfselfservice://content?entity=policy&id=117&action=view ] (i.e., Jamf Pro Self Service policy ID for operating system ugprades)
@@ -130,7 +131,7 @@ correctionCoefficient="1.01"            # "Fudge factor" (to help estimate match
 configurationCatchAllSize="34"          # Catch-all Configuration in Gibibits (i.e., Total File Size in Gigabytes * 7.451) 
 
 configurationOneName="Required"
-configurtaionOneDescription="Minimum organization apps"
+configurationOneDescription="Minimum organization apps"
 configurationOneSize="34"               # Configuration One in Gibibits (i.e., Total File Size in Gigabytes * 7.451) 
 
 configurationTwoName="Recommended"
@@ -511,8 +512,8 @@ welcomeTitle="Happy $( date +'%A' ), ${loggedInUserFirstname}!  \nWelcome to you
 
 welcomeMessage="Please enter the **required** information for your ${modelName}, select your preferred **Configuration** then click **Continue** to start applying settings to your new Mac. \n\nOnce completed, the **Wait** button will be enabled and you‘ll be able to review the results before restarting your ${modelName}. \n\nIf you need assistance, please contact the ${supportTeamName}: ${supportTeamPhone} and mention ${supportKB}. \n\n---"
 
-if [[ "${promptForConfiguration}" == "true" ]]; then
-    welcomeMessage+="  \n\n#### Configurations  \n- **${configurationOneName}:** ${configurtaionOneDescription}  \n- **${configurationTwoName}:** ${configurationTwoDescription}  \n- **${configurationThreeName}:** ${configurationThreeDescription}"
+if { [[ "${promptForConfiguration}" == "true" ]] && [[ "${welcomeDialog}" != "messageOnly" ]]; } then
+    welcomeMessage+="  \n\n#### Configurations  \n- **${configurationOneName}:** ${configurationOneDescription}  \n- **${configurationTwoName}:** ${configurationTwoDescription}  \n- **${configurationThreeName}:** ${configurationThreeDescription}"
 else
     welcomeMessage=${welcomeMessage//", select your preferred **Configuration**"/}
 fi
@@ -1219,7 +1220,7 @@ function policyJSONConfiguration() {
             '
             ;;
 
-        * ) # Catch-all (i.e., used when `welcomeDialog` is set to `video` or `false`)
+        * ) # Catch-all (i.e., used when `welcomeDialog` is set to `video`, `messageOnly` or `false`)
 
             policyJSON='
             {
@@ -2591,6 +2592,53 @@ if [[ "${welcomeDialog}" == "video" ]]; then
     eval "${dialogSetupYourMacCMD[*]}" & sleep 0.3
     dialogUpdateSetupYourMac "activate:"
 
+elif [[ "${welcomeDialog}" == "messageOnly" ]]; then
+
+    outputLineNumberInVerboseDebugMode
+
+    updateScriptLog "WELCOME DIALOG: Displaying ${welcomeDialog} …"
+
+    # Construct `welcomeJSON`, sans `textfield` and `selectitems`
+    welcomeJSON='
+    {
+        "commandfile" : "'"${welcomeCommandFile}"'",
+        "bannerimage" : "'"${welcomeBannerImage}"'",
+        "bannertext" : "'"${welcomeBannerText}"'",
+        "title" : "'"${welcomeTitle}"'",
+        "message" : "'"${welcomeMessage}"'",
+        "icon" : "'"${welcomeIcon}"'",
+        "infobox" : "",
+        "iconsize" : "198.0",
+        "button1text" : "Continue",
+        "button2text" : "Quit",
+        "infotext" : "'"${scriptVersion}"'",
+        "blurscreen" : "true",
+        "ontop" : "true",
+        "titlefont" : "shadow=true, size=36, colour=#FFFDF4",
+        "messagefont" : "size=14",
+        "height" : "53%"
+    }
+    '
+
+    # Write Welcome JSON to disk
+    echo "$welcomeJSON" > "$welcomeJSONFile"
+
+    # Display Welcome dialog
+    eval "${dialogBinary} --jsonfile ${welcomeJSONFile} --json"
+
+    # Set Configuration
+    if [[ -n "${presetConfiguration}" ]]; then
+        symConfiguration="${presetConfiguration}"
+    else
+        symConfiguration="Catch-all (messageOnly)"
+    fi
+    updateScriptLog "WELCOME DIALOG: Using ${symConfiguration} Configuration …"
+    policyJSONConfiguration
+
+    # Display main SYM dialog
+    eval "${dialogSetupYourMacCMD[*]}" & sleep 0.3
+    dialogUpdateSetupYourMac "activate:"
+
 elif [[ "${welcomeDialog}" == "userInput" ]]; then
 
     outputLineNumberInVerboseDebugMode
@@ -2941,7 +2989,7 @@ if [[ -n ${department} ]]; then infobox+="**Department:**  \n$department  \n\n" 
 if [[ -n ${building} ]]; then infobox+="**Building:**  \n$building  \n\n" ; fi
 if [[ -n ${room} ]]; then infobox+="**Room:**  \n$room  \n\n" ; fi
 
-if { [[ "${promptForConfiguration}" != "true" ]] && [[ "${configurationDownloadEstimation}" == "true" ]]; } || [[ "${welcomeDialog}" == "false" ]]; then
+if { [[ "${promptForConfiguration}" != "true" ]] && [[ "${configurationDownloadEstimation}" == "true" ]]; } || { [[ "${welcomeDialog}" == "false" ]] || [[ "${welcomeDialog}" == "messageOnly" ]]; } then
     updateScriptLog "SETUP YOUR MAC DIALOG: Purposely NOT updating 'infobox'"
 else
     updateScriptLog "SETUP YOUR MAC DIALOG: Updating 'infobox'"
