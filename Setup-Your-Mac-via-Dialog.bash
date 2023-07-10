@@ -24,6 +24,8 @@
 #   - Auto-cache / auto-remove a hosted welcomeBannerImage (Addresses [Issue No. 74](https://github.com/dan-snelson/Setup-Your-Mac/issues/74)
 #   - Added a `welcomeDialog` option of `messageOnly` (Addresses [Issue No. 66](https://github.com/dan-snelson/Setup-Your-Mac/issues/66); thanks for the suggestion, @ryanasik)
 #   - Reverted "Restart Attended" Completion Action one-liner (Unaddresses [Issue No. 71](https://github.com/dan-snelson/Setup-Your-Mac/issues/71); sorry, @master-vodawagner)
+#   - Set newly added email address to required (sans regex) (Addresses [Issue No. 75](https://github.com/dan-snelson/Setup-Your-Mac/issues/75); thanks for the suggestion, @ryanasik)
+#   - Added code to pre-fill user's full name (Addresses [Issue No. 76](https://github.com/dan-snelson/Setup-Your-Mac/issues/76); thanks for the suggestion, @ryanasik)
 #
 ####################################################################################################
 
@@ -39,7 +41,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.12.0-rc1"
+scriptVersion="1.12.0-rc2"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -69,6 +71,7 @@ failureDialog="true"        # Display the so-called "Failure" dialog (after the 
 promptForUsername="true"
 prefillUsername="true"          # prefills the currently logged in user's username
 promptForRealName="true"
+prefillRealname="true"          # prefills the currently logged in user's fullname
 promptForEmail="true"
 promptForComputerName="true"
 promptForAssetTag="true"
@@ -582,9 +585,17 @@ welcomeVideo="--title \"$welcomeTitle\" \
 
 # Text Fields
 if [ "$prefillUsername" == "true" ]; then usernamePrefil=',"value" : "'${loggedInUser}'"'; fi
+if [ "$prefillRealname" == "true" ]; then realnamePrefil=',"value" : "'${loggedInUserFullname}'"'; fi
 if [ "$promptForUsername" == "true" ]; then usernameJSON='{ "title" : "User Name","required" : false,"prompt" : "User Name"'${usernamePrefil}'},'; fi
-if [ "$promptForRealName" == "true" ]; then realNameJSON='{ "title" : "Full Name","required" : false,"prompt" : "Full Name" },'; fi
-if [ "$promptForEmail" == "true" ]; then emailJSON='{ "title" : "E-mail","required" : false,"prompt" : "E-mail" },'; fi
+if [ "$promptForRealName" == "true" ]; then realNameJSON='{ "title" : "Full Name","required" : false,"prompt" : "Full Name"'${realnamePrefil}'},'; fi
+if [ "$promptForEmail" == "true" ]; then
+    emailJSON='{   "title" : "E-mail",
+        "required" : true,
+        "prompt" : "E-mail Address",
+        "regex" : "",
+        "regexerror" : "Please enter a valid email address."
+    },'
+fi
 if [ "$promptForComputerName" == "true" ]; then compNameJSON='{ "title" : "Computer Name","required" : false,"prompt" : "Computer Name" },'; fi
 if [ "$promptForAssetTag" == "true" ]; then
     assetTagJSON='{   "title" : "Asset Tag",
