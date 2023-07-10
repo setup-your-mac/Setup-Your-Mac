@@ -10,7 +10,7 @@
 #
 # HISTORY
 #
-#   Version 1.12.0, 04-Jul-2023, Dan K. Snelson (@dan-snelson)
+#   Version 1.12.0, 10-Jul-2023, Dan K. Snelson (@dan-snelson)
 #   - Add version check to `dialogCheck` ([Pull Request No. 67](https://github.com/dan-snelson/Setup-Your-Mac/pull/67); thanks yet again, @drtaru!)
 #   - Make `presetConfiguration` also apply to `userInput` ([Pull Request No. 63](https://github.com/dan-snelson/Setup-Your-Mac/pull/63); thanks for another one, @rougegoat!)
 #   - Fix for visual hiccup where `infobox` displays "Analyzing input …" if `configurationDownloadEstimation` and `promptForConfiguration` are both set to `false` ([Pull Request No. 69](https://github.com/dan-snelson/Setup-Your-Mac/pull/69); thanks yet again, @rougegoat!)
@@ -23,6 +23,7 @@
 #   - Changed dialog heights to percentages
 #   - Auto-cache / auto-remove a hosted welcomeBannerImage (Addresses [Issue No. 74](https://github.com/dan-snelson/Setup-Your-Mac/issues/74)
 #   - Added a `welcomeDialog` option of `messageOnly` (Addresses [Issue No. 66](https://github.com/dan-snelson/Setup-Your-Mac/issues/66); thanks for the suggestion, @ryanasik)
+#   - Reverted "Restart Attended" Completion Action one-liner (Unaddresses [Issue No. 71](https://github.com/dan-snelson/Setup-Your-Mac/issues/71); sorry, @master-vodawagner)
 #
 ####################################################################################################
 
@@ -38,7 +39,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.12.0-b10"
+scriptVersion="1.12.0-rc1"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -2068,14 +2069,12 @@ function completionAction() {
                 ;;
 
             "Restart Attended" )
-                set -xv
                 updateScriptLog "Restart, requiring user-interaction"
                 killProcess "Self Service"
-                wait # "${symPID}"
-                runAsUser osascript -e 'tell app "System Events" to restart'
+                wait
+                # runAsUser osascript -e 'tell app "System Events" to restart'
                 # sleep 5 && runAsUser osascript -e 'tell app "System Events" to restart' &
-                # sleep 5 && shutdown -r now &
-                set +xv
+                sleep 5 && shutdown -r now &
                 ;;
 
             "Restart Confirm" )
