@@ -81,6 +81,9 @@ promptForBuilding="true"
 promptForDepartment="true"
 promptForConfiguration="true"   # Removes the Configuration dropdown entirely and uses the "Catch-all (i.e., used when `welcomeDialog` is set to `video` or `false`)" or presetConfiguration policyJSON
 
+# Set to "true" to suppress the Update Inventory option on policies that are called
+suppressReconOnPolicy="false"
+
 # Disables the Blurscreen enabled by default in Production
 moveableInProduction="false"
 
@@ -1660,14 +1663,14 @@ function run_jamf_trigger() {
 
     if [[ "${debugMode}" == "true" ]] || [[ "${debugMode}" == "verbose" ]] ; then
 
-        updateScriptLog "SETUP YOUR MAC DIALOG: DEBUG MODE: TRIGGER: $jamfBinary policy -event $trigger"
+        updateScriptLog "SETUP YOUR MAC DIALOG: DEBUG MODE: TRIGGER: $jamfBinary policy -event $trigger ${suppressRecon}"
         sleep "${debugModeSleepAmount}"
 
     else
 
         updateScriptLog "SETUP YOUR MAC DIALOG: RUNNING: $jamfBinary policy -event $trigger"
-        eval "${jamfBinary} policy -event ${trigger}"                                     # Add comment for policy testing
-        # eval "${jamfBinary} policy -event ${trigger} -verbose | tee -a ${scriptLog}"    # Remove comment for policy testing
+        eval "${jamfBinary} policy -event ${trigger} ${suppressRecon}"                                     # Add comment for policy testing
+        # eval "${jamfBinary} policy -event ${trigger} ${suppressRecon} -verbose | tee -a ${scriptLog}"    # Remove comment for policy testing
 
     fi
 
@@ -1686,6 +1689,7 @@ function confirmPolicyExecution() {
     trigger="${1}"
     validation="${2}"
     updateScriptLog "SETUP YOUR MAC DIALOG: Confirm Policy Execution: '${trigger}' '${validation}'"
+    if [ "${suppressReconOnPolicy}" == "true" ]; then suppressRecon="-forceNoRecon"; fi
 
     case ${validation} in
 
