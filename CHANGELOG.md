@@ -21,6 +21,7 @@
 - Updated Vimeo video ID
 - Updated `serialNumber` code (with special thanks to @Eltord for saving each and every user 0.0.6 seconds)
 - Added `suppressReconOnPolicy` variable; when set to `true`, a `-forceNoRecon` flag when executing the `run_jamf_trigger` function (Addresses [Issue No. 79](https://github.com/dan-snelson/Setup-Your-Mac/issues/79); thanks for the idea, @fitzwater-rowan; thanks for yet another PR, @rougegoat!)
+- Added "Install Buffers" to each Configuration to include installation time of packages (Addresses [Issue No. 78](https://github.com/dan-snelson/Setup-Your-Mac/issues/78); thanks, @Eltord!
 
 ## 1.11.0
 ### 24-May-2023

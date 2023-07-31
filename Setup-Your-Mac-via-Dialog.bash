@@ -30,6 +30,7 @@
 #   - Updated Vimeo video ID
 #   - Updated `serialNumber` code (with special thanks to @Eltord for saving each and every user 0.0.6 seconds)
 #   - Added `suppressReconOnPolicy` to `-forceNoRecon` flag when executing the `run_jamf_trigger` function (Addresses [Issue No. 79](https://github.com/dan-snelson/Setup-Your-Mac/issues/79); thanks for the idea, @fitzwater-rowan; thanks for yet another PR, @rougegoat!)
+#   - Added "Install Buffers" to each Configuration to include installation time of packages (Addresses [Issue No. 78](https://github.com/dan-snelson/Setup-Your-Mac/issues/78); thanks, @Eltord!
 #
 ####################################################################################################
 
@@ -45,7 +46,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.12.0-rc5"
+scriptVersion="1.12.0-rc6"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -137,25 +138,26 @@ exitCode="0"
 # Configuration Variables
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-configurationDownloadEstimation="true"  # [ true (default) | false ]
-correctionCoefficient="1.01"            # "Fudge factor" (to help estimate match reality)
-configurationCatchAllSize="34"          # Catch-all Configuration in Gibibits (i.e., Total File Size in Gigabytes * 7.451)
-configurationCatchAllInstallBuffer="480"     # Buffer time added to estimates to include installation time of packages, in seconds. Set to 0 to disable. 
+configurationDownloadEstimation="true"      # [ true (default) | false ]
+correctionCoefficient="1.01"                # "Fudge factor" (to help estimate match reality)
+
+configurationCatchAllSize="34"              # Catch-all Configuration in Gibibits (i.e., Total File Size in Gigabytes * 7.451)
+configurationCatchAllInstallBuffer="0"      # Buffer time added to estimates to include installation time of packages, in seconds. Set to 0 to disable. 
 
 configurationOneName="Required"
 configurationOneDescription="Minimum organization apps"
-configurationOneSize="34"               # Configuration One in Gibibits (i.e., Total File Size in Gigabytes * 7.451)
-configurationOneInstallBuffer="480"     # Buffer time added to estimates to include installation time of packages, in seconds. Set to 0 to disable. 
+configurationOneSize="34"                   # Configuration One in Gibibits (i.e., Total File Size in Gigabytes * 7.451)
+configurationOneInstallBuffer="0"           # Buffer time added to estimates to include installation time of packages, in seconds. Set to 0 to disable. 
 
 configurationTwoName="Recommended"
 configurationTwoDescription="Required apps and Microsoft Office"
-configurationTwoSize="62"               # Configuration Two in Gibibits (i.e., Total File Size in Gigabytes * 7.451) 
-configurationTwoInstallBuffer="600"     # Buffer time added to estimates to include installation time of packages, in seconds. Set to 0 to disable. 
+configurationTwoSize="62"                   # Configuration Two in Gibibits (i.e., Total File Size in Gigabytes * 7.451) 
+configurationTwoInstallBuffer="0"           # Buffer time added to estimates to include installation time of packages, in seconds. Set to 0 to disable. 
 
 configurationThreeName="Complete"
 configurationThreeDescription="Recommended apps, Adobe Acrobat Reader and Google Chrome"
-configurationThreeSize="106"            # Configuration Three in Gibibits (i.e., Total File Size in Gigabytes * 7.451) 
-configurationThreeInstallBuffer="720"     # Buffer time added to estimates to include installation time of packages, in seconds. Set to 0 to disable. 
+configurationThreeSize="106"                # Configuration Three in Gibibits (i.e., Total File Size in Gigabytes * 7.451) 
+configurationThreeInstallBuffer="0"         # Buffer time added to estimates to include installation time of packages, in seconds. Set to 0 to disable. 
 
 
 
@@ -2314,7 +2316,7 @@ function checkNetworkQualityCatchAllConfiguration() {
     mbps=$( echo "scale=2; ( $dlThroughput / 1000000 )" | bc )
     updateScriptLog "SETUP YOUR MAC DIALOG: $mbps (Mbps)"
 
-    configurationCatchAllEstimatedSeconds=$( echo "scale=2; ((((( $configurationCatchAllSize / $mbps ) * 60 ) * 60 ) * $correctionCoefficient ) + configurationCatchAllInstallBuffer)" | bc | sed 's/\.[0-9]*//' )
+    configurationCatchAllEstimatedSeconds=$( echo "scale=2; ((((( $configurationCatchAllSize / $mbps ) * 60 ) * 60 ) * $correctionCoefficient ) + $configurationCatchAllInstallBuffer)" | bc | sed 's/\.[0-9]*//' )
     updateScriptLog "SETUP YOUR MAC DIALOG: Catch-all Configuration Estimated Seconds: $configurationCatchAllEstimatedSeconds"
     updateScriptLog "SETUP YOUR MAC DIALOG: Catch-all Configuration Estimate: $(printf '%dh:%dm:%ds\n' $((configurationCatchAllEstimatedSeconds/3600)) $((configurationCatchAllEstimatedSeconds%3600/60)) $((configurationCatchAllEstimatedSeconds%60)))"
 
