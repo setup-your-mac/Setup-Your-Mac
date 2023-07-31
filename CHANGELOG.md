@@ -1,7 +1,7 @@
 # CHANGELOG
 
-## 1.12.0-rc3
-### 11-Jul-2023
+## 1.12.0
+### 31-Jul-2023
 - Add version check to `dialogCheck` ([Pull Request No. 67](https://github.com/dan-snelson/Setup-Your-Mac/pull/67); thanks yet again, @drtaru!)
 - Make `presetConfiguration` also apply to `userInput` ([Pull Request No. 63](https://github.com/dan-snelson/Setup-Your-Mac/pull/63); thanks for another one, @rougegoat!)
 - Fix for visual hiccup where `infobox` displays "Analyzing input …" if `configurationDownloadEstimation` and `promptForConfiguration` are both set to `false` ([Pull Request No. 69](https://github.com/dan-snelson/Setup-Your-Mac/pull/69); thanks yet again, @rougegoat!)
@@ -18,6 +18,8 @@
 - Set newly added email address to required (regex courtesy of @bartreardon) (Addresses [Issue No. 75](https://github.com/dan-snelson/Setup-Your-Mac/issues/75); thanks for the suggestion, @ryanasik)
 - Added code to pre-fill user's full name (Addresses [Issue No. 76](https://github.com/dan-snelson/Setup-Your-Mac/issues/76); thanks for the suggestion, @ryanasik)
 - Reverted dialog heights to pixels
+- Updated Vimeo video ID
+- Updated `serialNumber` code (with special thanks to @Eltord for saving each and every user 0.0.6 seconds)
 
 ## 1.11.0
 ### 24-May-2023
