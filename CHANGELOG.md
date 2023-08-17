@@ -1,7 +1,7 @@
 # CHANGELOG
 
 ## 1.12.0
-### 16-Aug-2023
+### 17-Aug-2023
 - Add version check to `dialogCheck` ([Pull Request No. 67](https://github.com/dan-snelson/Setup-Your-Mac/pull/67); thanks yet again, @drtaru!)
 - Make `presetConfiguration` also apply to `userInput` ([Pull Request No. 63](https://github.com/dan-snelson/Setup-Your-Mac/pull/63); thanks for another one, @rougegoat!)
 - Fix for visual hiccup where `infobox` displays "Analyzing input …" if `configurationDownloadEstimation` and `promptForConfiguration` are both set to `false` ([Pull Request No. 69](https://github.com/dan-snelson/Setup-Your-Mac/pull/69); thanks yet again, @rougegoat!)
@@ -23,6 +23,7 @@
 - Added `suppressReconOnPolicy` variable; when set to `true`, a `-forceNoRecon` flag when executing the `run_jamf_trigger` function (Addresses [Issue No. 79](https://github.com/dan-snelson/Setup-Your-Mac/issues/79); thanks for the idea, @fitzwater-rowan; thanks for yet another PR, @rougegoat!)
 - Added "Install Buffers" to each Configuration to include installation time of packages (Addresses [Issue No. 78](https://github.com/dan-snelson/Setup-Your-Mac/issues/78); thanks, @Eltord!
 - Added permissions correction on `mktemp`-created files (for swiftDialog 2.3)
+- Updated required version of swiftDialog to 2.3.0.4718
 
 ## 1.11.0
 ### 24-May-2023
