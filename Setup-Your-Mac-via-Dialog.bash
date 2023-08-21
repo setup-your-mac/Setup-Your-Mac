@@ -35,7 +35,7 @@
 #   - Updated required version of swiftDialog to `2.3.0.4718`
 #
 #   Version 1.12.1, 21-Aug-2023, Dan K. Snelson (@dan-snelson)
-#   - Reverted `mktemp`-created files to pre-1.12.0 code (to follow recommended approach)
+#   - Added permissions correction on ALL `mktemp`-created files (for swiftDialog `2.3.1`)
 #   - Updated required version of swiftDialog to `2.3.1.4721`
 #
 ####################################################################################################
@@ -401,7 +401,7 @@ function dialogInstall() {
     # Expected Team ID of the downloaded PKG
     expectedDialogTeamID="PWA5E9TQ59"
 
-    updateScriptLog "PRE-FLIGHT CHECK: Installing SwiftDialog..."
+    updateScriptLog "PRE-FLIGHT CHECK: Installing swiftDialog..."
 
     # Create temporary working directory
     workDirectory=$( /usr/bin/basename "$0" )
@@ -514,10 +514,14 @@ esac
 
 jamfBinary="/usr/local/bin/jamf"
 dialogBinary="/usr/local/bin/dialog"
-welcomeJSONFile=$( mktemp -u /var/tmp/welcomeJSONFile.XXX )
-welcomeCommandFile=$( mktemp -u /var/tmp/dialogCommandFileWelcome.XXX )
-setupYourMacCommandFile=$( mktemp -u /var/tmp/dialogCommandFileSetupYourMac.XXX )
-failureCommandFile=$( mktemp -u /var/tmp/dialogCommandFileFailure.XXX )
+welcomeJSONFile=$( mktemp /var/tmp/welcomeJSONFile.XXX )
+welcomeCommandFile=$( mktemp /var/tmp/dialogCommandFileWelcome.XXX )
+setupYourMacCommandFile=$( mktemp /var/tmp/dialogCommandFileSetupYourMac.XXX )
+failureCommandFile=$( mktemp /var/tmp/dialogCommandFileFailure.XXX )
+
+# Set permissions on Dialog Files
+chmod -v 666 "${welcomeJSONFile}"
+chmod -v 666 /var/tmp/dialogCommandFile*
 
 
 
@@ -1646,9 +1650,11 @@ function finalise(){
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 function get_json_value() {
+    # set -x
     JSON="$1" osascript -l 'JavaScript' \
         -e 'const env = $.NSProcessInfo.processInfo.environment.objectForKey("JSON").js' \
         -e "JSON.parse(env).$2"
+    # set +x
 }
 
 
@@ -1658,10 +1664,12 @@ function get_json_value() {
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 function get_json_value_welcomeDialog() {
+    # set -x
     for var in "${@:2}"; do jsonkey="${jsonkey}['${var}']"; done
     JSON="$1" osascript -l 'JavaScript' \
         -e 'const env = $.NSProcessInfo.processInfo.environment.objectForKey("JSON").js' \
         -e "JSON.parse(env)$jsonkey"
+    # set +x
 }
 
 
