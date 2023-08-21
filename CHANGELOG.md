@@ -2,7 +2,7 @@
 
 ## 1.12.1
 ### 21-Aug-2023
-- Reverted `mktemp`-created files to pre-1.12.0 code (to follow recommended approach)
+- Added permissions correction on ALL `mktemp`-created files (for swiftDialog `2.3.1`)
 - Updated required version of swiftDialog to `2.3.1.4721`
 
 ## 1.12.0
