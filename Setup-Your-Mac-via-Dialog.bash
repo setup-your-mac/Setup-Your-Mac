@@ -38,6 +38,10 @@
 #   - Added permissions correction on ALL `mktemp`-created files (for swiftDialog `2.3.1`)
 #   - Updated required version of swiftDialog to `2.3.1.4721`
 #
+#   Version 1.12.2, 21-Aug-2023, Dan K. Snelson (@dan-snelson)
+#   - Updated minimum version of macOS to 12
+#   - Corrected deletion of cached welcomeBannerImage
+#
 ####################################################################################################
 
 
@@ -52,7 +56,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.12.1"
+scriptVersion="1.12.2"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -287,8 +291,8 @@ if [[ "${requiredMinimumBuild}" == "disabled" ]]; then
 
 else
 
-    # Since swiftDialog requires at least macOS 11 Big Sur, first confirm the major OS version
-    if [[ "${osMajorVersion}" -ge 11 ]] ; then
+    # Since swiftDialog requires at least macOS 12 Monterey, first confirm the major OS version
+    if [[ "${osMajorVersion}" -ge 12 ]] ; then
 
         updateScriptLog "PRE-FLIGHT CHECK: macOS ${osMajorVersion} installed; checking build version ..."
 
@@ -307,10 +311,10 @@ else
 
         fi
 
-    # The Mac is running an operating system older than macOS 11 Big Sur; exit with error
+    # The Mac is running an operating system older than macOS 12 Monterey; exit with error
     else
 
-        updateScriptLog "PRE-FLIGHT CHECK: swiftDialog requires at least macOS 11 Big Sur and this Mac is running ${osVersion} (${osBuild}), exiting with error."
+        updateScriptLog "PRE-FLIGHT CHECK: swiftDialog requires at least macOS 12 Monterey and this Mac is running ${osVersion} (${osBuild}), exiting with error."
         osascript -e 'display dialog "Please advise your Support Representative of the following error:\r\rExpected macOS Build '${requiredMinimumBuild}' (or newer), but found macOS '${osVersion}' ('${osBuild}').\r\r" with title "Setup Your Mac: Detected Outdated Operating System" buttons {"Open Software Update"} with icon caution'
         updateScriptLog "PRE-FLIGHT CHECK: Executing /usr/bin/open '${outdatedOsAction}' …"
         su - "${loggedInUser}" -c "/usr/bin/open \"${outdatedOsAction}\""
@@ -2167,10 +2171,10 @@ function completionAction() {
 
     fi
 
-    # Remove custom welcomeBannerImage
-    if [[ -e ${welcomeBannerImage} ]]; then
-        updateScriptLog "COMPLETION ACTION: Removing ${welcomeBannerImage} …"
-        rm "${welcomeBannerImage}"
+    # Remove custom welcomeBannerImageFileName
+    if [[ -e "/var/tmp/${welcomeBannerImageFileName}" ]]; then
+        updateScriptLog "COMPLETION ACTION: Removing /var/tmp/${welcomeBannerImageFileName} …"
+        rm "/var/tmp/${welcomeBannerImageFileName}"
     fi
 
     # Remove overlayicon
@@ -2556,10 +2560,10 @@ function quitScript() {
     # Check for user clicking "Quit" at Welcome dialog
     if [[ "${welcomeReturnCode}" == "2" ]]; then
         
-        # Remove custom welcomeBannerImage
-        if [[ -e ${welcomeBannerImage} ]]; then
-            updateScriptLog "COMPLETION ACTION: Removing ${welcomeBannerImage} …"
-            rm "${welcomeBannerImage}"
+        # Remove custom welcomeBannerImageFileName
+        if [[ -e "/var/tmp/${welcomeBannerImageFileName}" ]]; then
+            updateScriptLog "COMPLETION ACTION: Removing /var/tmp/${welcomeBannerImageFileName} …"
+            rm "/var/tmp/${welcomeBannerImageFileName}"
         fi
 
         # Remove overlayicon

@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.12.2
+### 21-Aug-2023
+- Updated minimum version of macOS to 12
+- Corrected deletion of cached welcomeBannerImage
+
 ## 1.12.1
 ### 21-Aug-2023
 - Added permissions correction on ALL `mktemp`-created files (for swiftDialog `2.3.1`)
