@@ -22,6 +22,10 @@
 #   Exit if odd-ball user is logged-in
 #   Added "--ignorednd" and "--blurscreen" to Dialog command
 #
+# Version 0.0.4, 21-Aug-2023, Dan K. Snelson (@dan-snelson)
+#   Updates inline with "Setup Your Mac (1.12.0)"
+#   Added `quitkey`; Addresses Issue No. 83
+#
 #################################################################################
 
 
@@ -57,27 +61,34 @@ fi
 # Global variables
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="0.0.3"
-scriptResult="Prompt to Setup Your Mac (${scriptVersion}); "
+scriptVersion="0.0.4"
+export PATH=/usr/bin:/bin:/usr/sbin:/sbin
+secondsToWait="${4:-"2700"}"                                    # Parameter 4: "secondsToWait" setting; defaults to "2700"
+scriptLog="/var/log/org.churchofjesuschrist.log"                # Your organization's default location for client-side logs
+plistPath="/Library/Preferences/com.company.plist"              # Your organization's Reverse Domain Name Notation
 jamfProPolicyName="@Setup Your Mac"
-plistPath="/Library/Preferences/com.company.plist"
 plistKey="Setup Your Mac"
-selfServiceAppPath=$( /usr/bin/defaults read /Library/Preferences/com.jamfsoftware.jamf.plist self_service_app_path )
-dialogApp="/usr/local/bin/dialog"
-dialogCommandFile=$( /usr/bin/mktemp "/var/tmp/Prompt-to-Setup-Your-Mac.XXXXXXX" )
+selfServiceAppPath=$( defaults read /Library/Preferences/com.jamfsoftware.jamf.plist self_service_app_path )
+dialogBinary="/usr/local/bin/dialog"
+dialogCommandFile=$( mktemp "/var/tmp/Prompt-to-Setup-Your-Mac.XXXXXXX" )
+
+# Set permissions on Dialog Command File
+chmod -v 555 "${dialogCommandFile}"
 
 
+
+#################################################################################
+#
+# Pre-flight Checks
+#
+#################################################################################
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Check for a specified "secondsToWait" setting (Parameter 4); defaults to "2700"
+# Pre-flight Check: Client-side Logging
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-if [[ "${4}" != "" ]] && [[ "${secondsToWait}" == "" ]]; then
-  secondsToWait="${4}"
-  scriptResult+="Using ${secondsToWait} as the number of seconds before script execution; "
-else
-  secondsToWait="2700"
-  scriptResult+="Parameter 4 is blank; using ${secondsToWait} as the number of seconds before script execution; "
+if [[ ! -f "${scriptLog}" ]]; then
+    touch "${scriptLog}"
 fi
 
 
@@ -89,12 +100,22 @@ fi
 #################################################################################
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Client-side Script Logging Function
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+function updateScriptLog() {
+    echo -e "$( date +%Y-%m-%d\ %H:%M:%S ) - ${1}" | tee -a "${scriptLog}"
+}
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Prompt user to execute the Self Service policy via swiftDialog
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 function promptUser() {
 
-    scriptResult+="Prompting user to execute the \"${jamfProPolicyName}\" policy; "
+    updateScriptLog "Prompting user to execute the \"${jamfProPolicyName}\" policy; "
 
     dialogCheck
 
@@ -111,7 +132,7 @@ function promptUser() {
 
     overlayicon=$( defaults read /Library/Preferences/com.jamfsoftware.jamf.plist self_service_app_path )
 
-    dialogCMD="$dialogApp --ontop --title \"$title\" \
+    dialogCMD="$dialogBinary --ontop --title \"$title\" \
     --message \"$message\" \
     --icon \"$icon\" \
     --button1text \"OK\" \
@@ -126,6 +147,7 @@ function promptUser() {
     --position 'centre' \
     --ignorednd \
     --blurscreen \
+    --quitkey 'k' \
     --commandfile \"$dialogCommandFile\" "
 
     eval "$dialogCMD"
@@ -134,15 +156,15 @@ function promptUser() {
 
     case ${returnCode} in
 
-        0)  scriptResult+="${loggedInUser} clicked OK; "
+        0)  updateScriptLog "${loggedInUser} clicked OK; "
             ;;
-        2)  scriptResult+="${loggedInUser} clicked Button2; "
+        2)  updateScriptLog "${loggedInUser} clicked Button2; "
             ;;
-        3)  scriptResult+="${loggedInUser} clicked KB12345678; "
+        3)  updateScriptLog "${loggedInUser} clicked KB12345678; "
             ;;
-        4)  scriptResult+="${loggedInUser} allowed timer to expire; "
+        4)  updateScriptLog "${loggedInUser} allowed timer to expire; "
             ;;
-        *)  scriptResult+="Something else happened; swiftDialog Return Code: ${returnCode}; "
+        *)  updateScriptLog "Something else happened; swiftDialog Return Code: ${returnCode}; "
             ;;
 
     esac
@@ -157,39 +179,82 @@ function promptUser() {
 
 
 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Check for / install swiftDialog (thanks, Adam!)
-# https://github.com/acodega/dialog-scripts/blob/main/dialogCheckFunction.sh
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Pre-flight Check: Validate / install swiftDialog (Thanks big bunches, @acodega!)
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-function dialogCheck(){
-  # Get the URL of the latest PKG From the Dialog GitHub repo
-  dialogURL=$(curl --silent --fail "https://api.github.com/repos/bartreardon/swiftDialog/releases/latest" | awk -F '"' "/browser_download_url/ && /pkg\"/ { print \$4; exit }")
-  # Expected Team ID of the downloaded PKG
-  expectedDialogTeamID="PWA5E9TQ59"
+function dialogInstall() {
 
-  # Check for Dialog and install if not found
-  if [ ! -e "/Library/Application Support/Dialog/Dialog.app" ]; then
-    echo "Dialog not found. Installing..."
+    # Get the URL of the latest PKG From the Dialog GitHub repo
+    dialogURL=$(curl --silent --fail "https://api.github.com/repos/bartreardon/swiftDialog/releases/latest" | awk -F '"' "/browser_download_url/ && /pkg\"/ { print \$4; exit }")
+
+    # Expected Team ID of the downloaded PKG
+    expectedDialogTeamID="PWA5E9TQ59"
+
+    updateScriptLog "PRE-FLIGHT CHECK: Installing SwiftDialog..."
+
     # Create temporary working directory
     workDirectory=$( /usr/bin/basename "$0" )
     tempDirectory=$( /usr/bin/mktemp -d "/private/tmp/$workDirectory.XXXXXX" )
+
     # Download the installer package
     /usr/bin/curl --location --silent "$dialogURL" -o "$tempDirectory/Dialog.pkg"
+
     # Verify the download
     teamID=$(/usr/sbin/spctl -a -vv -t install "$tempDirectory/Dialog.pkg" 2>&1 | awk '/origin=/ {print $NF }' | tr -d '()')
+
     # Install the package if Team ID validates
-    if [ "$expectedDialogTeamID" = "$teamID" ] || [ "$expectedDialogTeamID" = "" ]; then
-      /usr/sbin/installer -pkg "$tempDirectory/Dialog.pkg" -target /
+    if [[ "$expectedDialogTeamID" == "$teamID" ]]; then
+
+        /usr/sbin/installer -pkg "$tempDirectory/Dialog.pkg" -target /
+        sleep 2
+        dialogVersion=$( /usr/local/bin/dialog --version )
+        updateScriptLog "PRE-FLIGHT CHECK: swiftDialog version ${dialogVersion} installed; proceeding..."
+
     else
-      jamfDisplayMessage "Dialog Team ID verification failed."
-      exit 1
+
+        # Display a so-called "simple" dialog if Team ID fails to validate
+        osascript -e 'display dialog "Please advise your Support Representative of the following error:\r\r• Dialog Team ID verification failed\r\r" with title "Setup Your Mac: Error" buttons {"Close"} with icon caution'
+        completionActionOption="Quit"
+        exitCode="1"
+        quitScript
+
     fi
+
     # Remove the temporary working directory when done
-    /bin/rm -Rf "$tempDirectory"  
-  else
-    scriptResult+="Dialog v$(dialog --version) installed, proceeding; "
-  fi
+    /bin/rm -Rf "$tempDirectory"
+
+}
+
+
+
+function dialogCheck() {
+
+    # Output Line Number in `verbose` Debug Mode
+    if [[ "${debugMode}" == "verbose" ]]; then updateScriptLog "PRE-FLIGHT CHECK: # # # SETUP YOUR MAC VERBOSE DEBUG MODE: Line No. ${LINENO} # # #" ; fi
+
+    # Check for Dialog and install if not found
+    if [ ! -e "/Library/Application Support/Dialog/Dialog.app" ]; then
+
+        updateScriptLog "PRE-FLIGHT CHECK: swiftDialog not found. Installing..."
+        dialogInstall
+
+    else
+
+        dialogVersion=$(/usr/local/bin/dialog --version)
+        if [[ "${dialogVersion}" < "2.3.0.4718" ]]; then
+            
+            updateScriptLog "PRE-FLIGHT CHECK: swiftDialog version ${dialogVersion} found but swiftDialog 2.3.0.4718 or newer is required; updating..."
+            dialogInstall
+            
+        else
+
+        updateScriptLog "PRE-FLIGHT CHECK: swiftDialog version ${dialogVersion} found; proceeding..."
+
+        fi
+    
+    fi
+
 }
 
 
@@ -199,7 +264,7 @@ function dialogCheck(){
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 function jamfDisplayMessage() {
-    scriptResult+="${1}; "
+    updateScriptLog "${1}; "
 	/usr/local/jamf/bin/jamf displayMessage -message "${1}" &
 }
 
@@ -219,11 +284,11 @@ function gracefullyExitForNewEnrollments() {
     ageInSecondsHumanReadable=$( printf '"%dd, %dh, %dm, %ds"\n' $((ageInSeconds/86400)) $((ageInSeconds%86400/3600)) $((ageInSeconds%3600/60)) $((ageInSeconds%60)) )
 
     if [[ ${ageInSeconds} -le ${secondsToWait} ]]; then
-        scriptResult+="Set to wait ${secondsToWaitHumanReadable} and enrollment was ${ageInSecondsHumanReadable} ago; exiting."
+        updateScriptLog "Set to wait ${secondsToWaitHumanReadable} and enrollment was ${ageInSecondsHumanReadable} ago; exiting."
         echo "${scriptResult}"
         exit 0
     else
-        scriptResult+="Set to wait ${secondsToWaitHumanReadable} and enrollment was ${ageInSecondsHumanReadable} ago, proceeding; "
+        updateScriptLog "Set to wait ${secondsToWaitHumanReadable} and enrollment was ${ageInSecondsHumanReadable} ago, proceeding; "
     fi
 
 }
@@ -271,7 +336,7 @@ function selfServiceLaunchValidation() {
     if [[ ${selfServiceLogInstalled} == "Yes" ]]; then
         selfServiceLaunches=$( /usr/bin/grep "Application successfully launched" /Users/"${loggedInUser}"/Library/Logs/JAMF/selfservice.log | /usr/bin/wc -l | /usr/bin/tr -d ' ' )
     else
-        scriptResult+="Something went sideways when checking the number of times \"${selfServiceAppPath}\" has been launched; exiting."
+        updateScriptLog "Something went sideways when checking the number of times \"${selfServiceAppPath}\" has been launched; exiting."
         echo "${scriptResult}"
         exit 1
     fi
@@ -289,7 +354,7 @@ function selfServiceLoginValidation() {
     if [[ ${selfServiceLogInstalled} == "Yes" ]]; then
         selfServiceLogins=$( /usr/bin/grep "user logged in" /Users/"${loggedInUser}"/Library/Logs/JAMF/selfservice.log | /usr/bin/wc -l | /usr/bin/tr -d ' ' )
     else
-        scriptResult+="Something went sideways when checking the number of times ${loggedInUser} has logged in to \"${selfServiceAppPath}\"; exiting."
+        updateScriptLog "Something went sideways when checking the number of times ${loggedInUser} has logged in to \"${selfServiceAppPath}\"; exiting."
         echo "${scriptResult}"
         exit 1
     fi
@@ -323,7 +388,7 @@ function selfServicePolicyValidation() {
     if [[ ${jamfLogInstalled} == "Yes" ]]; then
         selfServicePolicyExecutions=$( /usr/bin/grep "${jamfProPolicyName}" /private/var/log/jamf.log | /usr/bin/wc -l | /usr/bin/tr -d ' ' )
     else
-        scriptResult+="Something went sideways when checking the number of times ${loggedInUser} has executed the \"${jamfProPolicyName}\" policy; exiting."
+        updateScriptLog "Something went sideways when checking the number of times ${loggedInUser} has executed the \"${jamfProPolicyName}\" policy; exiting."
         echo "${scriptResult}"
         exit 1
     fi
@@ -357,6 +422,14 @@ function selfServicePolicyCompletionValidation() {
 #
 #################################################################################
 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Logging Preamble
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+updateScriptLog "\n\n###\n# Setup Your Mac, please (${scriptVersion})\n# https://snelson.us/sym\n###\n"
+
+
+
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Check 1. Gracefully exit for new enrollments
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -373,19 +446,19 @@ selfServiceValidation
 
 if [[ ${selfServiceInstalled} == "No" ]]; then
 
-    scriptResult+="\"${selfServiceAppPath}\" was NOT installed; attempting re-installation; "
+    updateScriptLog "\"${selfServiceAppPath}\" was NOT installed; attempting re-installation; "
     /usr/local/bin/jamf update -verbose
 
-    scriptResult+="Updating inventory; "
+    updateScriptLog "Updating inventory; "
     /usr/local/bin/jamf recon
 
-    scriptResult+="Exiting with error."
+    updateScriptLog "Exiting with error."
     echo "${scriptResult}"
     exit 1
 
 else
 
-    scriptResult+="\"${selfServiceAppPath}\" is installed, proceeding; "
+    updateScriptLog "\"${selfServiceAppPath}\" is installed, proceeding; "
 
 fi
 
@@ -399,7 +472,7 @@ selfServiceLogValidation
 
 if [[ ${selfServiceLogInstalled} == "No" ]]; then
 
-    scriptResult+="${loggedInUser}'s selfservice.log NOT found, launching \"${selfServiceAppPath}\"; "
+    updateScriptLog "${loggedInUser}'s selfservice.log NOT found, launching \"${selfServiceAppPath}\"; "
     /usr/bin/su "${loggedInUser}" -c "/usr/bin/open \"${selfServiceAppPath}\""
 
     promptUser
@@ -409,7 +482,7 @@ if [[ ${selfServiceLogInstalled} == "No" ]]; then
 
 else
 
-    scriptResult+="${loggedInUser}'s selfservice.log found, proceeding; "
+    updateScriptLog "${loggedInUser}'s selfservice.log found, proceeding; "
 
 fi
 
@@ -421,7 +494,7 @@ fi
 
 selfServiceLaunchValidation
 
-scriptResult+="\"${selfServiceAppPath}\" has been launched for ${loggedInUser} ${selfServiceLaunches} times; "
+updateScriptLog "\"${selfServiceAppPath}\" has been launched for ${loggedInUser} ${selfServiceLaunches} times; "
 
 
 
@@ -433,7 +506,7 @@ selfServiceLoginValidation
 
 if [[ ${selfServiceLogins} -le "0" ]]; then
 
-    scriptResult+="${loggedInUser} has logged in to \"${selfServiceAppPath}\" ${selfServiceLogins} times; "
+    updateScriptLog "${loggedInUser} has logged in to \"${selfServiceAppPath}\" ${selfServiceLogins} times; "
     /usr/bin/su "${loggedInUser}" -c "/usr/bin/open \"${selfServiceAppPath}\""
 
     promptUser
@@ -443,7 +516,7 @@ if [[ ${selfServiceLogins} -le "0" ]]; then
 
 else
 
-    scriptResult+="${loggedInUser} has logged in to \"${selfServiceAppPath}\" ${selfServiceLogins} times; "
+    updateScriptLog "${loggedInUser} has logged in to \"${selfServiceAppPath}\" ${selfServiceLogins} times; "
 
 fi
 
@@ -457,19 +530,19 @@ jamfLogValidation
 
 if [[ ${jamfLogInstalled} == "No" ]]; then
 
-    scriptResult+="jamf.log NOT found, attempting to re-manage; "
+    updateScriptLog "jamf.log NOT found, attempting to re-manage; "
     /usr/local/bin/jamf manage -verbose
 
-    scriptResult+="Updating inventory; "
+    updateScriptLog "Updating inventory; "
     /usr/local/bin/jamf recon
 
-    scriptResult+="Exiting with error."
+    updateScriptLog "Exiting with error."
     echo "${scriptResult}"
     exit 1
 
 else
 
-    scriptResult+="jamf.log found, proceeding; "
+    updateScriptLog "jamf.log found, proceeding; "
 
 fi
 
@@ -483,7 +556,7 @@ selfServicePolicyValidation
 
 if [[ ${selfServicePolicyExecutions} -le "0" ]]; then
 
-    scriptResult+="${loggedInUser} has started the \"${jamfProPolicyName}\" policy ${selfServicePolicyExecutions} times; "
+    updateScriptLog "${loggedInUser} has started the \"${jamfProPolicyName}\" policy ${selfServicePolicyExecutions} times; "
     /usr/bin/su "${loggedInUser}" -c "/usr/bin/open \"${selfServiceAppPath}\""
 
     promptUser
@@ -493,7 +566,7 @@ if [[ ${selfServicePolicyExecutions} -le "0" ]]; then
 
 else
 
-     scriptResult+="${loggedInUser} has started the \"${jamfProPolicyName}\" policy ${selfServicePolicyExecutions} times; "
+     updateScriptLog "${loggedInUser} has started the \"${jamfProPolicyName}\" policy ${selfServicePolicyExecutions} times; "
 
 fi
 
@@ -507,7 +580,7 @@ selfServicePolicyCompletionValidation
 
 if [[ ${selfServicePolicyCompletion} == "No" ]]; then
 
-    scriptResult+="The \"${jamfProPolicyName}\" policy has NOT completed; launching \"${selfServiceAppPath}\"; "
+    updateScriptLog "The \"${jamfProPolicyName}\" policy has NOT completed; launching \"${selfServiceAppPath}\"; "
     /usr/bin/su "${loggedInUser}" -c "/usr/bin/open \"${selfServiceAppPath}\""
 
     promptUser
@@ -517,12 +590,12 @@ if [[ ${selfServicePolicyCompletion} == "No" ]]; then
 
 else
 
-    scriptResult+="Success! The \"${jamfProPolicyName}\" policy has completed; "
+    updateScriptLog "Success! The \"${jamfProPolicyName}\" policy has completed; "
 
-    scriptResult+="Updating inventory; "
+    updateScriptLog "Updating inventory; "
     /usr/local/bin/jamf recon
     
-    scriptResult+="Goodbye!"
+    updateScriptLog "Goodbye!"
 
     echo "${scriptResult}"
     exit 0
@@ -535,7 +608,7 @@ fi
 # Exit
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptResult+="Catch-all exit; thank you!"
+updateScriptLog "Catch-all exit; thank you!"
 
 echo "${scriptResult}"
 

@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.12.1
+### 21-Aug-2023
+- Reverted `mktemp`-created files to pre-1.12.0 code (to follow recommended approach)
+- Updated required version of swiftDialog to `2.3.1.4721`
+
 ## 1.12.0
 ### 21-Aug-2023
 - Add version check to `dialogCheck` ([Pull Request No. 67](https://github.com/dan-snelson/Setup-Your-Mac/pull/67); thanks yet again, @drtaru!)

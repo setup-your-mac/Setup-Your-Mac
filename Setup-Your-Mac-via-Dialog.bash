@@ -34,6 +34,10 @@
 #   - Added permissions correction on `mktemp`-created files (for swiftDialog `2.3`)
 #   - Updated required version of swiftDialog to `2.3.0.4718`
 #
+#   Version 1.12.1, 21-Aug-2023, Dan K. Snelson (@dan-snelson)
+#   - Reverted `mktemp`-created files to pre-1.12.0 code (to follow recommended approach)
+#   - Updated required version of swiftDialog to `2.3.1.4721`
+#
 ####################################################################################################
 
 
@@ -448,7 +452,7 @@ function dialogCheck() {
     else
 
         dialogVersion=$(/usr/local/bin/dialog --version)
-        if [[ "${dialogVersion}" < "2.3.0.4718" ]]; then
+        if [[ "${dialogVersion}" < "2.3.1.4721" ]]; then
             
             updateScriptLog "PRE-FLIGHT CHECK: swiftDialog version ${dialogVersion} found but swiftDialog 2.3.0.4718 or newer is required; updating..."
             dialogInstall
@@ -510,13 +514,10 @@ esac
 
 jamfBinary="/usr/local/bin/jamf"
 dialogBinary="/usr/local/bin/dialog"
-welcomeJSONFile=$( mktemp /var/tmp/welcomeJSONFile.XXX )
-welcomeCommandFile=$( mktemp /var/tmp/dialogCommandFileWelcome.XXX )
-setupYourMacCommandFile=$( mktemp /var/tmp/dialogCommandFileSetupYourMac.XXX )
-failureCommandFile=$( mktemp /var/tmp/dialogCommandFileFailure.XXX )
-
-# Set permissions on Dialog Command Files
-chmod -v 555 /var/tmp/dialogCommandFile*
+welcomeJSONFile=$( mktemp -u /var/tmp/welcomeJSONFile.XXX )
+welcomeCommandFile=$( mktemp -u /var/tmp/dialogCommandFileWelcome.XXX )
+setupYourMacCommandFile=$( mktemp -u /var/tmp/dialogCommandFileSetupYourMac.XXX )
+failureCommandFile=$( mktemp -u /var/tmp/dialogCommandFileFailure.XXX )
 
 
 
