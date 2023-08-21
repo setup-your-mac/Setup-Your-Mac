@@ -517,6 +517,7 @@ dialogBinary="/usr/local/bin/dialog"
 welcomeJSONFile=$( mktemp /var/tmp/welcomeJSONFile.XXX )
 welcomeCommandFile=$( mktemp /var/tmp/dialogCommandFileWelcome.XXX )
 setupYourMacCommandFile=$( mktemp /var/tmp/dialogCommandFileSetupYourMac.XXX )
+ln -sf "$setupYourMacCommandFile" "/var/tmp/dialogCommandFileSetupYourMac"   ### symlink as consistant command file for Installomator
 failureCommandFile=$( mktemp /var/tmp/dialogCommandFileFailure.XXX )
 
 # Set permissions on Dialog Files
@@ -1751,7 +1752,7 @@ function confirmPolicyExecution() {
                 updateScriptLog "SETUP YOUR MAC DIALOG: DEBUG MODE: Set 'debugMode' to false to update computer inventory with the following 'reconOptions': \"${reconOptions}\" …"
             else
                 updateScriptLog "SETUP YOUR MAC DIALOG: Updating computer inventory with the following 'reconOptions': \"${reconOptions}\" …"
-                dialogUpdateSetupYourMac "listitem: index: $i, status: wait, statustext: Updating …, "
+                dialogUpdateSetupYourMac "listitem: index: $i, title: ${list_item_array[$i]}, status: wait, statustext: Updating …, "
                 reconRaw=$( eval "${jamfBinary} recon ${reconOptions} -verbose | tee -a ${scriptLog}" )
                 computerID=$( echo "${reconRaw}" | grep '<computer_id>' | xmllint --xpath xmllint --xpath '/computer_id/text()' - )
             fi
@@ -1796,11 +1797,11 @@ function validatePolicyResult() {
         */* ) 
             updateScriptLog "SETUP YOUR MAC DIALOG: Validate Policy Result: Testing for \"$validation\" …"
             if [[ "${previouslyInstalled}" == "true" ]]; then
-                dialogUpdateSetupYourMac "listitem: index: $i, status: success, statustext: Previously Installed"
+                dialogUpdateSetupYourMac "listitem: index: $i, title: ${list_item_array[$i]}, status: success, statustext: Previously Installed"
             elif [[ -f "${validation}" ]]; then
-                dialogUpdateSetupYourMac "listitem: index: $i, status: success, statustext: Installed"
+                dialogUpdateSetupYourMac "listitem: index: $i, title: ${list_item_array[$i]}, status: success, statustext: Installed"
             else
-                dialogUpdateSetupYourMac "listitem: index: $i, status: fail, statustext: Failed"
+                dialogUpdateSetupYourMac "listitem: index: $i, title: ${list_item_array[$i]}, status: fail, statustext: Failed"
                 jamfProPolicyTriggerFailure="failed"
                 exitCode="1"
                 jamfProPolicyNameFailures+="• $listitem  \n"
@@ -1818,7 +1819,7 @@ function validatePolicyResult() {
             case ${trigger} in
                 rosetta ) 
                     updateScriptLog "SETUP YOUR MAC DIALOG: Locally Validate Policy Result: Rosetta 2 … " # Thanks, @smithjw!
-                    dialogUpdateSetupYourMac "listitem: index: $i, status: wait, statustext: Checking …"
+                    dialogUpdateSetupYourMac "listitem: index: $i, title: ${list_item_array[$i]}, status: wait, statustext: Checking …"
                     arch=$( /usr/bin/arch )
                     if [[ "${arch}" == "arm64" ]]; then
                         # Mac with Apple silicon; check for Rosetta
@@ -1826,11 +1827,11 @@ function validatePolicyResult() {
                         if [[ "${rosettaTest}" -eq 0 ]]; then
                             # Installed
                             updateScriptLog "SETUP YOUR MAC DIALOG: Locally Validate Policy Result: Rosetta 2 is installed"
-                            dialogUpdateSetupYourMac "listitem: index: $i, status: success, statustext: Running"
+                            dialogUpdateSetupYourMac "listitem: index: $i, title: ${list_item_array[$i]}, status: success, statustext: Running"
                         else
                             # Not Installed
                             updateScriptLog "SETUP YOUR MAC DIALOG: Locally Validate Policy Result: Rosetta 2 is NOT installed"
-                            dialogUpdateSetupYourMac "listitem: index: $i, status: fail, statustext: Failed"
+                            dialogUpdateSetupYourMac "listitem: index: $i, title: ${list_item_array[$i]}, status: fail, statustext: Failed"
                             jamfProPolicyTriggerFailure="failed"
                             exitCode="1"
                             jamfProPolicyNameFailures+="• $listitem  \n"
@@ -1838,12 +1839,12 @@ function validatePolicyResult() {
                     else
                         # Ineligible
                         updateScriptLog "SETUP YOUR MAC DIALOG: Locally Validate Policy Result: Rosetta 2 is not applicable"
-                        dialogUpdateSetupYourMac "listitem: index: $i, status: error, statustext: Ineligible"
+                        dialogUpdateSetupYourMac "listitem: index: $i, title: ${list_item_array[$i]}, status: error, statustext: Ineligible"
                     fi
                     ;;
                 filevault )
                     updateScriptLog "SETUP YOUR MAC DIALOG: Locally Validate Policy Result: Validate FileVault … "
-                    dialogUpdateSetupYourMac "listitem: index: $i, status: wait, statustext: Checking …"
+                    dialogUpdateSetupYourMac "listitem: index: $i, title: ${list_item_array[$i]}, status: wait, statustext: Checking …"
                     updateScriptLog "SETUP YOUR MAC DIALOG: Validate Policy Result: Pausing for 5 seconds for FileVault … "
                     sleep 5 # Arbitrary value; tuning needed
                     if [[ -f /Library/Preferences/com.apple.fdesetup.plist ]]; then
@@ -1851,14 +1852,14 @@ function validatePolicyResult() {
                         case ${fileVaultStatus} in
                             *"FileVault is On."* ) 
                                 updateScriptLog "SETUP YOUR MAC DIALOG: Locally Validate Policy Result: FileVault: FileVault is On."
-                                dialogUpdateSetupYourMac "listitem: index: $i, status: success, statustext: Enabled"
+                                dialogUpdateSetupYourMac "listitem: index: $i, title: ${list_item_array[$i]}, status: success, statustext: Enabled"
                                 ;;
                             *"Deferred enablement appears to be active for user"* )
                                 updateScriptLog "SETUP YOUR MAC DIALOG: Locally Validate Policy Result: FileVault: Enabled"
-                                dialogUpdateSetupYourMac "listitem: index: $i, status: success, statustext: Enabled (next login)"
+                                dialogUpdateSetupYourMac "listitem: index: $i, title: ${list_item_array[$i]}, status: success, statustext: Enabled (next login)"
                                 ;;
                             *  )
-                                dialogUpdateSetupYourMac "listitem: index: $i, status: error, statustext: Unknown"
+                                dialogUpdateSetupYourMac "listitem: index: $i, title: ${list_item_array[$i]}, status: error, statustext: Unknown"
                                 jamfProPolicyTriggerFailure="failed"
                                 exitCode="1"
                                 jamfProPolicyNameFailures+="• $listitem  \n"
@@ -1866,7 +1867,7 @@ function validatePolicyResult() {
                         esac
                     else
                         updateScriptLog "SETUP YOUR MAC DIALOG: Locally Validate Policy Result: '/Library/Preferences/com.apple.fdesetup.plist' NOT Found"
-                        dialogUpdateSetupYourMac "listitem: index: $i, status: fail, statustext: Failed"
+                        dialogUpdateSetupYourMac "listitem: index: $i, title: ${list_item_array[$i]}, status: fail, statustext: Failed"
                         jamfProPolicyTriggerFailure="failed"
                         exitCode="1"
                         jamfProPolicyNameFailures+="• $listitem  \n"
@@ -1874,25 +1875,25 @@ function validatePolicyResult() {
                     ;;
                 sophosEndpointServices )
                     updateScriptLog "SETUP YOUR MAC DIALOG: Locally Validate Policy Result: Sophos Endpoint RTS Status … "
-                    dialogUpdateSetupYourMac "listitem: index: $i, status: wait, statustext: Checking …"
+                    dialogUpdateSetupYourMac "listitem: index: $i, title: ${list_item_array[$i]}, status: wait, statustext: Checking …"
                     if [[ -d /Applications/Sophos/Sophos\ Endpoint.app ]]; then
                         if [[ -f /Library/Preferences/com.sophos.sav.plist ]]; then
                             sophosOnAccessRunning=$( /usr/bin/defaults read /Library/Preferences/com.sophos.sav.plist OnAccessRunning )
                             case ${sophosOnAccessRunning} in
                                 "0" ) 
                                     updateScriptLog "SETUP YOUR MAC DIALOG: Locally Validate Policy Result: Sophos Endpoint RTS Status: Disabled"
-                                    dialogUpdateSetupYourMac "listitem: index: $i, status: fail, statustext: Failed"
+                                    dialogUpdateSetupYourMac "listitem: index: $i, title: ${list_item_array[$i]}, status: fail, statustext: Failed"
                                     jamfProPolicyTriggerFailure="failed"
                                     exitCode="1"
                                     jamfProPolicyNameFailures+="• $listitem  \n"
                                     ;;
                                 "1" )
                                     updateScriptLog "SETUP YOUR MAC DIALOG: Locally Validate Policy Result: Sophos Endpoint RTS Status: Enabled"
-                                    dialogUpdateSetupYourMac "listitem: index: $i, status: success, statustext: Running"
+                                    dialogUpdateSetupYourMac "listitem: index: $i, title: ${list_item_array[$i]}, status: success, statustext: Running"
                                     ;;
                                 *  )
                                     updateScriptLog "SETUP YOUR MAC DIALOG: Locally Validate Policy Result: Sophos Endpoint RTS Status: Unknown"
-                                    dialogUpdateSetupYourMac "listitem: index: $i, status: fail, statustext: Unknown"
+                                    dialogUpdateSetupYourMac "listitem: index: $i, title: ${list_item_array[$i]}, status: fail, statustext: Unknown"
                                     jamfProPolicyTriggerFailure="failed"
                                     exitCode="1"
                                     jamfProPolicyNameFailures+="• $listitem  \n"
@@ -1900,13 +1901,13 @@ function validatePolicyResult() {
                             esac
                         else
                             updateScriptLog "SETUP YOUR MAC DIALOG: Locally Validate Policy Result: Sophos Endpoint Not Found"
-                            dialogUpdateSetupYourMac "listitem: index: $i, status: fail, statustext: Failed"
+                            dialogUpdateSetupYourMac "listitem: index: $i, title: ${list_item_array[$i]}, status: fail, statustext: Failed"
                             jamfProPolicyTriggerFailure="failed"
                             exitCode="1"
                             jamfProPolicyNameFailures+="• $listitem  \n"
                         fi
                     else
-                        dialogUpdateSetupYourMac "listitem: index: $i, status: fail, statustext: Failed"
+                        dialogUpdateSetupYourMac "listitem: index: $i, title: ${list_item_array[$i]}, status: fail, statustext: Failed"
                         jamfProPolicyTriggerFailure="failed"
                         exitCode="1"
                         jamfProPolicyNameFailures+="• $listitem  \n"
@@ -1914,7 +1915,7 @@ function validatePolicyResult() {
                     ;;
                 globalProtect )
                     updateScriptLog "SETUP YOUR MAC DIALOG: Locally Validate Policy Result: Palo Alto Networks GlobalProtect Status … "
-                    dialogUpdateSetupYourMac "listitem: index: $i, status: wait, statustext: Checking …"
+                    dialogUpdateSetupYourMac "listitem: index: $i, title: ${list_item_array[$i]}, status: wait, statustext: Checking …"
                     if [[ -d /Applications/GlobalProtect.app ]]; then
                         updateScriptLog "SETUP YOUR MAC DIALOG: Locally Validate Policy Result: Pausing for 10 seconds to allow Palo Alto Networks GlobalProtect Services … "
                         sleep 10 # Arbitrary value; tuning needed
@@ -1923,18 +1924,18 @@ function validatePolicyResult() {
                             case "${globalProtectStatus}" in
                                 "0" )
                                     updateScriptLog "SETUP YOUR MAC DIALOG: Locally Validate Policy Result: Palo Alto Networks GlobalProtect Status: Enabled"
-                                    dialogUpdateSetupYourMac "listitem: index: $i, status: success, statustext: Running"
+                                    dialogUpdateSetupYourMac "listitem: index: $i, title: ${list_item_array[$i]}, status: success, statustext: Running"
                                     ;;
                                 "1" )
                                     updateScriptLog "SETUP YOUR MAC DIALOG: Locally Validate Policy Result: Palo Alto Networks GlobalProtect Status: Disabled"
-                                    dialogUpdateSetupYourMac "listitem: index: $i, status: fail, statustext: Failed"
+                                    dialogUpdateSetupYourMac "listitem: index: $i, title: ${list_item_array[$i]}, status: fail, statustext: Failed"
                                     jamfProPolicyTriggerFailure="failed"
                                     exitCode="1"
                                     jamfProPolicyNameFailures+="• $listitem  \n"
                                     ;;
                                 *  )
                                     updateScriptLog "SETUP YOUR MAC DIALOG: Locally Validate Policy Result: Palo Alto Networks GlobalProtect Status: Unknown"
-                                    dialogUpdateSetupYourMac "listitem: index: $i, status: fail, statustext: Unknown"
+                                    dialogUpdateSetupYourMac "listitem: index: $i, title: ${list_item_array[$i]}, status: fail, statustext: Unknown"
                                     jamfProPolicyTriggerFailure="failed"
                                     exitCode="1"
                                     jamfProPolicyNameFailures+="• $listitem  \n"
@@ -1942,13 +1943,13 @@ function validatePolicyResult() {
                             esac
                         else
                             updateScriptLog "SETUP YOUR MAC DIALOG: Locally Validate Policy Result: Palo Alto Networks GlobalProtect Not Found"
-                            dialogUpdateSetupYourMac "listitem: index: $i, status: fail, statustext: Failed"
+                            dialogUpdateSetupYourMac "listitem: index: $i, title: ${list_item_array[$i]}, status: fail, statustext: Failed"
                             jamfProPolicyTriggerFailure="failed"
                             exitCode="1"
                             jamfProPolicyNameFailures+="• $listitem  \n"
                         fi
                     else
-                        dialogUpdateSetupYourMac "listitem: index: $i, status: fail, statustext: Failed"
+                        dialogUpdateSetupYourMac "listitem: index: $i, title: ${list_item_array[$i]}, status: fail, statustext: Failed"
                         jamfProPolicyTriggerFailure="failed"
                         exitCode="1"
                         jamfProPolicyNameFailures+="• $listitem  \n"
@@ -1971,18 +1972,18 @@ function validatePolicyResult() {
         "Remote" )
             if [[ "${debugMode}" == "true" ]] || [[ "${debugMode}" == "verbose" ]] ; then
                 updateScriptLog "SETUP YOUR MAC DIALOG: DEBUG MODE: Remotely Confirm Policy Execution: Skipping 'run_jamf_trigger ${trigger}'"
-                dialogUpdateSetupYourMac "listitem: index: $i, status: error, statustext: Debug Mode Enabled"
+                dialogUpdateSetupYourMac "listitem: index: $i, title: ${list_item_array[$i]}, status: error, statustext: Debug Mode Enabled"
                 sleep 0.5
             else
                 updateScriptLog "SETUP YOUR MAC DIALOG: Remotely Validate '${trigger}' '${validation}'"
-                dialogUpdateSetupYourMac "listitem: index: $i, status: wait, statustext: Checking …"
+                dialogUpdateSetupYourMac "listitem: index: $i, title: ${list_item_array[$i]}, status: wait, statustext: Checking …"
                 result=$( "${jamfBinary}" policy -event "${trigger}" | grep "Script result:" )
                 if [[ "${result}" == *"Running"* ]]; then
-                    dialogUpdateSetupYourMac "listitem: index: $i, status: success, statustext: Running"
+                    dialogUpdateSetupYourMac "listitem: index: $i, title: ${list_item_array[$i]}, status: success, statustext: Running"
                 elif [[ "${result}" == *"Installed"* || "${result}" == *"Success"*  ]]; then
-                    dialogUpdateSetupYourMac "listitem: index: $i, status: success, statustext: Installed"
+                    dialogUpdateSetupYourMac "listitem: index: $i, title: ${list_item_array[$i]}, status: success, statustext: Installed"
                 else
-                    dialogUpdateSetupYourMac "listitem: index: $i, status: fail, statustext: Failed"
+                    dialogUpdateSetupYourMac "listitem: index: $i, title: ${list_item_array[$i]}, status: fail, statustext: Failed"
                     jamfProPolicyTriggerFailure="failed"
                     exitCode="1"
                     jamfProPolicyNameFailures+="• $listitem  \n"
@@ -2001,7 +2002,7 @@ function validatePolicyResult() {
 
             outputLineNumberInVerboseDebugMode
             updateScriptLog "SETUP YOUR MAC DIALOG: Confirm Policy Execution: ${validation}"
-            dialogUpdateSetupYourMac "listitem: index: $i, status: success, statustext: Installed"
+            dialogUpdateSetupYourMac "listitem: index: $i, title: ${list_item_array[$i]}, status: success, statustext: Installed"
             ;;
 
 
@@ -2015,7 +2016,7 @@ function validatePolicyResult() {
 
             outputLineNumberInVerboseDebugMode
             updateScriptLog "SETUP YOUR MAC DIALOG: Confirm Policy Execution: ${validation}"
-            dialogUpdateSetupYourMac "listitem: index: $i, status: success, statustext: Updated"
+            dialogUpdateSetupYourMac "listitem: index: $i, title: ${list_item_array[$i]}, status: success, statustext: Updated"
             ;;
 
 
@@ -2028,7 +2029,7 @@ function validatePolicyResult() {
 
             outputLineNumberInVerboseDebugMode
             updateScriptLog "SETUP YOUR MAC DIALOG: Validate Policy Results Catch-all: ${validation}"
-            dialogUpdateSetupYourMac "listitem: index: $i, status: error, statustext: Error"
+            dialogUpdateSetupYourMac "listitem: index: $i, title: ${list_item_array[$i]}, status: error, statustext: Error"
             ;;
 
     esac
@@ -3078,7 +3079,7 @@ for (( i=0; i<dialog_step_length; i++ )); do
     # If there's a value in the variable, update running swiftDialog
     if [[ -n "$listitem" ]]; then
         updateScriptLog "\n\n# # #\n# SETUP YOUR MAC DIALOG: policyJSON > listitem: ${listitem}\n# # #\n"
-        dialogUpdateSetupYourMac "listitem: index: $i, status: wait, statustext: Installing …, "
+        dialogUpdateSetupYourMac "listitem: index: $i, title: ${list_item_array[$i]}, status: wait, statustext: Installing …, "
     fi
     if [[ -n "$icon" ]]; then dialogUpdateSetupYourMac "icon: ${setupYourMacPolicyArrayIconPrefixUrl}${icon}"; fi
     if [[ -n "$progresstext" ]]; then dialogUpdateSetupYourMac "progresstext: $progresstext"; fi
