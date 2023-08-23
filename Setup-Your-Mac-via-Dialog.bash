@@ -38,9 +38,12 @@
 #   - Added permissions correction on ALL `mktemp`-created files (for swiftDialog `2.3.1`)
 #   - Updated required version of swiftDialog to `2.3.1.4721`
 #
-#   Version 1.12.2, 21-Aug-2023, Dan K. Snelson (@dan-snelson)
+#   Version 1.12.2, 22-Aug-2023, Dan K. Snelson (@dan-snelson)
 #   - Updated minimum version of macOS to 12
 #   - Corrected deletion of cached welcomeBannerImage
+#
+#   Version 1.12.3, 23-Aug-2023, Dan K. Snelson (@dan-snelson)
+#   - Changed `dialogURL` to new GitHub Repo ([Pull Request No. 88](https://github.com/dan-snelson/Setup-Your-Mac/pull/88); thanks yet again, @drtaru!)
 #
 ####################################################################################################
 
@@ -56,7 +59,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.12.2"
+scriptVersion="1.12.3"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -549,12 +552,12 @@ else
     welcomeMessage=${welcomeMessage//", select your preferred **Configuration**"/}
 fi
 
-
 if [[ -n "${brandingBanner}" ]]; then
     welcomeBannerImage="${brandingBanner}"
 else
     welcomeBannerImage="https://img.freepik.com/free-photo/yellow-watercolor-paper_95678-446.jpg"
 fi
+
 if [[ "${brandingBannerDisplayText}" == "true" ]]; then welcomeBannerText="Happy $( date +'%A' ), ${loggedInUserFirstname}!  \nWelcome to your new ${modelName}";
 else welcomeBannerText=""; fi
 welcomeCaption="Please review the above video, then click Continue."

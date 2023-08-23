@@ -1,7 +1,11 @@
 # CHANGELOG
 
+## 1.12.3
+### 23-Aug-2023
+- Changed `dialogURL` to new GitHub Repo ([Pull Request No. 88](https://github.com/dan-snelson/Setup-Your-Mac/pull/88); thanks yet again, @drtaru!)
+
 ## 1.12.2
-### 21-Aug-2023
+### 22-Aug-2023
 - Updated minimum version of macOS to 12
 - Corrected deletion of cached welcomeBannerImage
 
