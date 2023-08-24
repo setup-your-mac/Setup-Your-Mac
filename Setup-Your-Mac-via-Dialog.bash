@@ -2534,7 +2534,9 @@ function quitScript() {
     killProcess "caffeinate"
 
     # Toggle `jamf` binary check-in 
-    # toggleJamfLaunchDaemon
+    if [[ "${completionActionOption}" == "Log Out"* ]] || [[ "${completionActionOption}" == "Sleep"* ]] || [[ "${completionActionOption}" == "Quit" ]] || [[ "${completionActionOption}" == "wait" ]] ; then
+		toggleJamfLaunchDaemon
+	fi
     
     # Remove welcomeCommandFile
     if [[ -e ${welcomeCommandFile} ]]; then
