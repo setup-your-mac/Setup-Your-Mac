@@ -44,7 +44,6 @@
 #
 #   Version 1.12.3, 23-Aug-2023, Dan K. Snelson (@dan-snelson)
 #   - Changed `dialogURL` to new GitHub Repo ([Pull Request No. 88](https://github.com/dan-snelson/Setup-Your-Mac/pull/88); thanks yet again, @drtaru!)
-#
 ####################################################################################################
 
 
@@ -61,7 +60,7 @@
 
 scriptVersion="1.12.3"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
-scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
+scriptLog="${4:-"/var/log/(LOG LOCATION)"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
 welcomeDialog="${6:-"userInput"}"                                               # Parameter 6: Welcome dialog [ userInput (default) | video | messageOnly | false ]
 completionActionOption="${7:-"Restart Attended"}"                               # Parameter 7: Completion Action [ wait | sleep (with seconds) | Shut Down | Shut Down Attended | Shut Down Confirm | Restart | Restart Attended (default) | Restart Confirm | Log Out | Log Out Attended | Log Out Confirm ]
@@ -91,11 +90,13 @@ prefillUsername="true"          # prefills the currently logged in user's userna
 promptForRealName="true"
 prefillRealname="true"          # prefills the currently logged in user's fullname
 promptForEmail="true"
+prefillEmail="true"             # prefills email based on username and email ending variable
 promptForComputerName="true"
-promptForAssetTag="true"
-promptForRoom="true"
-promptForBuilding="true"
-promptForDepartment="true"
+prefillComputerName="true"      # prefills based on current computer name 
+promptForAssetTag="false"
+promptForRoom="false"
+promptForBuilding="false"
+promptForDepartment="false"
 promptForConfiguration="true"   # Removes the Configuration dropdown entirely and uses the "Catch-all (i.e., used when `welcomeDialog` is set to `video` or `false`)" or presetConfiguration policyJSON
 
 # Set to "true" to suppress the Update Inventory option on policies that are called
@@ -105,22 +106,31 @@ suppressReconOnPolicy="false"
 moveableInProduction="false"
 
 # An unsorted, comma-separated list of buildings (with possible duplication). If empty, this will be hidden from the user info prompt
-buildingsListRaw="Benson (Ezra Taft) Building,Brimhall (George H.) Building,BYU Conference Center,Centennial Carillon Tower,Chemicals Management Building,Clark (Herald R.) Building,Clark (J. Reuben) Building,Clyde (W.W.) Engineering Building,Crabtree (Roland A.) Technology Building,Ellsworth (Leo B.) Building,Engineering Building,Eyring (Carl F.) Science Center,Grant (Heber J.) Building,Harman (Caroline Hemenway) Building,Harris (Franklin S.) Fine Arts Center,Johnson (Doran) House East,Kimball (Spencer W.) Tower,Knight (Jesse) Building,Lee (Harold B.) Library,Life Sciences Building,Life Sciences Greenhouses,Maeser (Karl G.) Building,Martin (Thomas L.) Building,McKay (David O.) Building,Nicholes (Joseph K.) Building,Smith (Joseph F.) Building,Smith (Joseph) Building,Snell (William H.) Building,Talmage (James E.) Math Sciences/Computer Building,Tanner (N. Eldon) Building,Taylor (John) Building,Wells (Daniel H.) Building"
+buildingsListRaw="N/A"
 
 # A sorted, unique, JSON-compatible list of buildings
 buildingsList=$( echo "${buildingsListRaw}" | tr ',' '\n' | sort -f | uniq | sed -e 's/^/\"/' -e 's/$/\",/' -e '$ s/.$//' )
 
 # An unsorted, comma-separated list of departments (with possible duplication). If empty, this will be hidden from the user info prompt
-departmentListRaw="Asset Management,Sales,Australia Area Office,Purchasing / Sourcing,Board of Directors,Strategic Initiatives & Programs,Operations,Business Development,Marketing,Creative Services,Customer Service / Customer Experience,Risk Management,Engineering,Finance / Accounting,Sales,General Management,Human Resources,Marketing,Investor Relations,Legal,Marketing,Sales,Product Management,Production,Corporate Communications,Information Technology / Technology,Quality Assurance,Project Management Office,Sales,Technology"
+departmentListRaw="N/A"
 
 # A sorted, unique, JSON-compatible list of departments
 departmentList=$( echo "${departmentListRaw}" | tr ',' '\n' | sort -f | uniq | sed -e 's/^/\"/' -e 's/$/\",/' -e '$ s/.$//' )
 
+# Email ending variable (@gmail.com, @yahoo.com, @someschool.edu, etc.)
+emailEnding=""
+
+# Set the custom folder path for the receipt file (location for reciept folder to be located)
+folder_path=""
+
+# Receipt Path for Extension attribute (location of where you want your receipt to be located and part the readable extension attribute)
+receipt_path="/usr/local/receipts/SYMResults.txt"
+
 # Branding overrides
-brandingBanner="https://img.freepik.com/free-vector/abstract-orange-background-with-lines-halftone-effect_1017-32107.jpg"
+brandingBanner=""
 brandingBannerDisplayText="true"
-brandingIconLight="https://cdn-icons-png.flaticon.com/512/979/979585.png"
-brandingIconDark="https://cdn-icons-png.flaticon.com/512/740/740878.png"
+brandingIconLight=""
+brandingIconDark=""
 
 # IT Support Variables - Use these if the default text is fine but you want your org's info inserted instead
 supportTeamName="Help Desk"
@@ -144,7 +154,7 @@ if [[ -n $osVersionExtra ]] && [[ "${osMajorVersion}" -ge 13 ]]; then osVersion=
 modelName=$( /usr/libexec/PlistBuddy -c 'Print :0:_items:0:machine_name' /dev/stdin <<< "$(system_profiler -xml SPHardwareDataType)" )
 reconOptions=""
 exitCode="0"
-
+ComputerName=$(scutil --get ComputerName)
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -294,7 +304,7 @@ if [[ "${requiredMinimumBuild}" == "disabled" ]]; then
 
 else
 
-    # Since swiftDialog requires at least macOS 12 Monterey, first confirm the major OS version
+    # Since swiftDialog requires at least macOS 11 Big Sur, first confirm the major OS version
     if [[ "${osMajorVersion}" -ge 12 ]] ; then
 
         updateScriptLog "PRE-FLIGHT CHECK: macOS ${osMajorVersion} installed; checking build version ..."
@@ -542,23 +552,23 @@ chmod -v 666 /var/tmp/dialogCommandFile*
 # "Welcome" dialog Title, Message and Icon
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-welcomeTitle="Happy $( date +'%A' ), ${loggedInUserFirstname}!  \nWelcome to your new ${modelName}"
+welcomeTitle="Welcome to your new ${modelName} ${loggedInUserFirstname}!"
 
-welcomeMessage="Please enter the **required** information for your ${modelName}, select your preferred **Configuration** then click **Continue** to start applying settings to your new Mac. \n\nOnce completed, the **Wait** button will be enabled and you‘ll be able to review the results before restarting your ${modelName}.  \n\nIf you need assistance, please contact the ${supportTeamName} at  \n${supportTeamPhone} and mention ${supportKB}.  \n\n---"
+welcomeMessage="Please enter the **required** information for your ${modelName}, select your preferred **Configuration** then click **Continue** to start applying settings to your new Mac. \n\nOnce completed, the **Wait** button will be enabled and you‘ll be able to review the results before restarting your ${modelName}.  \n\nIf you need assistance, please contact the ${supportTeamName} at  \n${supportTeamPhone}. \n\n---"
 
 if { [[ "${promptForConfiguration}" == "true" ]] && [[ "${welcomeDialog}" != "messageOnly" ]]; } then
-    welcomeMessage+="  \n\n#### Configurations  \n- **${configurationOneName}:** ${configurationOneDescription}  \n- **${configurationTwoName}:** ${configurationTwoDescription}  \n- **${configurationThreeName}:** ${configurationThreeDescription}"
+    welcomeMessage+="  \n\n#### Configurations  \n\n- **${configurationOneName}:** ${configurationOneDescription}  \n\n- **${configurationTwoName}:** ${configurationTwoDescription}  \n\n- **${configurationThreeName}:** ${configurationThreeDescription}"
 else
     welcomeMessage=${welcomeMessage//", select your preferred **Configuration**"/}
 fi
 
+
 if [[ -n "${brandingBanner}" ]]; then
     welcomeBannerImage="${brandingBanner}"
 else
-    welcomeBannerImage="https://img.freepik.com/free-photo/yellow-watercolor-paper_95678-446.jpg"
+    welcomeBannerImage="https://img.freepik.com/free-photo/yellow-watercolor-paper_95678-448.jpg"
 fi
-
-if [[ "${brandingBannerDisplayText}" == "true" ]]; then welcomeBannerText="Happy $( date +'%A' ), ${loggedInUserFirstname}!  \nWelcome to your new ${modelName}";
+if [[ "${brandingBannerDisplayText}" == "true" ]]; then welcomeBannerText="Welcome to your new ${modelName} ${loggedInUserFirstname}!";
 else welcomeBannerText=""; fi
 welcomeCaption="Please review the above video, then click Continue."
 welcomeVideoID="vimeoid=844672129"
@@ -616,17 +626,19 @@ welcomeVideo="--title \"$welcomeTitle\" \
 # Text Fields
 if [ "$prefillUsername" == "true" ]; then usernamePrefil=',"value" : "'${loggedInUser}'"'; fi
 if [ "$prefillRealname" == "true" ]; then realnamePrefil=',"value" : "'${loggedInUserFullname}'"'; fi
-if [ "$promptForUsername" == "true" ]; then usernameJSON='{ "title" : "User Name","required" : false,"prompt" : "User Name"'${usernamePrefil}'},'; fi
-if [ "$promptForRealName" == "true" ]; then realNameJSON='{ "title" : "Full Name","required" : false,"prompt" : "Full Name"'${realnamePrefil}'},'; fi
+if [ "$promptForUsername" == "true" ]; then usernameJSON='{ "title" : "NetID","required" : true,"prompt" : "NetID"'${usernamePrefil}'},'; fi
+if [ "$promptForRealName" == "true" ]; then realNameJSON='{ "title" : "Full Name","required" : true,"prompt" : "Full Name"'${realnamePrefil}'},'; fi
+if [ "$prefillEmail" == "true" ]; then emailPrefil=',"value" : "'${loggedInUser}${emailEnding}'"'; fi
 if [ "$promptForEmail" == "true" ]; then
     emailJSON='{   "title" : "E-mail",
         "required" : true,
-        "prompt" : "E-mail Address",
+        "prompt" : "NetID@tamu.edu"'${emailPrefil}',
         "regex" : "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
         "regexerror" : "Please enter a valid email address."
     },'
 fi
-if [ "$promptForComputerName" == "true" ]; then compNameJSON='{ "title" : "Computer Name","required" : false,"prompt" : "Computer Name" },'; fi
+if [ "$prefillComputerName" == "true" ]; then computerNamePrefill=',"value" : "'${ComputerName}'"'; fi
+if [ "$promptForComputerName" == "true" ]; then compNameJSON='{ "title" : "Computer Name","required" : false,"prompt" : "Computer Name"'${computerNamePrefill}'},'; fi
 if [ "$promptForAssetTag" == "true" ]; then
     assetTagJSON='{   "title" : "Asset Tag",
         "required" : true,
@@ -832,7 +844,7 @@ dialogSetupYourMacCMD="$dialogBinary \
 # The fully qualified domain name of the server which hosts your icons, including any required sub-directories
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-setupYourMacPolicyArrayIconPrefixUrl="https://ics.services.jamfcloud.com/icon/hash_"
+setupYourMacPolicyArrayIconPrefixUrl="https://usw2.ics.services.jamfcloud.com/icon/hash_"
 
 
 
@@ -1557,11 +1569,13 @@ function finalise(){
     if [[ "${jamfProPolicyTriggerFailure}" == "failed" ]]; then
 
         outputLineNumberInVerboseDebugMode
-        updateScriptLog "Failed polcies detected …"
+        updateScriptLog "Failed policies detected …"
         if [[ -n "${webhookURL}" ]]; then
             updateScriptLog "Display Failure dialog: Sending webhook message"
             webhookStatus="Failures detected"
             webHookMessage
+            mkdir -p ${folder_path}
+            if [[ "${webhookStatus}" == "FailuresDetected" ]] ; then echo ${webhookStatus} > $receipt_path; fi
         fi
 
         if [[ "${failureDialog}" == "true" ]]; then
@@ -1587,7 +1601,7 @@ function finalise(){
             updateScriptLog "Jamf Pro Policy Name Failures:"
             updateScriptLog "${jamfProPolicyNameFailures}"
 
-            dialogUpdateFailure "message: A failure has been detected, ${loggedInUserFirstname}. \n\nPlease complete the following steps:\n1. Reboot and login to your ${modelName}  \n2. Login to Self Service  \n3. Re-run any failed policy listed below  \n\nThe following failed:  \n${jamfProPolicyNameFailures}  \n\n\n\nIf you need assistance, please contact the ${supportTeamName},  \n${supportTeamPhone}${supportTeamErrorKB}. "
+            dialogUpdateFailure "message: A failure has been detected, ${loggedInUserFirstname}. \n\nPlease complete the following steps:\n1. Reboot and login to your ${modelName}  \n2. Open to Self Service  \n3. Re-run any failed policy listed below  \n\nThe following failed:  \n${jamfProPolicyNameFailures}  \n\n\n\nIf you need assistance, please contact the ${supportTeamName},  \n${supportTeamPhone}. "
             dialogUpdateFailure "icon: SF=xmark.circle.fill,weight=bold,colour1=#BB1717,colour2=#F31F1F"
             dialogUpdateFailure "button1text: ${button1textCompletionActionOption}"
 
@@ -1629,6 +1643,8 @@ function finalise(){
             webhookStatus="Successful"
             updateScriptLog "Sending success webhook message"
             webHookMessage
+            mkdir -p ${folder_path}
+            if [[ "${webhookStatus}" == "Successful" ]] ; then echo ${webhookStatus} > $receipt_path; fi
         fi
 
         if [[ "${brandingBannerDisplayText}" == "true" ]] ; then dialogUpdateSetupYourMac "title: ${loggedInUserFirstname}‘s ${modelName} is ready!"; fi
@@ -1821,7 +1837,7 @@ function validatePolicyResult() {
         # Validation within this script, for example: "rosetta" or "filevault"
         ###
 
-        "Local" )
+       "Local" )
             case ${trigger} in
                 rosetta ) 
                     updateScriptLog "SETUP YOUR MAC DIALOG: Locally Validate Policy Result: Rosetta 2 … " # Thanks, @smithjw!
@@ -2415,7 +2431,7 @@ function webHookMessage() {
                         },
                         {
                             "type": "mrkdwn",
-                            "text": "*Additional Comments:*\n${jamfProPolicyNameFailures}"
+                            "text": "*Policy Failures:*\n${jamfProPolicyNameFailures}"
                         }
                     ]
                 },
@@ -2484,7 +2500,7 @@ EOF
             "name": "Operating System Version",
             "value": "${osVersion}"
         }, {
-            "name": "Additional Comments",
+            "name": "Policy Failures",
             "value": "${jamfProPolicyNameFailures}"
 }],
         "markdown": true,
@@ -2563,11 +2579,11 @@ function quitScript() {
     # Check for user clicking "Quit" at Welcome dialog
     if [[ "${welcomeReturnCode}" == "2" ]]; then
         
-        # Remove custom welcomeBannerImageFileName
-        if [[ -e "/var/tmp/${welcomeBannerImageFileName}" ]]; then
-            updateScriptLog "COMPLETION ACTION: Removing /var/tmp/${welcomeBannerImageFileName} …"
-            rm "/var/tmp/${welcomeBannerImageFileName}"
-        fi
+       # Remove custom welcomeBannerImageFileName
+    if [[ -e "/var/tmp/${welcomeBannerImageFileName}" ]]; then
+        updateScriptLog "COMPLETION ACTION: Removing /var/tmp/${welcomeBannerImageFileName} …"
+        rm "/var/tmp/${welcomeBannerImageFileName}"
+    fi
 
         # Remove overlayicon
         if [[ -e ${overlayicon} ]]; then
@@ -2733,7 +2749,7 @@ elif [[ "${welcomeDialog}" == "userInput" ]]; then
             ###
 
             computerName=$(get_json_value_welcomeDialog "$welcomeResults" "Computer Name")
-            userName=$(get_json_value_welcomeDialog "$welcomeResults" "User Name")
+            userName=$(get_json_value_welcomeDialog "$welcomeResults" "NetID")
             realName=$(get_json_value_welcomeDialog "$welcomeResults" "Full Name")
             email=$(get_json_value_welcomeDialog "$welcomeResults" "E-mail")
             assetTag=$(get_json_value_welcomeDialog "$welcomeResults" "Asset Tag")
@@ -2749,7 +2765,7 @@ elif [[ "${welcomeDialog}" == "userInput" ]]; then
             ###
 
             updateScriptLog "WELCOME DIALOG: • Computer Name: $computerName"
-            updateScriptLog "WELCOME DIALOG: • User Name: $userName"
+            updateScriptLog "WELCOME DIALOG: • NetID: $userName"
             updateScriptLog "WELCOME DIALOG: • Real Name: $realName"
             updateScriptLog "WELCOME DIALOG: • E-mail: $email"
             updateScriptLog "WELCOME DIALOG: • Asset Tag: $assetTag"
@@ -2814,7 +2830,7 @@ elif [[ "${welcomeDialog}" == "userInput" ]]; then
 
             fi
 
-            # User Name
+            # NetID
             if [[ -n "${userName}" ]]; then
                 # UNTESTED, UNSUPPORTED "YOYO" EXAMPLE
                 reconOptions+="-endUsername \"${userName}\" "
@@ -3027,7 +3043,8 @@ infobox=""
 
 if [[ -n ${comment} ]]; then infobox+="**Comment:**  \n$comment  \n\n" ; fi
 if [[ -n ${computerName} ]]; then infobox+="**Computer Name:**  \n$computerName  \n\n" ; fi
-if [[ -n ${userName} ]]; then infobox+="**Username:**  \n$userName  \n\n" ; fi
+if [[ -n ${userName} ]]; then infobox+="**NetID:**  \n$userName  \n\n" ; fi
+if [[ -n ${email} ]]; then infobox+="**Email:**  \n$email  \n\n" ; fi
 if [[ -n ${assetTag} ]]; then infobox+="**Asset Tag:**  \n$assetTag  \n\n" ; fi
 if [[ -n ${infoboxConfiguration} ]]; then infobox+="**Configuration:**  \n$infoboxConfiguration  \n\n" ; fi
 if [[ -n ${department} ]]; then infobox+="**Department:**  \n$department  \n\n" ; fi
@@ -3055,7 +3072,7 @@ if [[ "${symConfiguration}" != *"Catch-all"* ]]; then
 
         updateScriptLog "Update 'helpmessage' with Configuration: ${infoboxConfiguration} …"
 
-        helpmessage="If you need assistance, please contact the ${supportTeamName}:  \n- **Telephone:** ${supportTeamPhone}  \n- **Email:** ${supportTeamEmail}  \n- **Knowledge Base Article:** ${supportKB}  \n\n**Configuration:** \n- ${infoboxConfiguration}  \n\n**Computer Information:**  \n- **Operating System:**  ${macOSproductVersion} (${macOSbuildVersion})  \n- **Serial Number:** ${serialNumber}  \n- **Dialog:** ${dialogVersion}  \n- **Started:** ${timestamp}"
+        helpmessage="If you need assistance, please contact the ${supportTeamName}:  \n- **Telephone:** ${supportTeamPhone}  \n- **Email:** ${supportTeamEmail}  \n\n**Configuration:** \n- ${infoboxConfiguration}  \n\n**Computer Information:**  \n- **Operating System:**  ${macOSproductVersion} (${macOSbuildVersion})  \n- **Serial Number:** ${serialNumber}  \n- **Dialog:** ${dialogVersion}  \n- **Started:** ${timestamp}"
         
     fi
 
