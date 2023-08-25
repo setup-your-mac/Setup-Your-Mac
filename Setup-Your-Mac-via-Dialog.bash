@@ -626,13 +626,13 @@ welcomeVideo="--title \"$welcomeTitle\" \
 # Text Fields
 if [ "$prefillUsername" == "true" ]; then usernamePrefil=',"value" : "'${loggedInUser}'"'; fi
 if [ "$prefillRealname" == "true" ]; then realnamePrefil=',"value" : "'${loggedInUserFullname}'"'; fi
-if [ "$promptForUsername" == "true" ]; then usernameJSON='{ "title" : "NetID","required" : true,"prompt" : "NetID"'${usernamePrefil}'},'; fi
+if [ "$promptForUsername" == "true" ]; then usernameJSON='{ "title" : "User Name","required" : true,"prompt" : "User Name"'${usernamePrefil}'},'; fi
 if [ "$promptForRealName" == "true" ]; then realNameJSON='{ "title" : "Full Name","required" : true,"prompt" : "Full Name"'${realnamePrefil}'},'; fi
 if [ "$prefillEmail" == "true" ]; then emailPrefil=',"value" : "'${loggedInUser}${emailEnding}'"'; fi
 if [ "$promptForEmail" == "true" ]; then
     emailJSON='{   "title" : "E-mail",
         "required" : true,
-        "prompt" : "NetID@tamu.edu"'${emailPrefil}',
+        "prompt" : "Email Address"'${emailPrefil}',
         "regex" : "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
         "regexerror" : "Please enter a valid email address."
     },'
@@ -1601,7 +1601,7 @@ function finalise(){
             updateScriptLog "Jamf Pro Policy Name Failures:"
             updateScriptLog "${jamfProPolicyNameFailures}"
 
-            dialogUpdateFailure "message: A failure has been detected, ${loggedInUserFirstname}. \n\nPlease complete the following steps:\n1. Reboot and login to your ${modelName}  \n2. Open to Self Service  \n3. Re-run any failed policy listed below  \n\nThe following failed:  \n${jamfProPolicyNameFailures}  \n\n\n\nIf you need assistance, please contact the ${supportTeamName},  \n${supportTeamPhone}. "
+            dialogUpdateFailure "message: A failure has been detected, ${loggedInUserFirstname}. \n\nPlease complete the following steps:\n1. Reboot and login to your ${modelName}  \n2. Open to Self Service  \n3. Re-run any failed policy listed below  \n\nThe following failed:  \n${jamfProPolicyNameFailures}  \n\n\n\nIf you need assistance, please contact the ${supportTeamName},  \n${supportTeamPhone} \n${supportTeamErrorKB}. "
             dialogUpdateFailure "icon: SF=xmark.circle.fill,weight=bold,colour1=#BB1717,colour2=#F31F1F"
             dialogUpdateFailure "button1text: ${button1textCompletionActionOption}"
 
@@ -2749,7 +2749,7 @@ elif [[ "${welcomeDialog}" == "userInput" ]]; then
             ###
 
             computerName=$(get_json_value_welcomeDialog "$welcomeResults" "Computer Name")
-            userName=$(get_json_value_welcomeDialog "$welcomeResults" "NetID")
+            userName=$(get_json_value_welcomeDialog "$welcomeResults" "User Name")
             realName=$(get_json_value_welcomeDialog "$welcomeResults" "Full Name")
             email=$(get_json_value_welcomeDialog "$welcomeResults" "E-mail")
             assetTag=$(get_json_value_welcomeDialog "$welcomeResults" "Asset Tag")
@@ -2765,7 +2765,7 @@ elif [[ "${welcomeDialog}" == "userInput" ]]; then
             ###
 
             updateScriptLog "WELCOME DIALOG: • Computer Name: $computerName"
-            updateScriptLog "WELCOME DIALOG: • NetID: $userName"
+            updateScriptLog "WELCOME DIALOG: • User Name: $userName"
             updateScriptLog "WELCOME DIALOG: • Real Name: $realName"
             updateScriptLog "WELCOME DIALOG: • E-mail: $email"
             updateScriptLog "WELCOME DIALOG: • Asset Tag: $assetTag"
@@ -2830,7 +2830,7 @@ elif [[ "${welcomeDialog}" == "userInput" ]]; then
 
             fi
 
-            # NetID
+            # User Name
             if [[ -n "${userName}" ]]; then
                 # UNTESTED, UNSUPPORTED "YOYO" EXAMPLE
                 reconOptions+="-endUsername \"${userName}\" "
@@ -3043,7 +3043,7 @@ infobox=""
 
 if [[ -n ${comment} ]]; then infobox+="**Comment:**  \n$comment  \n\n" ; fi
 if [[ -n ${computerName} ]]; then infobox+="**Computer Name:**  \n$computerName  \n\n" ; fi
-if [[ -n ${userName} ]]; then infobox+="**NetID:**  \n$userName  \n\n" ; fi
+if [[ -n ${userName} ]]; then infobox+="**User Name:**  \n$userName  \n\n" ; fi
 if [[ -n ${email} ]]; then infobox+="**Email:**  \n$email  \n\n" ; fi
 if [[ -n ${assetTag} ]]; then infobox+="**Asset Tag:**  \n$assetTag  \n\n" ; fi
 if [[ -n ${infoboxConfiguration} ]]; then infobox+="**Configuration:**  \n$infoboxConfiguration  \n\n" ; fi
@@ -3072,7 +3072,7 @@ if [[ "${symConfiguration}" != *"Catch-all"* ]]; then
 
         updateScriptLog "Update 'helpmessage' with Configuration: ${infoboxConfiguration} …"
 
-        helpmessage="If you need assistance, please contact the ${supportTeamName}:  \n- **Telephone:** ${supportTeamPhone}  \n- **Email:** ${supportTeamEmail}  \n\n**Configuration:** \n- ${infoboxConfiguration}  \n\n**Computer Information:**  \n- **Operating System:**  ${macOSproductVersion} (${macOSbuildVersion})  \n- **Serial Number:** ${serialNumber}  \n- **Dialog:** ${dialogVersion}  \n- **Started:** ${timestamp}"
+        helpmessage="If you need assistance, please contact the ${supportTeamName}:  \n- **Telephone:** ${supportTeamPhone}  \n- **Email:** ${supportTeamEmail} \n- **Knowledge Base Article:** ${supportKB} \n\n**Configuration:** \n- ${infoboxConfiguration}  \n\n**Computer Information:**  \n- **Operating System:**  ${macOSproductVersion} (${macOSbuildVersion})  \n- **Serial Number:** ${serialNumber}  \n- **Dialog:** ${dialogVersion}  \n- **Started:** ${timestamp}"
         
     fi
 
