@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.12.4
+### 26-Aug-2023
+- `toggleJamfLaunchDaemon` (during `quitScript` function) based on `completionActionOption` ([Pull Request No. 89](https://github.com/dan-snelson/Setup-Your-Mac/pull/89); thanks for another one, @TechTrekkie!)
+
 ## 1.12.3
 ### 23-Aug-2023
 - Changed `dialogURL` to new GitHub Repo ([Pull Request No. 88](https://github.com/dan-snelson/Setup-Your-Mac/pull/88); thanks yet again, @drtaru!)
