@@ -48,6 +48,9 @@
 #   Version 1.12.4, 26-Aug-2023, Dan K. Snelson (@dan-snelson)
 #   - `toggleJamfLaunchDaemon` (during `quitScript` function) based on `completionActionOption` ([Pull Request No. 89](https://github.com/dan-snelson/Setup-Your-Mac/pull/89); thanks for another one, @TechTrekkie!)
 #
+#   Version 1.12.5, 28-Aug-2023, Dan K. Snelson (@dan-snelson)
+#   - Added `sleep "${debugModeSleepAmount}"` to `recon` validation
+#
 ####################################################################################################
 
 
@@ -62,7 +65,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.12.4"
+scriptVersion="1.12.5"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -1759,6 +1762,7 @@ function confirmPolicyExecution() {
             updateScriptLog "SETUP YOUR MAC DIALOG: Confirm Policy Execution: ${validation}"
             if [[ "${debugMode}" == "true" ]] || [[ "${debugMode}" == "verbose" ]] ; then
                 updateScriptLog "SETUP YOUR MAC DIALOG: DEBUG MODE: Set 'debugMode' to false to update computer inventory with the following 'reconOptions': \"${reconOptions}\" …"
+                sleep "${debugModeSleepAmount}"
             else
                 updateScriptLog "SETUP YOUR MAC DIALOG: Updating computer inventory with the following 'reconOptions': \"${reconOptions}\" …"
                 dialogUpdateSetupYourMac "listitem: index: $i, status: wait, statustext: Updating …, "

@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.12.5
+### 28-Aug-2023
+- Added `sleep "${debugModeSleepAmount}"` to `recon` validation
+
 ## 1.12.4
 ### 26-Aug-2023
 - `toggleJamfLaunchDaemon` (during `quitScript` function) based on `completionActionOption` ([Pull Request No. 89](https://github.com/dan-snelson/Setup-Your-Mac/pull/89); thanks for another one, @TechTrekkie!)
