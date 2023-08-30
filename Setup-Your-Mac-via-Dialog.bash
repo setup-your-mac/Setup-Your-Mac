@@ -51,6 +51,10 @@
 #   Version 1.12.5, 28-Aug-2023, Dan K. Snelson (@dan-snelson)
 #   - Added `sleep "${debugModeSleepAmount}"` to `recon` validation
 #
+#   Version 1.12.6, 30-Aug-2023, Dan K. Snelson (@dan-snelson)
+#   - Reverted `mktemp`-created files to pre-SYM `1.12.1` behaviour
+#   - Updated required version of swiftDialog to `2.3.2.4726`
+#
 ####################################################################################################
 
 
@@ -65,7 +69,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.12.5"
+scriptVersion="1.12.6"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -465,9 +469,9 @@ function dialogCheck() {
     else
 
         dialogVersion=$(/usr/local/bin/dialog --version)
-        if [[ "${dialogVersion}" < "2.3.1.4721" ]]; then
+        if [[ "${dialogVersion}" < "2.3.2.4726" ]]; then
             
-            updateScriptLog "PRE-FLIGHT CHECK: swiftDialog version ${dialogVersion} found but swiftDialog 2.3.0.4718 or newer is required; updating..."
+            updateScriptLog "PRE-FLIGHT CHECK: swiftDialog version ${dialogVersion} found but swiftDialog 2.3.2.4726 or newer is required; updating..."
             dialogInstall
             
         else
@@ -527,14 +531,10 @@ esac
 
 jamfBinary="/usr/local/bin/jamf"
 dialogBinary="/usr/local/bin/dialog"
-welcomeJSONFile=$( mktemp /var/tmp/welcomeJSONFile.XXX )
-welcomeCommandFile=$( mktemp /var/tmp/dialogCommandFileWelcome.XXX )
-setupYourMacCommandFile=$( mktemp /var/tmp/dialogCommandFileSetupYourMac.XXX )
-failureCommandFile=$( mktemp /var/tmp/dialogCommandFileFailure.XXX )
-
-# Set permissions on Dialog Files
-chmod -v 666 "${welcomeJSONFile}"
-chmod -v 666 /var/tmp/dialogCommandFile*
+welcomeJSONFile=$( mktemp -u /var/tmp/welcomeJSONFile.XXX )
+welcomeCommandFile=$( mktemp -u /var/tmp/dialogCommandFileWelcome.XXX )
+setupYourMacCommandFile=$( mktemp -u /var/tmp/dialogCommandFileSetupYourMac.XXX )
+failureCommandFile=$( mktemp -u /var/tmp/dialogCommandFileFailure.XXX )
 
 
 

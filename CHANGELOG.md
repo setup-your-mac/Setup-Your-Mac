@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.12.6
+### 30-Aug-2023
+- Reverted `mktemp`-created files to pre-SYM `1.12.1` behaviour
+- Updated required version of swiftDialog to `2.3.2.4726`
+
 ## 1.12.5
 ### 28-Aug-2023
 - Added `sleep "${debugModeSleepAmount}"` to `recon` validation
