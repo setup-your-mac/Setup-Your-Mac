@@ -140,7 +140,8 @@ supportKB="KB86753099"
 supportTeamErrorKB=", and mention [${supportKB}](https://servicenow.company.com/support?id=kb_article_view&sysparm_article=${supportKB}#Failures)"
 supportTeamHelpKB="\n- **Knowledge Base Article:** ${supportKB}"
 
-
+# Option to lock the Continue button in the User Input Welcome dialog until after the estimations are complete (true|false)
+lockContinueBeforeEstimations="true"
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Operating System, Computer Model Name, etc.
@@ -2300,6 +2301,11 @@ function checkNetworkQualityConfigurations() {
     updateScriptLog "WELCOME DIALOG: Network Quality Test: Started: $dlStartDate, Ended: $dlEndDate; Download: $mbps Mbps, Responsiveness: $dlResponsiveness"
     dialogUpdateWelcome "infobox: **Connection:**  \n- Download:  \n$mbps Mbps  \n\n**Estimates:**  \n- ${configurationOneName}:  \n$(printf '%dh:%dm:%ds\n' $((configurationOneEstimatedSeconds/3600)) $((configurationOneEstimatedSeconds%3600/60)) $((configurationOneEstimatedSeconds%60)))  \n\n- ${configurationTwoName}:  \n$(printf '%dh:%dm:%ds\n' $((configurationTwoEstimatedSeconds/3600)) $((configurationTwoEstimatedSeconds%3600/60)) $((configurationTwoEstimatedSeconds%60)))  \n\n- ${configurationThreeName}:  \n$(printf '%dh:%dm:%ds\n' $((configurationThreeEstimatedSeconds/3600)) $((configurationThreeEstimatedSeconds%3600/60)) $((configurationThreeEstimatedSeconds%60)))"
 
+    # If option to lock the continue button is set to true, enable the continue button now to let the user progress
+    if [[ "$lockContinueBeforeEstimations" = "true" ]]; then
+        updateScriptLog "WELCOME DIALOG: Enabling Continue Button"
+        dialogUpdateWelcome "button1: enable"
+    fi
 }
 
 
@@ -2710,8 +2716,18 @@ elif [[ "${welcomeDialog}" == "userInput" ]]; then
         updateScriptLog "WELCOME DIALOG: Write 'welcomeJSON' to $welcomeJSONFile …"
         echo "$welcomeJSON" > "$welcomeJSONFile"
 
-        updateScriptLog "WELCOME DIALOG: Display 'Welcome' dialog …"
-        welcomeResults=$( eval "${dialogBinary} --jsonfile ${welcomeJSONFile} --json" )
+        # If option to lock the continue button is set to true, open welcome dialog with button 1 disabled
+        if [[ "$lockContinueBeforeEstimations" = "true" ]]; then
+            
+            updateScriptLog "WELCOME DIALOG: Display 'Welcome' dialog with disabled Continue Button …"
+            welcomeResults=$( eval "${dialogBinary} --jsonfile ${welcomeJSONFile} --json --button1disabled" )
+            
+        else
+
+            updateScriptLog "WELCOME DIALOG: Display 'Welcome' dialog …"
+            welcomeResults=$( eval "${dialogBinary} --jsonfile ${welcomeJSONFile} --json" )
+
+        fi
 
     else
 
