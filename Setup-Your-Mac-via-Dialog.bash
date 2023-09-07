@@ -231,8 +231,13 @@ updateScriptLog "PRE-FLIGHT CHECK: Initiating …"
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Pre-flight Check: Confirm script is running as root
+# Pre-flight Check: Confirm script is running as root and under bash
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+if [ "$BASH" != "/bin/bash" ] ; then
+    updateScriptLog "PRE-FLIGHT CHECK: This script must be run under bash, please do not run it using sh or zsh etc; exiting."
+    exit 1
+fi
 
 if [[ $(id -u) -ne 0 ]]; then
     updateScriptLog "PRE-FLIGHT CHECK: This script must be run as root; exiting."
