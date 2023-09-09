@@ -55,6 +55,8 @@
 #   - Reverted `mktemp`-created files to pre-SYM `1.12.1` behaviour
 #   - Updated required version of swiftDialog to `2.3.2.4726`
 #
+#   Version 1.12.7, 09-Sep-2023, Dan K. Snelson (@dan-snelson)
+#
 ####################################################################################################
 
 
@@ -69,7 +71,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.12.6"
+scriptVersion="1.12.7"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -140,8 +142,10 @@ supportKB="KB86753099"
 supportTeamErrorKB=", and mention [${supportKB}](https://servicenow.company.com/support?id=kb_article_view&sysparm_article=${supportKB}#Failures)"
 supportTeamHelpKB="\n- **Knowledge Base Article:** ${supportKB}"
 
-# Option to lock the Continue button in the User Input Welcome dialog until after the estimations are complete (true|false)
-lockContinueBeforeEstimations="true"
+# Lock the "Continue" button in the User Input "Welcome" dialog until Dynamic Download Estimates have complete [ true | false ] (thanks, @Eltord!)
+lockContinueBeforeEstimations="false"
+
+
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Operating System, Computer Model Name, etc.
