@@ -57,6 +57,7 @@
 #
 #   Version 1.12.7, 09-Sep-2023, Dan K. Snelson (@dan-snelson)
 #   - Added ability disable the "Continue" button in the User Input "Welcome" dialog until Dynamic Download Estimates have complete ([Pull Request No. 93](https://github.com/dan-snelson/Setup-Your-Mac/pull/93); thanks, @Eltord!)
+#   - Added a check to account for if the `loggedInUser` returns in ALL CAPS (as this sometimes happens with SSO Attributes) ([Pull Request No. 94](https://github.com/dan-snelson/Setup-Your-Mac/pull/94); thanks for another one, @Eltord!)
 #
 ####################################################################################################
 
