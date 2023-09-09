@@ -5,6 +5,7 @@
 - Added ability disable the "Continue" button in the User Input "Welcome" dialog until Dynamic Download Estimates have complete ([Pull Request No. 93](https://github.com/dan-snelson/Setup-Your-Mac/pull/93); thanks, @Eltord!)
 - Added a check to account for if the `loggedInUser` returns in ALL CAPS (as this sometimes happens with SSO Attributes) ([Pull Request No. 94](https://github.com/dan-snelson/Setup-Your-Mac/pull/94); thanks for another one, @Eltord!)
 - Added a Pre-flight Check for the running shell environment: Will exit gracefully if the shell does not match \bin\bash. ([Pull Request No. 95](https://github.com/dan-snelson/Setup-Your-Mac/pull/95); thanks — yet again — @drtaru!)
+- Remove any default dialog file
 
 ## 1.12.6
 ### 30-Aug-2023
