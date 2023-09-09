@@ -56,6 +56,7 @@
 #   - Updated required version of swiftDialog to `2.3.2.4726`
 #
 #   Version 1.12.7, 09-Sep-2023, Dan K. Snelson (@dan-snelson)
+#   - Added ability disable the "Continue" button in the User Input "Welcome" dialog until Dynamic Download Estimates have complete ([Pull Request No. 93](https://github.com/dan-snelson/Setup-Your-Mac/pull/93); thanks, @Eltord!)
 #
 ####################################################################################################
 
@@ -142,7 +143,7 @@ supportKB="KB86753099"
 supportTeamErrorKB=", and mention [${supportKB}](https://servicenow.company.com/support?id=kb_article_view&sysparm_article=${supportKB}#Failures)"
 supportTeamHelpKB="\n- **Knowledge Base Article:** ${supportKB}"
 
-# Lock the "Continue" button in the User Input "Welcome" dialog until Dynamic Download Estimates have complete [ true | false ] (thanks, @Eltord!)
+# Disable the "Continue" button in the User Input "Welcome" dialog until Dynamic Download Estimates have complete [ true | false ] (thanks, @Eltord!)
 lockContinueBeforeEstimations="false"
 
 
