@@ -2593,6 +2593,12 @@ function quitScript() {
         rm "${failureCommandFile}"
     fi
 
+    # Remove any default dialog file
+    if [[ -e /var/tmp/dialog.log ]]; then
+        updateScriptLog "QUIT SCRIPT: Removing default dialog file …"
+        rm /var/tmp/dialog.log
+    fi
+
     # Check for user clicking "Quit" at Welcome dialog
     if [[ "${welcomeReturnCode}" == "2" ]]; then
         
