@@ -26,6 +26,9 @@
 #   Updates inline with "Setup Your Mac (1.12.0)"
 #   Added `quitkey`; Addresses Issue No. 83
 #
+# Version 0.0.5, 09-Sep-2023, Dan K. Snelson (@dan-snelson)
+#   - Updated `dialogURL`
+#
 #################################################################################
 
 
@@ -61,7 +64,7 @@ fi
 # Global variables
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="0.0.4"
+scriptVersion="0.0.5"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 secondsToWait="${4:-"2700"}"                                    # Parameter 4: "secondsToWait" setting; defaults to "2700"
 scriptLog="/var/log/org.churchofjesuschrist.log"                # Your organization's default location for client-side logs
@@ -186,7 +189,7 @@ function promptUser() {
 function dialogInstall() {
 
     # Get the URL of the latest PKG From the Dialog GitHub repo
-    dialogURL=$(curl --silent --fail "https://api.github.com/repos/bartreardon/swiftDialog/releases/latest" | awk -F '"' "/browser_download_url/ && /pkg\"/ { print \$4; exit }")
+    dialogURL=$(curl -L --silent --fail "https://api.github.com/repos/swiftDialog/swiftDialog/releases/latest" | awk -F '"' "/browser_download_url/ && /pkg\"/ { print \$4; exit }")
 
     # Expected Team ID of the downloaded PKG
     expectedDialogTeamID="PWA5E9TQ59"

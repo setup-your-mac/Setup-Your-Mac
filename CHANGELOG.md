@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.12.8
+### 13-Sep-2023
+- Added a check for FileVault being enabled during Setup Assistant (for macOS 14 Sonoma) ([Pull Request No. 96](https://github.com/dan-snelson/Setup-Your-Mac/pull/96); thanks, Obi-@drtaru!)
+
 ## 1.12.7
 ### 09-Sep-2023
 - Added ability disable the "Continue" button in the User Input "Welcome" dialog until Dynamic Download Estimates have complete ([Pull Request No. 93](https://github.com/dan-snelson/Setup-Your-Mac/pull/93); thanks, @Eltord!)

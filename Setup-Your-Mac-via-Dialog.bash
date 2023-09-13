@@ -61,6 +61,9 @@
 #   - Added a Pre-flight Check for the running shell environment: Will exit gracefully if the shell does not match \bin\bash. ([Pull Request No. 95](https://github.com/dan-snelson/Setup-Your-Mac/pull/95); thanks — yet again — @drtaru!)
 #   - Remove any default dialog file
 #
+#   Version 1.12.8, 13-Sep-2023, Dan K. Snelson (@dan-snelson)
+#   - Added a check for FileVault being enabled during Setup Assistant (for macOS 14 Sonoma) ([Pull Request No. 96](https://github.com/dan-snelson/Setup-Your-Mac/pull/96); thanks, Obi-@drtaru!)
+#
 ####################################################################################################
 
 
