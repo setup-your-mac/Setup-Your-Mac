@@ -1880,7 +1880,8 @@ function validatePolicyResult() {
                     dialogUpdateSetupYourMac "listitem: index: $i, status: wait, statustext: Checking …"
                     updateScriptLog "SETUP YOUR MAC DIALOG: Validate Policy Result: Pausing for 5 seconds for FileVault … "
                     sleep 5 # Arbitrary value; tuning needed
-                    if [[ -f /Library/Preferences/com.apple.fdesetup.plist ]]; then
+                    fileVaultCheck=$( fdesetup isactive )
+                    if [[ -f /Library/Preferences/com.apple.fdesetup.plist ]] || [[ "$fileVaultCheck" == "true" ]]; then
                         fileVaultStatus=$( fdesetup status -extended -verbose 2>&1 )
                         case ${fileVaultStatus} in
                             *"FileVault is On."* ) 
