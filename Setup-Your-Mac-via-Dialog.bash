@@ -63,7 +63,7 @@
 #
 #   Version 1.12.8, 13-Sep-2023, Dan K. Snelson (@dan-snelson)
 #   - Added a check for FileVault being enabled during Setup Assistant (for macOS 14 Sonoma) ([Pull Request No. 96](https://github.com/dan-snelson/Setup-Your-Mac/pull/96); thanks, Obi-@drtaru!)
-#   - Added `-L` to `curl` command when caching banner images
+#   - Added `-L` to `curl` command when caching banner images (thanks for the suggestion, @bartreardon!)
 #
 ####################################################################################################
 
