@@ -764,7 +764,7 @@ if [ -n "$supportTeamEmail" ]; then
   helpmessage+="- **Email:** ${supportTeamEmail}\n"
 fi
 
-if [ -n "$supportTeamHelpKB" ]; then
+if [ -n "$supportKB" ]; then
   helpmessage+="${supportTeamHelpKB}\n"
 fi
 
@@ -1627,13 +1627,13 @@ function finalise(){
 
             supportContactMessage="If you need assistance, please contact the ${supportTeamName},"
 
-            if [[ -n "${supportTeamPhone}" || -n "${supportTeamErrorKB}" ]]; then
+            if [[ -n "${supportTeamPhone}" || -n "${supportKB}" ]]; then
 
                 if [[ -n "${supportTeamPhone}" ]]; then
                     supportContactMessage+="\n ${supportTeamPhone}"
                 fi
 
-                if [[ -n "${supportTeamErrorKB}" ]]; then
+                if [[ -n "${supportKB}" ]]; then
                     supportContactMessage+="${supportTeamErrorKB}"
                 fi
 
