@@ -149,7 +149,7 @@ brandingIconDark="https://cdn-icons-png.flaticon.com/512/740/740878.png"
 # IT Support Variables - Use these if the default text is fine but you want your org's info inserted instead
 supportTeamName="Help Desk"
 supportTeamPhone="+1 (801) 555-1212"
-supportTeamEmail="support@domain.org"
+supportTeamEmail=""
 supportKB="KB86753099"
 supportTeamErrorKB=", and mention [${supportKB}](https://servicenow.company.com/support?id=kb_article_view&sysparm_article=${supportKB}#Failures)"
 supportTeamHelpKB="\n- **Knowledge Base Article:** ${supportKB}"
@@ -584,11 +584,15 @@ if [ -n "$supportTeamName" ]; then
   welcomeMessage+="\n\nIf you need assistance, please contact the ${supportTeamName} at"
 
     if [ -n "$supportTeamPhone" ]; then
-    welcomeMessage+="\n${supportTeamPhone}"
+        welcomeMessage+="\n${supportTeamPhone}"
     fi
 
     if [ -n "$supportKB" ]; then
-    welcomeMessage+=" and mention ${supportKB}"
+        welcomeMessage+=" and mention ${supportKB}"
+    fi
+
+    if [ -n "$supportTeamEmail" ]; then
+        welcomeMessage+="\n${supportTeamEmail}"
     fi
 fi
 
@@ -1658,24 +1662,25 @@ function finalise(){
 
             failureMessage="A failure has been detected, ${loggedInUserFirstname}. \n\nPlease complete the following steps:\n1. Reboot and login to your ${modelName}  \n2. Login to Self Service  \n3. Re-run any failed policy listed below  \n\nThe following failed:  \n${jamfProPolicyNameFailures}"
             
-            if [ -n "$supportTeamName" ]; then
+            if [[ -n "$supportTeamName" ]]; then
                 supportContactMessage+="If you need assistance, please contact the ${supportTeamName},"
-            fi
 
-            if [[ -n "${supportTeamPhone}" || -n "${supportKB}" ]]; then
+                if [[ -n "$supportTeamEmail" ]]; then
+                    supportContactMessage+="\n${supportTeamEmail}"
+                fi
 
                 if [[ -n "${supportTeamPhone}" ]]; then
-                    supportContactMessage+="\n ${supportTeamPhone}"
+                    supportContactMessage+="\n${supportTeamPhone}"
                 fi
 
                 if [[ -n "${supportKB}" ]]; then
-                    supportContactMessage+="${supportTeamErrorKB}"
+                    supportContactMessage+="\n${supportTeamErrorKB}"
                 fi
-
-                supportContactMessage+="."
-
-                failureMessage+="\n\n${supportContactMessage}"
+            supportContactMessage+="."
             fi
+
+
+            failureMessage+="\n\n${supportContactMessage}"
 
             dialogUpdateFailure "message: ${failureMessage}"
 
@@ -3171,22 +3176,22 @@ if [[ "${symConfiguration}" != *"Catch-all"* ]]; then
 
         updateScriptLog "Update 'helpmessage' with Configuration: ${infoboxConfiguration} …"
 
-        helpmessage="If you need assistance, "
+        helpmessage="If you need assistance...\n "
         
-        if [ -n "$supportTeamName"]; then
-        helpmessage="please contact the ${supportTeamName}:\n"
+        if [ -n "$supportTeamName" ]; then
+            helpmessage+="Please contact the $supportTeamName:\n"
         fi
 
         if [ -n "$supportTeamPhone" ]; then
-        helpmessage+="- **Telephone:** $supportTeamPhone\n"
+            helpmessage+="- **Telephone:** $supportTeamPhone\n"
         fi
 
         if [ -n "$supportTeamEmail" ]; then
-        helpmessage+="- **Email:** $supportTeamEmail\n"
+            helpmessage+="- **Email:** $supportTeamEmail\n"
         fi
 
         if [ -n "$supportKB" ]; then
-        helpmessage+="- **Knowledge Base Article:** $supportKB\n"
+            helpmessage+="- **Knowledge Base Article:** $supportKB\n"
         fi
 
         helpmessage+="\n**Configuration:**\n- $infoboxConfiguration\n"
