@@ -63,6 +63,7 @@
 #
 #   Version 1.12.8, 13-Sep-2023, Dan K. Snelson (@dan-snelson)
 #   - Added a check for FileVault being enabled during Setup Assistant (for macOS 14 Sonoma) ([Pull Request No. 96](https://github.com/dan-snelson/Setup-Your-Mac/pull/96); thanks, Obi-@drtaru!)
+#   - Added `-L` to `curl` command when caching banner images
 #
 ####################################################################################################
 
@@ -593,7 +594,7 @@ welcomeCaption="Please review the above video, then click Continue."
 welcomeVideoID="vimeoid=844672129"
 
 # Check if the custom welcomeBannerImage is available, and if not, use a alternative image
-if curl --output /dev/null --silent --head --fail "$welcomeBannerImage" || [ -f "$welcomeBannerImage" ]; then
+if curl -L --output /dev/null --silent --head --fail "$welcomeBannerImage" || [ -f "$welcomeBannerImage" ]; then
     updateScriptLog "WELCOME DIALOG: welcomeBannerImage is available, using it"
 else
     updateScriptLog "WELCOME DIALOG: welcomeBannerImage is not available, using a default image"
@@ -604,7 +605,7 @@ fi
 if [[ $welcomeBannerImage == *"http"* ]]; then
     welcomeBannerImageFileName=$( echo ${welcomeBannerImage} | awk -F '/' '{print $NF}' )
     updateScriptLog "WELCOME DIALOG: Auto-caching hosted '$welcomeBannerImageFileName' …"
-    curl --location --silent "$welcomeBannerImage" -o "/var/tmp/${welcomeBannerImageFileName}"
+    curl -L --location --silent "$welcomeBannerImage" -o "/var/tmp/${welcomeBannerImageFileName}"
     welcomeBannerImage="/var/tmp/${welcomeBannerImageFileName}"
 fi
 
@@ -771,7 +772,7 @@ helpmessage="If you need assistance, please contact the ${supportTeamName}:  \n-
 infobox="Analyzing input …" # Customize at "Update Setup Your Mac's infobox"
 
 # Check if the custom bannerImage is available, and if not, use a alternative image
-if curl --output /dev/null --silent --head --fail "$bannerImage" || [ -f "$bannerImage" ]; then
+if curl -L --output /dev/null --silent --head --fail "$bannerImage" || [ -f "$bannerImage" ]; then
     updateScriptLog "WELCOME DIALOG: bannerImage is available"
 else
     updateScriptLog "WELCOME DIALOG: bannerImage is not available, using alternative image"
