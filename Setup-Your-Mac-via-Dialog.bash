@@ -67,6 +67,7 @@
 #   Version 1.12.9, 14-Sep-2023, Dan K. Snelson (@dan-snelson)
 #   - Added `-L` to `curl` command when caching banner images (thanks for the suggestion, @bartreardon!)
 #   - Added `swiftDialogMinimumRequiredVersion` variable to more easily track the minimum build. ([Pull Request No. 98](https://github.com/dan-snelson/Setup-Your-Mac/pull/98); thanks, @GadgetGeekNI!)
+#   - Hide unused Support variables ([Pull Request No. 99](https://github.com/dan-snelson/Setup-Your-Mac/pull/99); thanks again, @GadgetGeekNI!)
 #
 ####################################################################################################
 
@@ -82,7 +83,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.12.9-rc1"
+scriptVersion="1.12.9-rc2"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -149,8 +150,8 @@ brandingIconDark="https://cdn-icons-png.flaticon.com/512/740/740878.png"
 # IT Support Variables - Use these if the default text is fine but you want your org's info inserted instead
 supportTeamName="Help Desk"
 supportTeamPhone="+1 (801) 555-1212"
-supportTeamEmail=""
-supportKB="KB86753099"
+supportTeamEmail="RescueMe@domain.com"
+supportKB="KB8675309"
 supportTeamErrorKB=", and mention [${supportKB}](https://servicenow.company.com/support?id=kb_article_view&sysparm_article=${supportKB}#Failures)"
 supportTeamHelpKB="\n- **Knowledge Base Article:** ${supportKB}"
 
@@ -3176,7 +3177,7 @@ if [[ "${symConfiguration}" != *"Catch-all"* ]]; then
 
         updateScriptLog "Update 'helpmessage' with Configuration: ${infoboxConfiguration} …"
 
-        helpmessage="If you need assistance...\n "
+        helpmessage="If you need assistance…  \n\n"
         
         if [ -n "$supportTeamName" ]; then
             helpmessage+="Please contact the $supportTeamName:\n"
