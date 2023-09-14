@@ -149,7 +149,7 @@ brandingIconDark="https://cdn-icons-png.flaticon.com/512/740/740878.png"
 # IT Support Variables - Use these if the default text is fine but you want your org's info inserted instead
 supportTeamName="Help Desk"
 supportTeamPhone="+1 (801) 555-1212"
-supportTeamEmail="support@domain.org"
+supportTeamEmail=""
 supportKB="KB86753099"
 supportTeamErrorKB=", and mention [${supportKB}](https://servicenow.company.com/support?id=kb_article_view&sysparm_article=${supportKB}#Failures)"
 supportTeamHelpKB="\n- **Knowledge Base Article:** ${supportKB}"
@@ -578,7 +578,25 @@ failureCommandFile=$( mktemp -u /var/tmp/dialogCommandFileFailure.XXX )
 
 welcomeTitle="Happy $( date +'%A' ), ${loggedInUserFirstname}!  \nWelcome to your new ${modelName}"
 
-welcomeMessage="Please enter the **required** information for your ${modelName}, select your preferred **Configuration** then click **Continue** to start applying settings to your new Mac. \n\nOnce completed, the **Wait** button will be enabled and you‘ll be able to review the results before restarting your ${modelName}.  \n\nIf you need assistance, please contact the ${supportTeamName} at  \n${supportTeamPhone} and mention ${supportKB}.  \n\n---"
+welcomeMessage="Please enter the **required** information for your ${modelName}, select your preferred **Configuration** then click **Continue** to start applying settings to your new Mac. \n\nOnce completed, the **Wait** button will be enabled and you‘ll be able to review the results before restarting your ${modelName}."
+
+if [ -n "$supportTeamName" ]; then
+  welcomeMessage+="\n\nIf you need assistance, please contact the ${supportTeamName} at"
+
+    if [ -n "$supportTeamPhone" ]; then
+        welcomeMessage+="\n${supportTeamPhone}"
+    fi
+
+    if [ -n "$supportKB" ]; then
+        welcomeMessage+=" and mention ${supportKB}"
+    fi
+
+    if [ -n "$supportTeamEmail" ]; then
+        welcomeMessage+="\n${supportTeamEmail}"
+    fi
+fi
+
+welcomeMessage+=".\n\n---"
 
 if { [[ "${promptForConfiguration}" == "true" ]] && [[ "${welcomeDialog}" != "messageOnly" ]]; } then
     welcomeMessage+="  \n\n#### Configurations  \n- **${configurationOneName}:** ${configurationOneDescription}  \n- **${configurationTwoName}:** ${configurationTwoDescription}  \n- **${configurationThreeName}:** ${configurationThreeDescription}"
@@ -772,7 +790,28 @@ fi
 if [[ "${brandingBannerDisplayText}" == "true" ]] ; then bannerText="Setting up ${loggedInUserFirstname}‘s ${modelName}";
 else bannerText=""; fi
 
-helpmessage="If you need assistance, please contact the ${supportTeamName}:  \n- **Telephone:** ${supportTeamPhone}  \n- **Email:** ${supportTeamEmail}  ${supportTeamHelpKB}  \n\n**Computer Information:**  \n- **Operating System:**  ${macOSproductVersion} (${macOSbuildVersion})  \n- **Serial Number:** ${serialNumber}  \n- **Dialog:** ${dialogVersion}  \n- **Started:** ${timestamp}"
+if [ -n "$supportTeamName" ]; then
+  helpmessage+="If you need assistance, please contact the ${supportTeamName}:\n"
+fi
+
+if [ -n "$supportTeamPhone" ]; then
+  helpmessage+="- **Telephone:** ${supportTeamPhone}\n"
+fi
+
+if [ -n "$supportTeamEmail" ]; then
+  helpmessage+="- **Email:** ${supportTeamEmail}\n"
+fi
+
+if [ -n "$supportKB" ]; then
+  helpmessage+="${supportTeamHelpKB}\n"
+fi
+
+helpmessage+="\n**Computer Information:**\n"
+helpmessage+="- **Operating System:** ${macOSproductVersion} (${macOSbuildVersion})\n"
+helpmessage+="- **Serial Number:** ${serialNumber}\n"
+helpmessage+="- **Dialog:** ${dialogVersion}\n"
+helpmessage+="- **Started:** ${timestamp}"
+
 infobox="Analyzing input …" # Customize at "Update Setup Your Mac's infobox"
 
 # Check if the custom bannerImage is available, and if not, use a alternative image
@@ -1619,9 +1658,32 @@ function finalise(){
 
             updateScriptLog "\n\n# # #\n# FAILURE DIALOG\n# # #\n"
             updateScriptLog "Jamf Pro Policy Name Failures:"
-            updateScriptLog "${jamfProPolicyNameFailures}"
+            
 
-            dialogUpdateFailure "message: A failure has been detected, ${loggedInUserFirstname}. \n\nPlease complete the following steps:\n1. Reboot and login to your ${modelName}  \n2. Login to Self Service  \n3. Re-run any failed policy listed below  \n\nThe following failed:  \n${jamfProPolicyNameFailures}  \n\n\n\nIf you need assistance, please contact the ${supportTeamName},  \n${supportTeamPhone}${supportTeamErrorKB}. "
+            failureMessage="A failure has been detected, ${loggedInUserFirstname}. \n\nPlease complete the following steps:\n1. Reboot and login to your ${modelName}  \n2. Login to Self Service  \n3. Re-run any failed policy listed below  \n\nThe following failed:  \n${jamfProPolicyNameFailures}"
+            
+            if [[ -n "$supportTeamName" ]]; then
+                supportContactMessage+="If you need assistance, please contact the ${supportTeamName},"
+
+                if [[ -n "$supportTeamEmail" ]]; then
+                    supportContactMessage+="\n${supportTeamEmail}"
+                fi
+
+                if [[ -n "${supportTeamPhone}" ]]; then
+                    supportContactMessage+="\n${supportTeamPhone}"
+                fi
+
+                if [[ -n "${supportKB}" ]]; then
+                    supportContactMessage+="\n${supportTeamErrorKB}"
+                fi
+            supportContactMessage+="."
+            fi
+
+
+            failureMessage+="\n\n${supportContactMessage}"
+
+            dialogUpdateFailure "message: ${failureMessage}"
+
             dialogUpdateFailure "icon: SF=xmark.circle.fill,weight=bold,colour1=#BB1717,colour2=#F31F1F"
             dialogUpdateFailure "button1text: ${button1textCompletionActionOption}"
 
@@ -3114,7 +3176,30 @@ if [[ "${symConfiguration}" != *"Catch-all"* ]]; then
 
         updateScriptLog "Update 'helpmessage' with Configuration: ${infoboxConfiguration} …"
 
-        helpmessage="If you need assistance, please contact the ${supportTeamName}:  \n- **Telephone:** ${supportTeamPhone}  \n- **Email:** ${supportTeamEmail}  \n- **Knowledge Base Article:** ${supportKB}  \n\n**Configuration:** \n- ${infoboxConfiguration}  \n\n**Computer Information:**  \n- **Operating System:**  ${macOSproductVersion} (${macOSbuildVersion})  \n- **Serial Number:** ${serialNumber}  \n- **Dialog:** ${dialogVersion}  \n- **Started:** ${timestamp}"
+        helpmessage="If you need assistance...\n "
+        
+        if [ -n "$supportTeamName" ]; then
+            helpmessage+="Please contact the $supportTeamName:\n"
+        fi
+
+        if [ -n "$supportTeamPhone" ]; then
+            helpmessage+="- **Telephone:** $supportTeamPhone\n"
+        fi
+
+        if [ -n "$supportTeamEmail" ]; then
+            helpmessage+="- **Email:** $supportTeamEmail\n"
+        fi
+
+        if [ -n "$supportKB" ]; then
+            helpmessage+="- **Knowledge Base Article:** $supportKB\n"
+        fi
+
+        helpmessage+="\n**Configuration:**\n- $infoboxConfiguration\n"
+        helpmessage+="\n**Computer Information:**\n"
+        helpmessage+="- **Operating System:** $macOSproductVersion ($macOSbuildVersion)\n"
+        helpmessage+="- **Serial Number:** $serialNumber\n"
+        helpmessage+="- **Dialog:** $dialogVersion\n"
+        helpmessage+="- **Started:** $timestamp\n"
         
     fi
 
