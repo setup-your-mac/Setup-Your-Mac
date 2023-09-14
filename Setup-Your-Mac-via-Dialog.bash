@@ -64,6 +64,7 @@
 #   Version 1.12.8, 13-Sep-2023, Dan K. Snelson (@dan-snelson)
 #   - Added a check for FileVault being enabled during Setup Assistant (for macOS 14 Sonoma) ([Pull Request No. 96](https://github.com/dan-snelson/Setup-Your-Mac/pull/96); thanks, Obi-@drtaru!)
 #   - Added `-L` to `curl` command when caching banner images (thanks for the suggestion, @bartreardon!)
+#   - Added `swiftDialogMinimumRequiredVersion` variable to more easily track the minimum build. ([Pull Request No. 98](https://github.com/dan-snelson/Setup-Your-Mac/pull/98); thanks, @GadgetGeekNI!)
 #
 ####################################################################################################
 
@@ -89,6 +90,7 @@ requiredMinimumBuild="${8:-"disabled"}"                                         
 outdatedOsAction="${9:-"/System/Library/CoreServices/Software Update.app"}"     # Parameter 9: Outdated OS Action [ /System/Library/CoreServices/Software Update.app (default) | jamfselfservice://content?entity=policy&id=117&action=view ] (i.e., Jamf Pro Self Service policy ID for operating system ugprades)
 webhookURL="${10:-""}"                                                          # Parameter 10: Microsoft Teams or Slack Webhook URL [ Leave blank to disable (default) | https://microsoftTeams.webhook.com/URL | https://hooks.slack.com/services/URL ] Can be used to send a success or failure message to Microsoft Teams or Slack via Webhook. (Function will automatically detect if Webhook URL is for Slack or Teams; can be modified to include other communication tools that support functionality.)
 presetConfiguration="${11:-""}"                                                 # Parameter 11: Specify a Configuration (i.e., `policyJSON`; NOTE: If set, `promptForConfiguration` will be automatically suppressed and the preselected configuration will be used instead)
+swiftDialogMinimumRequiredVersion="2.3.2.4726"                                  # This will be set and updated as dependancies on newer features change.
 
 
 
@@ -195,13 +197,7 @@ configurationThreeDescription="Recommended apps, Adobe Acrobat Reader and Google
 configurationThreeSize="106"                # Configuration Three in Gibibits (i.e., Total File Size in Gigabytes * 7.451) 
 configurationThreeInstallBuffer="0"         # Buffer time added to estimates to include installation time of packages, in seconds. Set to 0 to disable. 
 
-####################################################################################################
-#
-# SwiftDialog Minimum Required Version
-#
-####################################################################################################
 
-swiftDialogMinimumRequiredVersion="2.3.2.4726"  # This will be set & updated as our dependancies on newer features change.
 
 ####################################################################################################
 #
@@ -499,9 +495,9 @@ function dialogCheck() {
     else
 
         dialogVersion=$(/usr/local/bin/dialog --version)
-        if [[ "${dialogVersion}" < "$swiftDialogMinimumRequiredVersion" ]]; then
+        if [[ "${dialogVersion}" < "${swiftDialogMinimumRequiredVersion}" ]]; then
             
-            updateScriptLog "PRE-FLIGHT CHECK: swiftDialog version ${dialogVersion} found but swiftDialog $swiftDialogMinimumRequiredVersion or newer is required; updating..."
+            updateScriptLog "PRE-FLIGHT CHECK: swiftDialog version ${dialogVersion} found but swiftDialog ${swiftDialogMinimumRequiredVersion} or newer is required; updating..."
             dialogInstall
             
         else
