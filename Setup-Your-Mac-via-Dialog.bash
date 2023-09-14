@@ -195,7 +195,13 @@ configurationThreeDescription="Recommended apps, Adobe Acrobat Reader and Google
 configurationThreeSize="106"                # Configuration Three in Gibibits (i.e., Total File Size in Gigabytes * 7.451) 
 configurationThreeInstallBuffer="0"         # Buffer time added to estimates to include installation time of packages, in seconds. Set to 0 to disable. 
 
+####################################################################################################
+#
+# SwiftDialog Minimum Required Version
+#
+####################################################################################################
 
+swiftDialogMinimumRequiredVersion="2.3.2.4726"  # This will be set & updated as our dependancies on newer features change.
 
 ####################################################################################################
 #
@@ -493,9 +499,9 @@ function dialogCheck() {
     else
 
         dialogVersion=$(/usr/local/bin/dialog --version)
-        if [[ "${dialogVersion}" < "2.3.2.4726" ]]; then
+        if [[ "${dialogVersion}" < "$swiftDialogMinimumRequiredVersion" ]]; then
             
-            updateScriptLog "PRE-FLIGHT CHECK: swiftDialog version ${dialogVersion} found but swiftDialog 2.3.2.4726 or newer is required; updating..."
+            updateScriptLog "PRE-FLIGHT CHECK: swiftDialog version ${dialogVersion} found but swiftDialog $swiftDialogMinimumRequiredVersion or newer is required; updating..."
             dialogInstall
             
         else
