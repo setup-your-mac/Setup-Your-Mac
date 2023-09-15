@@ -599,18 +599,18 @@ welcomeTitle="Happy $( date +'%A' ), ${loggedInUserFirstname}!  \nWelcome to you
 welcomeMessage="Please enter the **required** information for your ${modelName}, select your preferred **Configuration** then click **Continue** to start applying settings to your new Mac. \n\nOnce completed, the **Wait** button will be enabled and you‘ll be able to review the results before restarting your ${modelName}."
 
 if [ -n "$supportTeamName" ]; then
-  welcomeMessage+="\n\nIf you need assistance, please contact the ${supportTeamName} at"
+  welcomeMessage+="\n\nIf you need assistance, please contact the ${supportTeamName}:"
 
     if [ -n "$supportTeamPhone" ]; then
-        welcomeMessage+="\n${supportTeamPhone}"
-    fi
-
-    if [ -n "$supportKB" ]; then
-        welcomeMessage+=" and mention ${supportKB}"
+        welcomeMessage+="\n - **Via Phone** : ${supportTeamPhone}"
     fi
 
     if [ -n "$supportTeamEmail" ]; then
-        welcomeMessage+="\n${supportTeamEmail}"
+        welcomeMessage+="\n - **Via Email** : ${supportTeamEmail}"
+    fi
+    
+    if [ -n "$supportKB" ]; then
+        welcomeMessage+=" and mention ${supportKB}"
     fi
 fi
 
