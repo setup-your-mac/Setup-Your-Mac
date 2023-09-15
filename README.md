@@ -1,16 +1,17 @@
+[<img alt="Setup Your Mac (1.12.0)" src="images/SYM_icon.png" width="128" />](https://snelson.us/sym)
 # Setup Your Mac (1.12.9) via swiftDialog (2.3.2)
 
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/dan-snelson/Setup-Your-Mac?display_name=tag) ![GitHub issues](https://img.shields.io/github/issues-raw/dan-snelson/Setup-Your-Mac) ![GitHub closed issues](https://img.shields.io/github/issues-closed-raw/dan-snelson/Setup-Your-Mac) ![GitHub pull requests](https://img.shields.io/github/issues-pr-raw/dan-snelson/Setup-Your-Mac) ![GitHub closed pull requests](https://img.shields.io/github/issues-pr-closed-raw/dan-snelson/Setup-Your-Mac)
 
-> With more accurate Dynamic Download Estimates, additional user-input fields and multiple speed improvements, Setup Your Mac (1.12.9) helps MacAdmins provide their users a seamless onboarding experience.
+> With more accurate Dynamic Download Estimates, additional user-input fields and multiple speed improvements, Setup Your Mac (1.12.9) helps MacAdmins provide their users a seamless onboarding experience via swiftDialog (2.3.2).
 
-[<img alt="Setup Your Mac (1.12.7)" src="images/Setup_Your_Mac_1.12.0_estimates.png" />](https://snelson.us/sym)
+[<img alt="Setup Your Mac (1.12.0)" src="images/Setup_Your_Mac_1.12.0_estimates.png" />](https://snelson.us/sym)
 
 ## Introduction
 
 Apple's Automated Device Enrollment helps streamline Mobile Device Management (MDM) enrollment and device Supervision during activation, enabling IT to manage enterprise devices with "zero touch."
 
-**Setup Your Mac** aims to simplify initial device configuration by leveraging `swiftDialog` and Jamf Pro Policy Custom Events to allow end-users to self-complete Mac setup **post-enrollment**.
+**Setup Your Mac** aims to simplify initial device configuration by leveraging `swiftDialog` and Jamf Pro Policy Custom Events to allow end-users to self-complete Mac setup _post-enrollment_.
 
 [Continue reading …](https://snelson.us/sym)
 
