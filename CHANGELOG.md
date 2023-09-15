@@ -5,6 +5,7 @@
 - Added `-L` to `curl` command when caching banner images (thanks for the suggestion, @bartreardon!)
 - Added `swiftDialogMinimumRequiredVersion` variable to more easily track the minimum build. ([Pull Request No. 98](https://github.com/dan-snelson/Setup-Your-Mac/pull/98); thanks, @GadgetGeekNI!)
 - Hide unused Support variables ([Pull Request No. 99](https://github.com/dan-snelson/Setup-Your-Mac/pull/99); thanks again, @GadgetGeekNI!)
+- Added Pre-flight Check: Validate `supportTeam` variables are populated ([Pull Request No. 100](https://github.com/dan-snelson/Setup-Your-Mac/pull/100); thanks for another one, @GadgetGeekNI!)
 
 ## 1.12.8
 ### 13-Sep-2023

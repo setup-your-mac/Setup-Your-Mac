@@ -68,6 +68,7 @@
 #   - Added `-L` to `curl` command when caching banner images (thanks for the suggestion, @bartreardon!)
 #   - Added `swiftDialogMinimumRequiredVersion` variable to more easily track the minimum build. ([Pull Request No. 98](https://github.com/dan-snelson/Setup-Your-Mac/pull/98); thanks, @GadgetGeekNI!)
 #   - Hide unused Support variables ([Pull Request No. 99](https://github.com/dan-snelson/Setup-Your-Mac/pull/99); thanks again, @GadgetGeekNI!)
+#   - Added Pre-flight Check: Validate `supportTeam` variables are populated ([Pull Request No. 100](https://github.com/dan-snelson/Setup-Your-Mac/pull/100); thanks for another one, @GadgetGeekNI!)
 #
 ####################################################################################################
 
@@ -83,7 +84,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.12.9-rc2"
+scriptVersion="1.12.9-rc3"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -295,20 +296,6 @@ done
 updateScriptLog "PRE-FLIGHT CHECK: Finder & Dock are running; proceeding …"
 
 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Pre-flight Check: Validate at least one support variable is populated
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
-# Check if supportTeamName is populated
-if [[ -z $supportTeamName ]]; then
-    updateScriptLog "PRE-FLIGHT CHECK: SupportTeamName must be populated to proceed; exiting"
-    exit 1
-fi
-
-if [[ -z $supportTeamPhone && -z $supportTeamEmail && -z $supportKB ]]; then
-    updateScriptLog "PRE-FLIGHT CHECK: At least one SupportTeam variable must be populated to proceed; exiting"
-    exit 1
-fi
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Pre-flight Check: Validate Logged-in System Accounts
@@ -528,6 +515,22 @@ function dialogCheck() {
 }
 
 dialogCheck
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Pre-flight Check: Validate `supportTeam` variables are populated
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+if [[ -z $supportTeamName ]]; then
+    updateScriptLog "PRE-FLIGHT CHECK: 'supportTeamName' must be populated to proceed; exiting"
+    exit 1
+fi
+
+if [[ -z $supportTeamPhone && -z $supportTeamEmail && -z $supportKB ]]; then
+    updateScriptLog "PRE-FLIGHT CHECK: At least **one** 'supportTeam' variable must be populated to proceed; exiting"
+    exit 1
+fi
 
 
 
