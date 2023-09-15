@@ -149,9 +149,9 @@ brandingIconDark="https://cdn-icons-png.flaticon.com/512/740/740878.png"
 
 # IT Support Variables - Use these if the default text is fine but you want your org's info inserted instead
 supportTeamName="Help Desk"
-supportTeamPhone=""
-supportTeamEmail="rescueme@domain.com"
-supportKB="KB86753099"
+supportTeamPhone="+1 (801) 555-1212"
+supportTeamEmail="RescueMe@domain.com"
+supportKB="KB8675309"
 supportTeamErrorKB=", and mention [${supportKB}](https://servicenow.company.com/support?id=kb_article_view&sysparm_article=${supportKB}#Failures)"
 supportTeamHelpKB="\n- **Knowledge Base Article:** ${supportKB}"
 
