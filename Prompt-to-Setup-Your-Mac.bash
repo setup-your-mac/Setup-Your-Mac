@@ -29,7 +29,7 @@
 # Version 0.0.5, 09-Sep-2023, Dan K. Snelson (@dan-snelson)
 #   - Updated `dialogURL`
 #
-# Version 1.12.9, 15-Sep-2023, Dan K. Snelson (@dan-snelson)
+# Version 1.12.10, 15-Sep-2023, Dan K. Snelson (@dan-snelson)
 #   - Reverted `mktemp`-created files to pre-SYM `1.12.1` behaviour
 #   - Matched SYM version number
 #
@@ -68,7 +68,7 @@ fi
 # Global variables
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.12.9"
+scriptVersion="1.12.10"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 secondsToWait="${4:-"2700"}"                                    # Parameter 4: "secondsToWait" setting; defaults to "2700"
 scriptLog="/var/log/org.churchofjesuschrist.log"                # Your organization's default location for client-side logs

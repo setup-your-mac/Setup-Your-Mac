@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.12.10
+### 15-Sep-2023
+- Better WelcomeMessage logic and variable handling ([Pull Request No. 101](https://github.com/dan-snelson/Setup-Your-Mac/pull/101); thanks big bunches, @GadgetGeekNI!)
+
 ## 1.12.9
 ### 15-Sep-2023
 - Added `-L` to `curl` command when caching banner images (thanks for the suggestion, @bartreardon!)

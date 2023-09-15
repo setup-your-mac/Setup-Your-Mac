@@ -70,6 +70,9 @@
 #   - Hide unused Support variables ([Pull Request No. 99](https://github.com/dan-snelson/Setup-Your-Mac/pull/99); thanks again, @GadgetGeekNI!)
 #   - Added Pre-flight Check: Validate `supportTeam` variables are populated ([Pull Request No. 100](https://github.com/dan-snelson/Setup-Your-Mac/pull/100); thanks for another one, @GadgetGeekNI!)
 #
+#   Version 1.12.10, 15-Sep-2023, Dan K. Snelson (@dan-snelson)
+#   - Better WelcomeMessage logic and variable handling ([Pull Request No. 101](https://github.com/dan-snelson/Setup-Your-Mac/pull/101); thanks big bunches, @GadgetGeekNI!)
+#
 ####################################################################################################
 
 
@@ -84,7 +87,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.12.9"
+scriptVersion="1.12.10"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -149,9 +152,9 @@ brandingIconLight="https://cdn-icons-png.flaticon.com/512/979/979585.png"
 brandingIconDark="https://cdn-icons-png.flaticon.com/512/740/740878.png"
 
 # IT Support Variables - Use these if the default text is fine but you want your org's info inserted instead
-supportTeamName="Help Desk"
+supportTeamName="Support Team Name"
 supportTeamPhone="+1 (801) 555-1212"
-supportTeamEmail="RescueMe@domain.com"
+supportTeamEmail="support@domain.com"
 supportKB="KB8675309"
 supportTeamErrorKB=", and mention [${supportKB}](https://servicenow.company.com/support?id=kb_article_view&sysparm_article=${supportKB}#Failures)"
 supportTeamHelpKB="\n- **Knowledge Base Article:** ${supportKB}"
@@ -528,7 +531,7 @@ if [[ -z $supportTeamName ]]; then
 fi
 
 if [[ -z $supportTeamPhone && -z $supportTeamEmail && -z $supportKB ]]; then
-    updateScriptLog "PRE-FLIGHT CHECK: At least **one** 'supportTeam' variable must be populated to proceed; exiting"
+    updateScriptLog "PRE-FLIGHT CHECK: At least ONE 'supportTeam' variable must be populated to proceed; exiting"
     exit 1
 fi
 
@@ -602,11 +605,11 @@ if [ -n "$supportTeamName" ]; then
   welcomeMessage+="\n\nIf you need assistance, please contact the ${supportTeamName}:"
 
     if [ -n "$supportTeamPhone" ]; then
-        welcomeMessage+="\n - **Via Phone** : ${supportTeamPhone}"
+        welcomeMessage+="\n - **Phone**: ${supportTeamPhone}"
     fi
 
     if [ -n "$supportTeamEmail" ]; then
-        welcomeMessage+="\n - **Via Email** : ${supportTeamEmail}"
+        welcomeMessage+="\n - **Email**: ${supportTeamEmail}"
     fi
     
     if [ -n "$supportKB" ]; then
@@ -614,7 +617,7 @@ if [ -n "$supportTeamName" ]; then
     fi
 fi
 
-welcomeMessage+=".\n\n---"
+welcomeMessage+="\n\n---"
 
 if { [[ "${promptForConfiguration}" == "true" ]] && [[ "${welcomeDialog}" != "messageOnly" ]]; } then
     welcomeMessage+="  \n\n#### Configurations  \n- **${configurationOneName}:** ${configurationOneDescription}  \n- **${configurationTwoName}:** ${configurationTwoDescription}  \n- **${configurationThreeName}:** ${configurationThreeDescription}"
