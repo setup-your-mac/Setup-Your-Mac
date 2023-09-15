@@ -149,9 +149,9 @@ brandingIconDark="https://cdn-icons-png.flaticon.com/512/740/740878.png"
 
 # IT Support Variables - Use these if the default text is fine but you want your org's info inserted instead
 supportTeamName="Help Desk"
-supportTeamPhone="+1 (801) 555-1212"
-supportTeamEmail="RescueMe@domain.com"
-supportKB="KB8675309"
+supportTeamPhone=""
+supportTeamEmail="rescueme@domain.com"
+supportKB="KB86753099"
 supportTeamErrorKB=", and mention [${supportKB}](https://servicenow.company.com/support?id=kb_article_view&sysparm_article=${supportKB}#Failures)"
 supportTeamHelpKB="\n- **Knowledge Base Article:** ${supportKB}"
 
@@ -295,6 +295,20 @@ done
 updateScriptLog "PRE-FLIGHT CHECK: Finder & Dock are running; proceeding …"
 
 
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Pre-flight Check: Validate at least one support variable is populated
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+# Check if supportTeamName is populated
+if [[ -z $supportTeamName ]]; then
+    updateScriptLog "PRE-FLIGHT CHECK: SupportTeamName must be populated to proceed; exiting"
+    exit 1
+fi
+
+if [[ -z $supportTeamPhone && -z $supportTeamEmail && -z $supportKB ]]; then
+    updateScriptLog "PRE-FLIGHT CHECK: At least one SupportTeam variable must be populated to proceed; exiting"
+    exit 1
+fi
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Pre-flight Check: Validate Logged-in System Accounts
