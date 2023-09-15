@@ -29,6 +29,10 @@
 # Version 0.0.5, 09-Sep-2023, Dan K. Snelson (@dan-snelson)
 #   - Updated `dialogURL`
 #
+# Version 1.12.9, 15-Sep-2023, Dan K. Snelson (@dan-snelson)
+#   - Reverted `mktemp`-created files to pre-SYM `1.12.1` behaviour
+#   - Matched SYM version number
+#
 #################################################################################
 
 
@@ -64,7 +68,7 @@ fi
 # Global variables
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="0.0.5"
+scriptVersion="1.12.9"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 secondsToWait="${4:-"2700"}"                                    # Parameter 4: "secondsToWait" setting; defaults to "2700"
 scriptLog="/var/log/org.churchofjesuschrist.log"                # Your organization's default location for client-side logs
@@ -73,10 +77,8 @@ jamfProPolicyName="@Setup Your Mac"
 plistKey="Setup Your Mac"
 selfServiceAppPath=$( defaults read /Library/Preferences/com.jamfsoftware.jamf.plist self_service_app_path )
 dialogBinary="/usr/local/bin/dialog"
-dialogCommandFile=$( mktemp "/var/tmp/Prompt-to-Setup-Your-Mac.XXXXXXX" )
-
-# Set permissions on Dialog Command File
-chmod -v 555 "${dialogCommandFile}"
+dialogCommandFile=$( mktemp -u /var/tmp/Prompt-to-Setup-Your-Mac.XXX )
+swiftDialogMinimumRequiredVersion="2.3.2.4726"                  # This will be set and updated as dependancies on newer features change.
 
 
 
@@ -128,9 +130,9 @@ function promptUser() {
     appleInterfaceStyle=$( /usr/bin/defaults read /Users/"${loggedInUser}"/Library/Preferences/.GlobalPreferences.plist AppleInterfaceStyle 2>&1 )
 
     if [[ "${appleInterfaceStyle}" == "Dark" ]]; then
-        icon="/System/Library/CoreServices/Finder.app"
+        icon="https://raw.githubusercontent.com/dan-snelson/Setup-Your-Mac/development/images/SYM_icon.png"
     else
-        icon="/System/Library/CoreServices/Finder.app"
+        icon="https://raw.githubusercontent.com/dan-snelson/Setup-Your-Mac/development/images/SYM_icon.png"
     fi
 
     overlayicon=$( defaults read /Library/Preferences/com.jamfsoftware.jamf.plist self_service_app_path )
@@ -194,7 +196,7 @@ function dialogInstall() {
     # Expected Team ID of the downloaded PKG
     expectedDialogTeamID="PWA5E9TQ59"
 
-    updateScriptLog "PRE-FLIGHT CHECK: Installing SwiftDialog..."
+    updateScriptLog "PRE-FLIGHT CHECK: Installing swiftDialog..."
 
     # Create temporary working directory
     workDirectory=$( /usr/bin/basename "$0" )
@@ -230,9 +232,6 @@ function dialogInstall() {
 
 function dialogCheck() {
 
-    # Output Line Number in `verbose` Debug Mode
-    if [[ "${debugMode}" == "verbose" ]]; then updateScriptLog "PRE-FLIGHT CHECK: # # # SETUP YOUR MAC VERBOSE DEBUG MODE: Line No. ${LINENO} # # #" ; fi
-
     # Check for Dialog and install if not found
     if [ ! -e "/Library/Application Support/Dialog/Dialog.app" ]; then
 
@@ -242,9 +241,9 @@ function dialogCheck() {
     else
 
         dialogVersion=$(/usr/local/bin/dialog --version)
-        if [[ "${dialogVersion}" < "2.3.0.4718" ]]; then
+        if [[ "${dialogVersion}" < "${swiftDialogMinimumRequiredVersion}" ]]; then
             
-            updateScriptLog "PRE-FLIGHT CHECK: swiftDialog version ${dialogVersion} found but swiftDialog 2.3.0.4718 or newer is required; updating..."
+            updateScriptLog "PRE-FLIGHT CHECK: swiftDialog version ${dialogVersion} found but swiftDialog ${swiftDialogMinimumRequiredVersion} or newer is required; updating..."
             dialogInstall
             
         else
@@ -257,16 +256,7 @@ function dialogCheck() {
 
 }
 
-
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Display Message via the jamf binary
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
-function jamfDisplayMessage() {
-    updateScriptLog "${1}; "
-	/usr/local/jamf/bin/jamf displayMessage -message "${1}" &
-}
+dialogCheck
 
 
 
