@@ -1,0 +1,26 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "commitType": "docs",
+  "commitConvention": "angular",
+  "contributors": [
+    {
+      "login": "bartreardon",
+      "name": "Bart Reardon",
+      "avatar_url": "https://avatars.githubusercontent.com/u/3598965?v=4",
+      "profile": "https://github.com/bartreardon",
+      "contributions": [
+        "code"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "skipCi": true,
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "projectName": "Setup-Your-Mac",
+  "projectOwner": "dan-snelson"
+}
