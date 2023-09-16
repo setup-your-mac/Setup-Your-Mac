@@ -1,4 +1,7 @@
 [<img alt="Setup Your Mac (1.12.0)" src="images/SYM_icon.png" width="128" />](https://snelson.us/sym)
+<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
+<!-- ALL-CONTRIBUTORS-BADGE:END -->
 # Setup Your Mac (1.12.10) via swiftDialog (2.3.2)
 
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/dan-snelson/Setup-Your-Mac?display_name=tag) ![GitHub issues](https://img.shields.io/github/issues-raw/dan-snelson/Setup-Your-Mac) ![GitHub closed issues](https://img.shields.io/github/issues-closed-raw/dan-snelson/Setup-Your-Mac) ![GitHub pull requests](https://img.shields.io/github/issues-pr-raw/dan-snelson/Setup-Your-Mac) ![GitHub closed pull requests](https://img.shields.io/github/issues-pr-closed-raw/dan-snelson/Setup-Your-Mac)
@@ -32,3 +35,25 @@ While we _thought_ we'd done everything to help ensure our users had a seamless 
 
 ### Script
 - [Prompt-to-Setup-Your-Mac.bash](Prompt-to-Setup-Your-Mac.bash)
+
+## Contributors ✨
+
+Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/bartreardon"><img src="https://avatars.githubusercontent.com/u/3598965?v=4?s=100" width="100px;" alt="Bart Reardon"/><br /><sub><b>Bart Reardon</b></sub></a><br /><a href="https://github.com/dan-snelson/Setup-Your-Mac/commits?author=bartreardon" title="Code">💻</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
