@@ -1,4 +1,4 @@
-[<img alt="Setup Your Mac (1.12.0)" src="../images/SYM_icon.png" width="128" />](https://snelson.us/sym)
+[<img alt="Setup Your Mac (1.12.0)" src="images/SYM_icon.png" width="128" />](https://snelson.us/sym)
 
 # Contributing to Setup Your Mac
 
