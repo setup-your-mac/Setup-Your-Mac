@@ -22,7 +22,7 @@ Apple's Automated Device Enrollment helps streamline Mobile Device Management (M
 - [Setup-Your-Mac-via-Dialog.bash](Setup-Your-Mac-via-Dialog.bash)
 
 ### Contributors
-A special thanks to the ever-growing list of [contributors](.github/CONTRIBUTORS.md); learn how [you can contribute](.github/CONTRIBUTING.md).
+A special thanks to the ever-growing list of [contributors](CONTRIBUTORS.md); learn how you can contribute](CONTRIBUTING.md).
 
 ---
 
@@ -38,3 +38,16 @@ While we _thought_ we'd done everything to help ensure our users had a seamless 
 
 ### Script
 - [Prompt-to-Setup-Your-Mac.bash](Prompt-to-Setup-Your-Mac.bash)
+
+---
+
+## Contributors
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
