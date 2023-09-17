@@ -40,6 +40,8 @@ While we _thought_ we'd done everything to help ensure our users had a seamless 
 ### Script
 - [Prompt-to-Setup-Your-Mac.bash](Prompt-to-Setup-Your-Mac.bash)
 
+---
+
 ## Contributors ✨
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):

@@ -1,11 +1,6 @@
 {
-<<<<<<< HEAD
-  "projectName": "Setup Your Mac",
-  "projectOwner": "dan-snelson"
-}
-=======
   "files": [
-    "README.md"
+    "CONTRIBUTORS.md"
   ],
   "imageSize": 100,
   "commit": false,
@@ -29,4 +24,3 @@
   "projectName": "Setup-Your-Mac",
   "projectOwner": "dan-snelson"
 }
->>>>>>> all-contributors/add-bartreardon
