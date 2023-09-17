@@ -21,7 +21,7 @@ Even if you can't _yet_ write `code` you're comfortable sharing with the world, 
 ### 4. Pull Requests
 [Pull Requests](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/proposing-changes-to-your-work-with-pull-requests/about-pull-requests) are the lifeblood of all open-source projects.
 
-If you're hesitant to submit a PR to the [main SYM script](../Setup-Your-Mac-via-Dialog.bash), contributing a [Remote Validation](../Validations/README.md) is a great place to start.
+If you're hesitant to submit a PR to the [main SYM script](../Setup-Your-Mac-via-Dialog.bash), contributing a [Remote Validation](https://github.com/dan-snelson/Setup-Your-Mac/blob/main/Validations/README.md) is a great place to start.
 
 ---
 
