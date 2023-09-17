@@ -18,6 +18,8 @@
 ### Humbled & Amazed
 
 The response to Setup Your Mac has been both humbling and amazing; my personal thanks to MacAdmins worldwide and the ever-growing number of contributors:
+- @all-contributors please add @Honestpuck for #105
+- @all-contributors please add @Honestpuck for #104
 - @all-contributors please add @GadgetGeekNI for #101
 - @all-contributors please add @bartreardon for suggesting the addition of `-L` to `curl` command when caching banner images
 - @all-contributors please add @GadgetGeekNI for #100
