@@ -33,7 +33,16 @@
       "contributions": [
         "code"
       ]
-    }   
+    },
+    {
+      "login": "robjschroeder",
+      "name": "Robert Schroeder",
+      "avatar_url": "https://avatars.githubusercontent.com/u/23343243?v=4",
+      "profile": "https://techitout.xyz",
+      "contributions": [
+        "code"
+      ]
+    }
   ],
   "contributorsPerLine": 7,
   "skipCi": true,
