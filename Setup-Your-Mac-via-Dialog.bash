@@ -944,6 +944,7 @@ function policyJSONConfiguration() {
 
         "${configurationOneName}" )
 
+            overlayoverride=""
             policyJSON='
             {
                 "steps": [
@@ -1050,6 +1051,7 @@ function policyJSONConfiguration() {
 
         "${configurationTwoName}" )
 
+            overlayoverride=""
             policyJSON='
             {
                 "steps": [
@@ -1182,6 +1184,7 @@ function policyJSONConfiguration() {
 
         "${configurationThreeName}" )
 
+            overlayoverride=""
             policyJSON='
             {
                 "steps": [
@@ -1358,6 +1361,7 @@ function policyJSONConfiguration() {
 
         * ) # Catch-all (i.e., used when `welcomeDialog` is set to `video`, `messageOnly` or `false`)
 
+            overlayoverride=""
             policyJSON='
             {
                 "steps": [
@@ -2768,6 +2772,9 @@ if [[ "${welcomeDialog}" == "video" ]]; then
 
     eval "${dialogSetupYourMacCMD[*]}" & sleep 0.3
     dialogUpdateSetupYourMac "activate:"
+    if [[ ! -z "$overlayoverride" ]]; then
+        dialogUpdateSetupYourMac "overlayicon: ${overlayoverride}"
+    fi
 
 elif [[ "${welcomeDialog}" == "messageOnly" ]]; then
 
@@ -2815,6 +2822,9 @@ elif [[ "${welcomeDialog}" == "messageOnly" ]]; then
     # Display main SYM dialog
     eval "${dialogSetupYourMacCMD[*]}" & sleep 0.3
     dialogUpdateSetupYourMac "activate:"
+    if [[ ! -z "$overlayoverride" ]]; then
+        dialogUpdateSetupYourMac "overlayicon: ${overlayoverride}"
+    fi
 
 elif [[ "${welcomeDialog}" == "userInput" ]]; then
 
@@ -3007,6 +3017,9 @@ elif [[ "${welcomeDialog}" == "userInput" ]]; then
             done
             updateScriptLog "WELCOME DIALOG: 'Setup Your Mac' dialog displayed; ensure it's the front-most app"
             runAsUser osascript -e 'tell application "Dialog" to activate'
+            if [[ ! -z "$overlayoverride" ]]; then
+                dialogUpdateSetupYourMac "overlayicon: ${overlayoverride}"
+            fi
             ;;
 
         2)  # Process exit code 2 scenario here
@@ -3063,6 +3076,9 @@ else
     done
     updateScriptLog "WELCOME DIALOG: 'Setup Your Mac' dialog displayed; ensure it's the front-most app"
     runAsUser osascript -e 'tell application "Dialog" to activate'
+    if [[ ! -z "$overlayoverride" ]]; then
+        dialogUpdateSetupYourMac "overlayicon: ${overlayoverride}"
+    fi
 
 fi
 
