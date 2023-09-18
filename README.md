@@ -39,24 +39,8 @@ While we _thought_ we'd done everything to help ensure our users had a seamless 
 
 ---
 
-## Contributors ✨
+## Contributors
 
-Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+The response to Setup Your Mac has been both humbling and amazing; my personal thanks to MacAdmins worldwide and the ever-growing number of [contributors](CONTRIBUTORS.md).
 
-<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-<!-- prettier-ignore-start -->
-<!-- markdownlint-disable -->
-<table>
-  <tbody>
-    <tr>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/bartreardon"><img src="https://avatars.githubusercontent.com/u/3598965?v=4?s=100" width="100px;" alt="Bart Reardon"/><br /><sub><b>Bart Reardon</b></sub></a><br /><a href="https://github.com/dan-snelson/Setup-Your-Mac/commits?author=bartreardon" title="Code">💻</a></td>
-    </tr>
-  </tbody>
-</table>
-
-<!-- markdownlint-restore -->
-<!-- prettier-ignore-end -->
-
-<!-- ALL-CONTRIBUTORS-LIST:END -->
-
-This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
+Learn how you can [contribute](CONTRIBUTING.md).
