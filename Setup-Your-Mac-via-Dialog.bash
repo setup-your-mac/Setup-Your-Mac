@@ -109,7 +109,6 @@ debugModeSleepAmount="3"    # Delay for various actions when running in Debug Mo
 failureDialog="true"        # Display the so-called "Failure" dialog (after the main SYM dialog) [ true | false ]
 
 
-
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Welcome Message User Input Customization Choices (thanks, @rougegoat!)
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -161,6 +160,13 @@ supportTeamHelpKB="\n- **Knowledge Base Article:** ${supportKB}"
 
 # Disable the "Continue" button in the User Input "Welcome" dialog until Dynamic Download Estimates have complete [ true | false ] (thanks, @Eltord!)
 lockContinueBeforeEstimations="false"
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# The fully qualified domain name of the server which hosts your icons, including any required sub-directories
+# Note: Jamf has been moving some icons to usw2 or other geolocated hosting regions so make sure you grab the prefix your environment uses
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+setupYourMacPolicyArrayIconPrefixUrl="https://ics.services.jamfcloud.com/icon/hash_"
 
 
 
@@ -921,13 +927,6 @@ dialogSetupYourMacCMD="$dialogBinary \
 # policy_array=("$(curl -sL $jsonURL)")
 #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# The fully qualified domain name of the server which hosts your icons, including any required sub-directories
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
-setupYourMacPolicyArrayIconPrefixUrl="https://ics.services.jamfcloud.com/icon/hash_"
-
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
