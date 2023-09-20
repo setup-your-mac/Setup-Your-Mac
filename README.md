@@ -24,6 +24,16 @@ A special thanks to the ever-growing list of [contributors](CONTRIBUTORS.md); le
 
 ---
 
+# SYM-Helper
+
+> A stand-alone macOS app to help MacAdmins more easily deploy [Setup Your Mac](https://snelson.us/sym)
+
+![SYM-Helper Hero](images/SYM-Helper-Hero.png)
+
+[Documentation](https://snelson.us/sym-helper) | [Releases](https://github.com/BIG-RAT/SYM-Helper/releases)
+
+---
+
 # &ldquo;Setup Your Mac, please&rdquo;
 
 > When auto-launching Self Service post-enrollment isn't enough, **continually** prompt your users to _actually_ setup their Macs
