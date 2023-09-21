@@ -863,12 +863,6 @@ dialogSetupYourMacCMD="$dialogBinary \
 #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# The fully qualified domain name of the server which hosts your icons, including any required sub-directories
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-
-setupYourMacPolicyArrayIconPrefixUrl="https://ics.services.jamfcloud.com/icon/hash_"
-
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -3048,7 +3042,7 @@ outputLineNumberInVerboseDebugMode
 list_item_string=${list_item_array[*]/%/,}
 dialogUpdateSetupYourMac "list: ${list_item_string%?}"
 for (( i=0; i<dialog_step_length; i++ )); do
-    dialogUpdateSetupYourMac "listitem: index: $i, icon: https://ics.services.jamfcloud.com/icon/hash_${icon_url_array[$i]}, status: pending, statustext: Pending …"
+    dialogUpdateSetupYourMac "listitem: index: $i, icon: ${icon_url_array[$i]}, status: pending, statustext: Pending …"
 done
 dialogUpdateSetupYourMac "list: show"
 
@@ -3193,7 +3187,7 @@ for (( i=0; i<dialog_step_length; i++ )); do
         updateScriptLog "\n\n# # #\n# SETUP YOUR MAC DIALOG: policyJSON > listitem: ${listitem}\n# # #\n"
         dialogUpdateSetupYourMac "listitem: index: $i, status: wait, statustext: Installing …, "
     fi
-    if [[ -n "$icon" ]]; then dialogUpdateSetupYourMac "icon: https://ics.services.jamfcloud.com/icon/hash_${icon}"; fi
+    if [[ -n "$icon" ]]; then dialogUpdateSetupYourMac "icon: ${icon}"; fi
     if [[ -n "$progresstext" ]]; then dialogUpdateSetupYourMac "progresstext: $progresstext"; fi
     if [[ -n "$trigger_list_length" ]]; then
 
