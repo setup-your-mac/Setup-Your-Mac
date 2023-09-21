@@ -1,4 +1,4 @@
-[<img alt="Setup Your Mac (1.12.0)" src="images/SYM_icon.png" width="128" />](https://snelson.us/sym)
+[<img alt="SYM_icon" src="images/SYM_icon.png" width="128" />](https://snelson.us/sym)
 
 # Setup Your Mac Contributors
 
@@ -18,6 +18,7 @@
 ### Humbled & Amazed
 
 The response to Setup Your Mac has been both humbling and amazing; my personal thanks to MacAdmins worldwide and the ever-growing number of contributors:
+- @all-contributors please add @drtaru for [112](https://github.com/dan-snelson/Setup-Your-Mac/pull/112)
 - @all-contributors please add @Honestpuck for [105](https://github.com/dan-snelson/Setup-Your-Mac/pull/105)
 - @all-contributors please add @Honestpuck for [104](https://github.com/dan-snelson/Setup-Your-Mac/issues/104)
 - @all-contributors please add @GadgetGeekNI for [101](https://github.com/dan-snelson/Setup-Your-Mac/pull/101)

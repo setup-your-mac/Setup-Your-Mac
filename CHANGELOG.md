@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 1.13.0-b1
+### TBD-Oct-2023
+- 🔥 **Breaking Change** for users of Setup Your Mac prior to `1.13.0` 🔥 
+  - Removed `setupYourMacPolicyArrayIconPrefixUrl` in favor using the fully qualified domain name of the server which hosts your icons
+
+
 ## 1.12.10
 ### 15-Sep-2023
 - Better WelcomeMessage logic and variable handling ([Pull Request No. 101](https://github.com/dan-snelson/Setup-Your-Mac/pull/101); thanks big bunches, @GadgetGeekNI!)

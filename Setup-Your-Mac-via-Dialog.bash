@@ -10,68 +10,9 @@
 #
 # HISTORY
 #
-#   Version 1.12.0, 21-Aug-2023, Dan K. Snelson (@dan-snelson)
-#   - Add version check to `dialogCheck` ([Pull Request No. 67](https://github.com/dan-snelson/Setup-Your-Mac/pull/67); thanks yet again, @drtaru!)
-#   - Make `presetConfiguration` also apply to `userInput` ([Pull Request No. 63](https://github.com/dan-snelson/Setup-Your-Mac/pull/63); thanks for another one, @rougegoat!)
-#   - Fix for visual hiccup where `infobox` displays "Analyzing input …" if `configurationDownloadEstimation` and `promptForConfiguration` are both set to `false` ([Pull Request No. 69](https://github.com/dan-snelson/Setup-Your-Mac/pull/69); thanks yet again, @rougegoat!)
-#   - Added networkQuality check for macOS Sonoma 14
-#   - Formatting updates
-#   - Updated Palo Alto GlobalProtect icon hash
-#   - Changed "Restart Attended" Completion Action one-liner (Addresses [Issue No. 71](https://github.com/dan-snelson/Setup-Your-Mac/issues/71); thanks, @master-vodawagner!)
-#   - Delay the removal of `overlayicon` (Addresses [Issue No. 73](https://github.com/dan-snelson/Setup-Your-Mac/issues/73); thanks, @mani2care!)
-#   - Added `reconOption` prompts for `realname` and `email` (Addresses [Issue No. 52](https://github.com/dan-snelson/Setup-Your-Mac/issues/52); thanks for the suggestion @brianhm; thanks for the code, @Siggloo!)
-#   - Changed dialog heights to percentages
-#   - Auto-cache / auto-remove a hosted welcomeBannerImage (Addresses [Issue No. 74](https://github.com/dan-snelson/Setup-Your-Mac/issues/74)
-#   - Added a `welcomeDialog` option of `messageOnly` (Addresses [Issue No. 66](https://github.com/dan-snelson/Setup-Your-Mac/issues/66); thanks for the suggestion, @ryanasik)
-#   - Reverted "Restart Attended" Completion Action one-liner (Unaddresses [Issue No. 71](https://github.com/dan-snelson/Setup-Your-Mac/issues/71); sorry, @master-vodawagner)
-#   - Set newly added email address to required (regex courtesy of @bartreardon) (Addresses [Issue No. 75](https://github.com/dan-snelson/Setup-Your-Mac/issues/75); thanks for the suggestion, @ryanasik)
-#   - Added code to pre-fill user's full name (Addresses [Issue No. 76](https://github.com/dan-snelson/Setup-Your-Mac/issues/76); thanks for the suggestion, @ryanasik)
-#   - Reverted dialog heights to pixels
-#   - Updated Vimeo video ID
-#   - Updated `serialNumber` code (with special thanks to @Eltord for saving each and every user `0.0.6` seconds)
-#   - Added `suppressReconOnPolicy` to `-forceNoRecon` flag when executing the `run_jamf_trigger` function (Addresses [Issue No. 79](https://github.com/dan-snelson/Setup-Your-Mac/issues/79); thanks for the idea, @fitzwater-rowan; thanks for yet another PR, @rougegoat!)
-#   - Added "Install Buffers" to each Configuration to include installation time of packages (Addresses [Issue No. 78](https://github.com/dan-snelson/Setup-Your-Mac/issues/78); thanks, @Eltord!
-#   - Added permissions correction on `mktemp`-created files (for swiftDialog `2.3`)
-#   - Updated required version of swiftDialog to `2.3.0.4718`
-#
-#   Version 1.12.1, 21-Aug-2023, Dan K. Snelson (@dan-snelson)
-#   - Added permissions correction on ALL `mktemp`-created files (for swiftDialog `2.3.1`)
-#   - Updated required version of swiftDialog to `2.3.1.4721`
-#
-#   Version 1.12.2, 22-Aug-2023, Dan K. Snelson (@dan-snelson)
-#   - Updated minimum version of macOS to 12
-#   - Corrected deletion of cached welcomeBannerImage
-#
-#   Version 1.12.3, 23-Aug-2023, Dan K. Snelson (@dan-snelson)
-#   - Changed `dialogURL` to new GitHub Repo ([Pull Request No. 88](https://github.com/dan-snelson/Setup-Your-Mac/pull/88); thanks yet again, @drtaru!)
-#
-#   Version 1.12.4, 26-Aug-2023, Dan K. Snelson (@dan-snelson)
-#   - `toggleJamfLaunchDaemon` (during `quitScript` function) based on `completionActionOption` ([Pull Request No. 89](https://github.com/dan-snelson/Setup-Your-Mac/pull/89); thanks for another one, @TechTrekkie!)
-#
-#   Version 1.12.5, 28-Aug-2023, Dan K. Snelson (@dan-snelson)
-#   - Added `sleep "${debugModeSleepAmount}"` to `recon` validation
-#
-#   Version 1.12.6, 30-Aug-2023, Dan K. Snelson (@dan-snelson)
-#   - Reverted `mktemp`-created files to pre-SYM `1.12.1` behaviour
-#   - Updated required version of swiftDialog to `2.3.2.4726`
-#
-#   Version 1.12.7, 09-Sep-2023, Dan K. Snelson (@dan-snelson)
-#   - Added ability disable the "Continue" button in the User Input "Welcome" dialog until Dynamic Download Estimates have complete ([Pull Request No. 93](https://github.com/dan-snelson/Setup-Your-Mac/pull/93); thanks, @Eltord!)
-#   - Added a check to account for if the `loggedInUser` returns in ALL CAPS (as this sometimes happens with SSO Attributes) ([Pull Request No. 94](https://github.com/dan-snelson/Setup-Your-Mac/pull/94); thanks for another one, @Eltord!)
-#   - Added a Pre-flight Check for the running shell environment: Will exit gracefully if the shell does not match \bin\bash. ([Pull Request No. 95](https://github.com/dan-snelson/Setup-Your-Mac/pull/95); thanks — yet again — @drtaru!)
-#   - Remove any default dialog file
-#
-#   Version 1.12.8, 13-Sep-2023, Dan K. Snelson (@dan-snelson)
-#   - Added a check for FileVault being enabled during Setup Assistant (for macOS 14 Sonoma) ([Pull Request No. 96](https://github.com/dan-snelson/Setup-Your-Mac/pull/96); thanks, Obi-@drtaru!)
-#
-#   Version 1.12.9, 15-Sep-2023, Dan K. Snelson (@dan-snelson)
-#   - Added `-L` to `curl` command when caching banner images (thanks for the suggestion, @bartreardon!)
-#   - Added `swiftDialogMinimumRequiredVersion` variable to more easily track the minimum build. ([Pull Request No. 98](https://github.com/dan-snelson/Setup-Your-Mac/pull/98); thanks, @GadgetGeekNI!)
-#   - Hide unused Support variables ([Pull Request No. 99](https://github.com/dan-snelson/Setup-Your-Mac/pull/99); thanks again, @GadgetGeekNI!)
-#   - Added Pre-flight Check: Validate `supportTeam` variables are populated ([Pull Request No. 100](https://github.com/dan-snelson/Setup-Your-Mac/pull/100); thanks for another one, @GadgetGeekNI!)
-#
-#   Version 1.12.10, 15-Sep-2023, Dan K. Snelson (@dan-snelson)
-#   - Better WelcomeMessage logic and variable handling ([Pull Request No. 101](https://github.com/dan-snelson/Setup-Your-Mac/pull/101); thanks big bunches, @GadgetGeekNI!)
+#   Version 1.13.0, TBD-Oct-2023, Dan K. Snelson (@dan-snelson)
+#   - 🔥 **Breaking Change** for users of Setup Your Mac prior to `1.13.0` 🔥 
+#       - Removed `setupYourMacPolicyArrayIconPrefixUrl` in favor using the fully qualified domain name of the server which hosts your icons
 #
 ####################################################################################################
 
@@ -87,7 +28,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.12.10"
+scriptVersion="1.13.0-b1"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -3107,7 +3048,7 @@ outputLineNumberInVerboseDebugMode
 list_item_string=${list_item_array[*]/%/,}
 dialogUpdateSetupYourMac "list: ${list_item_string%?}"
 for (( i=0; i<dialog_step_length; i++ )); do
-    dialogUpdateSetupYourMac "listitem: index: $i, icon: ${setupYourMacPolicyArrayIconPrefixUrl}${icon_url_array[$i]}, status: pending, statustext: Pending …"
+    dialogUpdateSetupYourMac "listitem: index: $i, icon: https://ics.services.jamfcloud.com/icon/hash_${icon_url_array[$i]}, status: pending, statustext: Pending …"
 done
 dialogUpdateSetupYourMac "list: show"
 
@@ -3252,7 +3193,7 @@ for (( i=0; i<dialog_step_length; i++ )); do
         updateScriptLog "\n\n# # #\n# SETUP YOUR MAC DIALOG: policyJSON > listitem: ${listitem}\n# # #\n"
         dialogUpdateSetupYourMac "listitem: index: $i, status: wait, statustext: Installing …, "
     fi
-    if [[ -n "$icon" ]]; then dialogUpdateSetupYourMac "icon: ${setupYourMacPolicyArrayIconPrefixUrl}${icon}"; fi
+    if [[ -n "$icon" ]]; then dialogUpdateSetupYourMac "icon: https://ics.services.jamfcloud.com/icon/hash_${icon}"; fi
     if [[ -n "$progresstext" ]]; then dialogUpdateSetupYourMac "progresstext: $progresstext"; fi
     if [[ -n "$trigger_list_length" ]]; then
 
