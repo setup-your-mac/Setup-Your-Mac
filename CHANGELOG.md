@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.12.11
+### 24-Sep-2023
+- Restored logging of `jamfProPolicyNameFailures`
+
 ## 1.12.10
 ### 15-Sep-2023
 - Better WelcomeMessage logic and variable handling ([Pull Request No. 101](https://github.com/dan-snelson/Setup-Your-Mac/pull/101); thanks big bunches, @GadgetGeekNI!)

@@ -1,10 +1,10 @@
  [<img alt="Setup Your Mac (1.12.0)" src="images/SYM_icon.png" width="128" />](https://snelson.us/sym)
  
- # Setup Your Mac (1.12.10) via swiftDialog (2.3.2)
+ # Setup Your Mac (1.12.11) via swiftDialog (2.3.2)
 
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/dan-snelson/Setup-Your-Mac?display_name=tag) ![GitHub issues](https://img.shields.io/github/issues-raw/dan-snelson/Setup-Your-Mac) ![GitHub closed issues](https://img.shields.io/github/issues-closed-raw/dan-snelson/Setup-Your-Mac) ![GitHub pull requests](https://img.shields.io/github/issues-pr-raw/dan-snelson/Setup-Your-Mac) ![GitHub closed pull requests](https://img.shields.io/github/issues-pr-closed-raw/dan-snelson/Setup-Your-Mac) ![GitHub contributors (via allcontributors.org)](https://img.shields.io/github/all-contributors/dan-snelson/Setup-Your-Mac/main)
 
-> With more accurate Dynamic Download Estimates, additional user-input fields and multiple speed improvements, Setup Your Mac (1.12.10) helps MacAdmins provide their users a seamless onboarding experience via swiftDialog (2.3.2).
+> With more accurate Dynamic Download Estimates, additional user-input fields and multiple speed improvements, Setup Your Mac (1.12.11) helps MacAdmins provide their users a seamless onboarding experience via swiftDialog (2.3.2).
 
 [<img alt="Setup Your Mac (1.12.0)" src="images/Setup_Your_Mac_1.12.0_estimates.png" />](https://snelson.us/sym)
 

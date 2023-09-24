@@ -73,6 +73,9 @@
 #   Version 1.12.10, 15-Sep-2023, Dan K. Snelson (@dan-snelson)
 #   - Better WelcomeMessage logic and variable handling ([Pull Request No. 101](https://github.com/dan-snelson/Setup-Your-Mac/pull/101); thanks big bunches, @GadgetGeekNI!)
 #
+#   Version 1.12.11, 24-Sep-2023, Dan K. Snelson (@dan-snelson)
+#   - Restored logging of `jamfProPolicyNameFailures`
+#
 ####################################################################################################
 
 
@@ -1679,7 +1682,7 @@ function finalise(){
 
             updateScriptLog "\n\n# # #\n# FAILURE DIALOG\n# # #\n"
             updateScriptLog "Jamf Pro Policy Name Failures:"
-            
+            updateScriptLog "${jamfProPolicyNameFailures}"
 
             failureMessage="A failure has been detected, ${loggedInUserFirstname}. \n\nPlease complete the following steps:\n1. Reboot and login to your ${modelName}  \n2. Login to Self Service  \n3. Re-run any failed policy listed below  \n\nThe following failed:  \n${jamfProPolicyNameFailures}"
             
