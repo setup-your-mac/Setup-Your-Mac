@@ -1,10 +1,11 @@
 # CHANGELOG
 
-## 1.13.0-b1
-### TBD-Oct-2023
+## 1.13.0-b2
+### 25-Sep-2023
+- Optimized variable placement for SYM-Helper
 - 🔥 **Breaking Change** for users of Setup Your Mac prior to `1.13.0` 🔥 
   - Removed `setupYourMacPolicyArrayIconPrefixUrl` in favor using the fully qualified domain name of the server which hosts your icons
-
+- Restored logging of `jamfProPolicyNameFailures`
 
 ## 1.12.10
 ### 15-Sep-2023

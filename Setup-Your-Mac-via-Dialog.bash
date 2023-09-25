@@ -10,9 +10,11 @@
 #
 # HISTORY
 #
-#   Version 1.13.0, TBD-Oct-2023, Dan K. Snelson (@dan-snelson)
+#   Version 1.13.0, 25-Sep-2023, Dan K. Snelson (@dan-snelson)
+#   - Optimized variable placement for SYM-Helper
 #   - 🔥 **Breaking Change** for users of Setup Your Mac prior to `1.13.0` 🔥 
 #       - Removed `setupYourMacPolicyArrayIconPrefixUrl` in favor using the fully qualified domain name of the server which hosts your icons
+#   - Restored logging of `jamfProPolicyNameFailures`
 #
 ####################################################################################################
 
@@ -28,7 +30,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.13.0-b1"
+scriptVersion="1.13.0-b2"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -1614,7 +1616,7 @@ function finalise(){
 
             updateScriptLog "\n\n# # #\n# FAILURE DIALOG\n# # #\n"
             updateScriptLog "Jamf Pro Policy Name Failures:"
-            
+            updateScriptLog "${jamfProPolicyNameFailures}"
 
             failureMessage="A failure has been detected, ${loggedInUserFirstname}. \n\nPlease complete the following steps:\n1. Reboot and login to your ${modelName}  \n2. Login to Self Service  \n3. Re-run any failed policy listed below  \n\nThe following failed:  \n${jamfProPolicyNameFailures}"
             
