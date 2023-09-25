@@ -73,7 +73,7 @@
 #   Version 1.12.10, 15-Sep-2023, Dan K. Snelson (@dan-snelson)
 #   - Better WelcomeMessage logic and variable handling ([Pull Request No. 101](https://github.com/dan-snelson/Setup-Your-Mac/pull/101); thanks big bunches, @GadgetGeekNI!)
 #
-#   Version 1.12.11, 24-Sep-2023, Dan K. Snelson (@dan-snelson)
+#   Version 1.12.11, 25-Sep-2023, Dan K. Snelson (@dan-snelson)
 #   - Restored logging of `jamfProPolicyNameFailures`
 #
 ####################################################################################################
@@ -90,7 +90,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.12.10"
+scriptVersion="1.12.11"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]

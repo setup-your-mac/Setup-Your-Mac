@@ -1,7 +1,7 @@
 # CHANGELOG
 
 ## 1.12.11
-### 24-Sep-2023
+### 25-Sep-2023
 - Restored logging of `jamfProPolicyNameFailures`
 
 ## 1.12.10
