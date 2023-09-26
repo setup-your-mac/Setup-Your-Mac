@@ -1,8 +1,9 @@
 # CHANGELOG
 
 ## 1.12.11
-### 25-Sep-2023
+### 26-Sep-2023
 - Restored logging of `jamfProPolicyNameFailures`
+- Updated `if … then` statements when disabling the "Continue" button in the User Input "Welcome" dialog until Dynamic Download Estimates have complete ([Pull Request No. 115](https://github.com/dan-snelson/Setup-Your-Mac/pull/116); thanks, @delize!)
 
 ## 1.12.10
 ### 15-Sep-2023
