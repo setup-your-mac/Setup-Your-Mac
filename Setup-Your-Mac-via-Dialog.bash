@@ -2416,7 +2416,7 @@ function checkNetworkQualityConfigurations() {
     dialogUpdateWelcome "infobox: **Connection:**  \n- Download:  \n$mbps Mbps  \n\n**Estimates:**  \n- ${configurationOneName}:  \n$(printf '%dh:%dm:%ds\n' $((configurationOneEstimatedSeconds/3600)) $((configurationOneEstimatedSeconds%3600/60)) $((configurationOneEstimatedSeconds%60)))  \n\n- ${configurationTwoName}:  \n$(printf '%dh:%dm:%ds\n' $((configurationTwoEstimatedSeconds/3600)) $((configurationTwoEstimatedSeconds%3600/60)) $((configurationTwoEstimatedSeconds%60)))  \n\n- ${configurationThreeName}:  \n$(printf '%dh:%dm:%ds\n' $((configurationThreeEstimatedSeconds/3600)) $((configurationThreeEstimatedSeconds%3600/60)) $((configurationThreeEstimatedSeconds%60)))"
 
     # If option to lock the continue button is set to true, enable the continue button now to let the user progress
-    if [[ "$lockContinueBeforeEstimations" = "true" ]]; then
+    if [[ "${lockContinueBeforeEstimations}" == "true" ]]; then
         updateScriptLog "WELCOME DIALOG: Enabling Continue Button"
         dialogUpdateWelcome "button1: enable"
     fi
@@ -2470,7 +2470,10 @@ function checkNetworkQualityCatchAllConfiguration() {
 
     updateScriptLog "SETUP YOUR MAC DIALOG: Network Quality Test: Started: $dlStartDate, Ended: $dlEndDate; Download: $mbps Mbps, Responsiveness: $dlResponsiveness"
     dialogUpdateSetupYourMac "infobox: **Connection:**  \n- Download:  \n$mbps Mbps  \n\n**Estimates:**  \n- $(printf '%dh:%dm:%ds\n' $((configurationCatchAllEstimatedSeconds/3600)) $((configurationCatchAllEstimatedSeconds%3600/60)) $((configurationCatchAllEstimatedSeconds%60)))"
-
+    if [[ "${lockContinueBeforeEstimations}" == "true" ]]; then
+        updateScriptLog "WELCOME DIALOG: Enabling Continue Button"
+        dialogUpdateWelcome "button1: enable"
+    fi
 }
 
 
@@ -2837,7 +2840,7 @@ elif [[ "${welcomeDialog}" == "userInput" ]]; then
         echo "$welcomeJSON" > "$welcomeJSONFile"
 
         # If option to lock the continue button is set to true, open welcome dialog with button 1 disabled
-        if [[ "$lockContinueBeforeEstimations" = "true" ]]; then
+        if [[ "${lockContinueBeforeEstimations}" == "true" ]]; then
             
             updateScriptLog "WELCOME DIALOG: Display 'Welcome' dialog with disabled Continue Button …"
             welcomeResults=$( eval "${dialogBinary} --jsonfile ${welcomeJSONFile} --json --button1disabled" )
