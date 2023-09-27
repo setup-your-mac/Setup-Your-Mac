@@ -2085,7 +2085,11 @@ function validatePolicyResult() {
                     fi
                     ;;
                 * )
-                    updateScriptLog "SETUP YOUR MAC DIALOG: Locally Validate Policy Results Local Catch-all: ${validation}"
+                    updateScriptLog "SETUP YOUR MAC DIALOG: Locally Validate Policy Result: Local Validation “${validation}” Missing"
+                    dialogUpdateSetupYourMac "listitem: index: $i, status: fail, statustext: Missing Local Validation"
+                    jamfProPolicyTriggerFailure="failed"
+                    exitCode="1"
+                    jamfProPolicyNameFailures+="• $listitem  \n"
                     ;;
             esac
             ;;
