@@ -2,7 +2,7 @@
  
  # Setup Your Mac (1.13.0) with SYM-Helper via swiftDialog
 
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/dan-snelson/Setup-Your-Mac?display_name=tag) ![GitHub issues](https://img.shields.io/github/issues-raw/dan-snelson/Setup-Your-Mac) ![GitHub closed issues](https://img.shields.io/github/issues-closed-raw/dan-snelson/Setup-Your-Mac) ![GitHub pull requests](https://img.shields.io/github/issues-pr-raw/dan-snelson/Setup-Your-Mac) ![GitHub closed pull requests](https://img.shields.io/github/issues-pr-closed-raw/dan-snelson/Setup-Your-Mac) ![GitHub contributors (via allcontributors.org)](https://img.shields.io/github/all-contributors/dan-snelson/Setup-Your-Mac/main)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/dan-snelson/Setup-Your-Mac?display_name=tag) ![GitHub issues](https://img.shields.io/github/issues-raw/dan-snelson/Setup-Your-Mac) ![GitHub closed issues](https://img.shields.io/github/issues-closed-raw/dan-snelson/Setup-Your-Mac) ![GitHub pull requests](https://img.shields.io/github/issues-pr-raw/dan-snelson/Setup-Your-Mac) ![GitHub closed pull requests](https://img.shields.io/github/issues-pr-closed-raw/dan-snelson/Setup-Your-Mac)
 
 > Optimized to leverage SYM-Helper, Setup Your Mac (1.13.0) offers MacAdmins under-the-hood, quality-of-life improvements.
 
@@ -30,6 +30,8 @@ A special thanks to the ever-growing list of [contributors](CONTRIBUTORS.md); le
 
 ![SYM-Helper Hero](images/SYM-Helper-Hero.png)
 
+When reviewing [Setup-Your-Mac-via-Dialog.bash](Setup-Your-Mac-via-Dialog.bash), the desktop computer icon &ldquo;🖥&rdquo; indicates variables which can be configured with SYM-Helper.
+
 [Documentation](https://snelson.us/sym-helper) | [Releases](https://github.com/BIG-RAT/SYM-Helper/releases)
 
 ---
@@ -46,11 +48,3 @@ While we _thought_ we'd done everything to help ensure our users had a seamless 
 
 ### Script
 - [Prompt-to-Setup-Your-Mac.bash](Prompt-to-Setup-Your-Mac.bash)
-
----
-
-## Contributors
-
-The response to Setup Your Mac has been both humbling and amazing; my personal thanks to MacAdmins worldwide and the ever-growing number of [contributors](CONTRIBUTORS.md).
-
-Learn how you can [contribute](CONTRIBUTING.md).

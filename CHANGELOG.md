@@ -1,10 +1,19 @@
 # CHANGELOG
 
-## 1.13.0-b3
-### 26-Sep-2023
-- Optimized variable placement for SYM-Helper
+## 1.13.0
+### TBD-Oct-2023
 - 🔥 **Breaking Change** for users of Setup Your Mac prior to `1.13.0` 🔥 
-  - Removed `setupYourMacPolicyArrayIconPrefixUrl` in favor using the fully qualified domain name of the server which hosts your icons
+  - Removed `setupYourMacPolicyArrayIconPrefixUrl` (in favor using the fully qualified domain name of the server which hosts your icons)
+- Added &ldquo;🖥&rdquo; to identify variables which can be configured in SYM-Helper (0.8.0)
+
+## 1.12.12
+### 28-Sep-2023
+- Added a failure indication when a "Local" validation trigger does not exist in the main script ([Pull Request No. 117](https://github.com/dan-snelson/Setup-Your-Mac/pull/117); thanks for another one, @drtaru!)
+
+## 1.12.11
+### 26-Sep-2023
+- Restored logging of `jamfProPolicyNameFailures`
+- Updated `if … then` statements when disabling the "Continue" button in the User Input "Welcome" dialog until Dynamic Download Estimates have complete ([Pull Request No. 115](https://github.com/dan-snelson/Setup-Your-Mac/pull/116); thanks, @delize!)
 
 ## 1.12.10
 ### 15-Sep-2023
