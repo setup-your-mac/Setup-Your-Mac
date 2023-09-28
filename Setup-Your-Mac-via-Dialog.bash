@@ -13,7 +13,7 @@
 #   Version 1.13.0, TBD-Oct-2023, Dan K. Snelson (@dan-snelson)
 #   - 🔥 **Breaking Change** for users of Setup Your Mac prior to `1.13.0` 🔥 
 #       - Removed `setupYourMacPolicyArrayIconPrefixUrl` (in favor using the fully qualified domain name of the server which hosts your icons)
-#   - Added 🖥 to identify variables which can be configured in SYM-Helper (0.8.0)
+#   - Added [SYM-Helper] to identify variables which can be configured in SYM-Helper (0.8.0)
 #
 ####################################################################################################
 
@@ -29,7 +29,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.13.0-b4"
+scriptVersion="1.13.0-b5"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -56,7 +56,7 @@ failureDialog="true"        # Display the so-called "Failure" dialog (after the 
 # Welcome Message User Input Customization Choices (thanks, @rougegoat!)
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-# 🖥 These control which user input boxes are added to the first page of Setup Your Mac. If you do not want to ask about a value, set it to any other value
+# [SYM-Helper] These control which user input boxes are added to the first page of Setup Your Mac. If you do not want to ask about a value, set it to any other value
 promptForUsername="true"
 prefillUsername="true"          # prefills the currently logged in user's username
 promptForRealName="true"
@@ -75,25 +75,25 @@ suppressReconOnPolicy="false"
 # Disables the Blurscreen enabled by default in Production
 moveableInProduction="false"
 
-# 🖥 An unsorted, comma-separated list of buildings (with possible duplication). If empty, this will be hidden from the user info prompt
+# [SYM-Helper] An unsorted, comma-separated list of buildings (with possible duplication). If empty, this will be hidden from the user info prompt
 buildingsListRaw="Benson (Ezra Taft) Building,Brimhall (George H.) Building,BYU Conference Center,Centennial Carillon Tower,Chemicals Management Building,Clark (Herald R.) Building,Clark (J. Reuben) Building,Clyde (W.W.) Engineering Building,Crabtree (Roland A.) Technology Building,Ellsworth (Leo B.) Building,Engineering Building,Eyring (Carl F.) Science Center,Grant (Heber J.) Building,Harman (Caroline Hemenway) Building,Harris (Franklin S.) Fine Arts Center,Johnson (Doran) House East,Kimball (Spencer W.) Tower,Knight (Jesse) Building,Lee (Harold B.) Library,Life Sciences Building,Life Sciences Greenhouses,Maeser (Karl G.) Building,Martin (Thomas L.) Building,McKay (David O.) Building,Nicholes (Joseph K.) Building,Smith (Joseph F.) Building,Smith (Joseph) Building,Snell (William H.) Building,Talmage (James E.) Math Sciences/Computer Building,Tanner (N. Eldon) Building,Taylor (John) Building,Wells (Daniel H.) Building"
 
 # A sorted, unique, JSON-compatible list of buildings
 buildingsList=$( echo "${buildingsListRaw}" | tr ',' '\n' | sort -f | uniq | sed -e 's/^/\"/' -e 's/$/\",/' -e '$ s/.$//' )
 
-# 🖥 An unsorted, comma-separated list of departments (with possible duplication). If empty, this will be hidden from the user info prompt
+# [SYM-Helper] An unsorted, comma-separated list of departments (with possible duplication). If empty, this will be hidden from the user info prompt
 departmentListRaw="Asset Management,Sales,Australia Area Office,Purchasing / Sourcing,Board of Directors,Strategic Initiatives & Programs,Operations,Business Development,Marketing,Creative Services,Customer Service / Customer Experience,Risk Management,Engineering,Finance / Accounting,Sales,General Management,Human Resources,Marketing,Investor Relations,Legal,Marketing,Sales,Product Management,Production,Corporate Communications,Information Technology / Technology,Quality Assurance,Project Management Office,Sales,Technology"
 
 # A sorted, unique, JSON-compatible list of departments
 departmentList=$( echo "${departmentListRaw}" | tr ',' '\n' | sort -f | uniq | sed -e 's/^/\"/' -e 's/$/\",/' -e '$ s/.$//' )
 
-# 🖥 Branding overrides
+# [SYM-Helper] Branding overrides
 brandingBanner="https://img.freepik.com/free-vector/abstract-orange-background-with-lines-halftone-effect_1017-32107.jpg"
 brandingBannerDisplayText="true"
 brandingIconLight="https://cdn-icons-png.flaticon.com/512/979/979585.png"
 brandingIconDark="https://cdn-icons-png.flaticon.com/512/740/740878.png"
 
-# 🖥 IT Support Variables - Use these if the default text is fine but you want your org's info inserted instead
+# [SYM-Helper] IT Support Variables - Use these if the default text is fine but you want your org's info inserted instead
 supportTeamName="Support Team Name"
 supportTeamPhone="+1 (801) 555-1212"
 supportTeamEmail="support@domain.com"
@@ -832,7 +832,7 @@ dialogSetupYourMacCMD="$dialogBinary \
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #
-# 🖥 "Setup Your Mac" policies to execute (Thanks, Obi-@smithjw!)
+# [SYM-Helper] "Setup Your Mac" policies to execute (Thanks, Obi-@smithjw!)
 #
 # For each configuration step, specify:
 # - listitem: The text to be displayed in the list

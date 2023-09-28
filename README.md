@@ -30,7 +30,7 @@ A special thanks to the ever-growing list of [contributors](CONTRIBUTORS.md); le
 
 ![SYM-Helper Hero](images/SYM-Helper-Hero.png)
 
-When reviewing [Setup-Your-Mac-via-Dialog.bash](Setup-Your-Mac-via-Dialog.bash), the desktop computer icon &ldquo;🖥&rdquo; indicates variables which can be configured with SYM-Helper.
+**NOTE:** When editing [Setup-Your-Mac-via-Dialog.bash](Setup-Your-Mac-via-Dialog.bash), &ldquo;[SYM-Helper]&rdquo; indicates variables which can be configured with SYM-Helper.
 
 [Documentation](https://snelson.us/sym-helper) | [Releases](https://github.com/BIG-RAT/SYM-Helper/releases)
 

@@ -13,6 +13,7 @@
 ### Humbled & Amazed
 
 The response to Setup Your Mac has been both humbling and amazing; my personal thanks to MacAdmins worldwide and the ever-growing number of contributors:
+- scriptingosx for &ldquo;[SYM-Helper]&rdquo; suggestion
 - drtaru for [117](https://github.com/dan-snelson/Setup-Your-Mac/pull/117)
 - delize for [115](https://github.com/dan-snelson/Setup-Your-Mac/pull/116)
 - drtaru for [112](https://github.com/dan-snelson/Setup-Your-Mac/pull/112)
