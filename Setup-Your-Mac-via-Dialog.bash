@@ -1,5 +1,5 @@
 #!/bin/bash
-# shellcheck disable=SC2001,SC1112,SC2143,SC2145,SC2086,SC2089,SC2090
+# shellcheck disable=SC2001,SC1111,SC1112,SC2143,SC2145,SC2086,SC2089,SC2090
 
 ####################################################################################################
 #
@@ -14,6 +14,10 @@
 #   - 🔥 **Breaking Change** for users of Setup Your Mac prior to `1.13.0` 🔥 
 #       - Removed `setupYourMacPolicyArrayIconPrefixUrl` (in favor using the fully qualified domain name of the server which hosts your icons)
 #   - Added [SYM-Helper] to identify variables which can be configured in SYM-Helper (0.8.0)
+#   - Updated sample banner image (Image by pikisuperstar on Freepik)
+#   - Added `overlayoverride` variable to dynamically override the `overlayicon`, based on which Configuration is selected by the end-user ([Pull Request No. 111](https://github.com/dan-snelson/Setup-Your-Mac/pull/111); thanks yet again, @drtaru!)
+#   - Added `supportTeamWebsite` (Addresses [Issue No. 97](https://github.com/dan-snelson/Setup-Your-Mac/issues/97); thanks, @theahadub!)
+#   - Modified the display of support-related information
 #
 ####################################################################################################
 
@@ -29,7 +33,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.13.0-b5"
+scriptVersion="1.13.0-b6"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -88,7 +92,7 @@ departmentListRaw="Asset Management,Sales,Australia Area Office,Purchasing / Sou
 departmentList=$( echo "${departmentListRaw}" | tr ',' '\n' | sort -f | uniq | sed -e 's/^/\"/' -e 's/$/\",/' -e '$ s/.$//' )
 
 # [SYM-Helper] Branding overrides
-brandingBanner="https://img.freepik.com/free-vector/abstract-orange-background-with-lines-halftone-effect_1017-32107.jpg"
+brandingBanner="https://img.freepik.com/free-vector/green-abstract-geometric-wallpaper_52683-29623.jpg" # Image by pikisuperstar on Freepik
 brandingBannerDisplayText="true"
 brandingIconLight="https://cdn-icons-png.flaticon.com/512/979/979585.png"
 brandingIconDark="https://cdn-icons-png.flaticon.com/512/740/740878.png"
@@ -97,9 +101,11 @@ brandingIconDark="https://cdn-icons-png.flaticon.com/512/740/740878.png"
 supportTeamName="Support Team Name"
 supportTeamPhone="+1 (801) 555-1212"
 supportTeamEmail="support@domain.com"
+supportTeamWebsite="support.domain.com"
+supportTeamHyperlink="[${supportTeamWebsite}](https://${supportTeamWebsite})"
 supportKB="KB8675309"
-supportTeamErrorKB=", and mention [${supportKB}](https://servicenow.company.com/support?id=kb_article_view&sysparm_article=${supportKB}#Failures)"
-supportTeamHelpKB="\n- **Knowledge Base Article:** ${supportKB}"
+supportTeamErrorKB="[${supportKB}](https://servicenow.company.com/support?id=kb_article_view&sysparm_article=${supportKB}#Failures)"
+# supportTeamHelpKB="\n- **Knowledge Base Article:** ${supportKB}"
 
 # Disable the "Continue" button in the User Input "Welcome" dialog until Dynamic Download Estimates have complete [ true | false ] (thanks, @Eltord!)
 lockContinueBeforeEstimations="false"
@@ -543,20 +549,26 @@ welcomeTitle="Happy $( date +'%A' ), ${loggedInUserFirstname}!  \nWelcome to you
 
 welcomeMessage="Please enter the **required** information for your ${modelName}, select your preferred **Configuration** then click **Continue** to start applying settings to your new Mac. \n\nOnce completed, the **Wait** button will be enabled and you‘ll be able to review the results before restarting your ${modelName}."
 
-if [ -n "$supportTeamName" ]; then
-  welcomeMessage+="\n\nIf you need assistance, please contact the ${supportTeamName}:"
+if [[ -n "${supportTeamName}" ]]; then
 
-    if [ -n "$supportTeamPhone" ]; then
-        welcomeMessage+="\n - **Phone**: ${supportTeamPhone}"
+    welcomeMessage+="\n\nIf you need assistance, please contact the ${supportTeamName}:  \n"
+
+    if [[ -n "${supportTeamPhone}" ]]; then
+        welcomeMessage+="- **Telephone**: ${supportTeamPhone}\n"
     fi
 
-    if [ -n "$supportTeamEmail" ]; then
-        welcomeMessage+="\n - **Email**: ${supportTeamEmail}"
+    if [[ -n "${supportTeamEmail}" ]]; then
+        welcomeMessage+="- **Email**: ${supportTeamEmail}\n"
     fi
-    
-    if [ -n "$supportKB" ]; then
-        welcomeMessage+=" and mention ${supportKB}"
+
+    if [[ -n "${supportTeamWebsite}" ]]; then
+        welcomeMessage+="- **Web**: ${supportTeamHyperlink}\n"
     fi
+
+    if [[ -n "${supportKB}" ]]; then
+        welcomeMessage+="- **Knowledge Base Article:** ${supportTeamErrorKB}\n"
+    fi
+
 fi
 
 welcomeMessage+="\n\n---"
@@ -570,7 +582,7 @@ fi
 if [[ -n "${brandingBanner}" ]]; then
     welcomeBannerImage="${brandingBanner}"
 else
-    welcomeBannerImage="https://img.freepik.com/free-photo/yellow-watercolor-paper_95678-446.jpg"
+    welcomeBannerImage="https://img.freepik.com/free-vector/green-abstract-geometric-wallpaper_52683-29623.jpg" # Image by pikisuperstar on Freepik
 fi
 
 if [[ "${brandingBannerDisplayText}" == "true" ]]; then welcomeBannerText="Happy $( date +'%A' ), ${loggedInUserFirstname}!  \nWelcome to your new ${modelName}";
@@ -583,7 +595,7 @@ if curl -L --output /dev/null --silent --head --fail "$welcomeBannerImage" || [ 
     updateScriptLog "WELCOME DIALOG: welcomeBannerImage is available, using it"
 else
     updateScriptLog "WELCOME DIALOG: welcomeBannerImage is not available, using a default image"
-    welcomeBannerImage="https://img.freepik.com/free-photo/yellow-watercolor-paper_95678-448.jpg"
+    welcomeBannerImage="https://img.freepik.com/free-vector/green-abstract-geometric-wallpaper_52683-29623.jpg" # Image by pikisuperstar on Freepik
 fi
 
 # Cache the hosted custom welcomeBannerImage
@@ -727,7 +739,7 @@ welcomeJSON='
     "selectitems" : [
         '${selectItemsJSON}'
     ],
-    "height" : "860"
+    "height" : "970"
 }
 '
 
@@ -748,13 +760,13 @@ message="Please wait while the following apps are installed …"
 if [[ -n "${brandingBanner}" ]]; then
     bannerImage="${brandingBanner}"
 else
-    bannerImage="https://img.freepik.com/free-photo/yellow-watercolor-paper_95678-446.jpg"
+    bannerImage="https://img.freepik.com/free-vector/green-abstract-geometric-wallpaper_52683-29623.jpg" # Image by pikisuperstar on Freepik
 fi
 if [[ "${brandingBannerDisplayText}" == "true" ]] ; then bannerText="Setting up ${loggedInUserFirstname}‘s ${modelName}";
 else bannerText=""; fi
 
 if [ -n "$supportTeamName" ]; then
-  helpmessage+="If you need assistance, please contact the ${supportTeamName}:\n"
+  helpmessage+="If you need assistance, please contact the ${supportTeamName}:  \n\n"
 fi
 
 if [ -n "$supportTeamPhone" ]; then
@@ -765,8 +777,12 @@ if [ -n "$supportTeamEmail" ]; then
   helpmessage+="- **Email:** ${supportTeamEmail}\n"
 fi
 
+if [ -n "$supportTeamWebsite" ]; then
+    helpmessage+="\n - **Web**: ${supportTeamHyperlink}"
+fi
+
 if [ -n "$supportKB" ]; then
-  helpmessage+="${supportTeamHelpKB}\n"
+  helpmessage+="${supportTeamErrorKB}\n"
 fi
 
 helpmessage+="\n**Computer Information:**\n"
@@ -782,7 +798,7 @@ if curl -L --output /dev/null --silent --head --fail "$bannerImage" || [ -f "$ba
     updateScriptLog "WELCOME DIALOG: bannerImage is available"
 else
     updateScriptLog "WELCOME DIALOG: bannerImage is not available, using alternative image"
-    bannerImage="https://img.freepik.com/free-photo/yellow-watercolor-paper_95678-448.jpg"
+    bannerImage="https://img.freepik.com/free-vector/green-abstract-geometric-wallpaper_52683-29623.jpg" # Image by pikisuperstar on Freepik
 fi
 
 # Create `overlayicon` from Self Service's custom icon (thanks, @meschwartz!)
@@ -820,7 +836,7 @@ dialogSetupYourMacCMD="$dialogBinary \
 --infotext \"$scriptVersion\" \
 --titlefont 'shadow=true, size=36, colour=#FFFDF4' \
 --messagefont 'size=14' \
---height '780' \
+--height '915' \
 --position 'centre' \
 --blurscreen \
 --ontop \
@@ -880,6 +896,7 @@ function policyJSONConfiguration() {
 
         "${configurationOneName}" )
 
+            overlayoverride=""
             policyJSON='
             {
                 "steps": [
@@ -986,6 +1003,7 @@ function policyJSONConfiguration() {
 
         "${configurationTwoName}" )
 
+            overlayoverride=""
             policyJSON='
             {
                 "steps": [
@@ -1118,6 +1136,7 @@ function policyJSONConfiguration() {
 
         "${configurationThreeName}" )
 
+            overlayoverride=""
             policyJSON='
             {
                 "steps": [
@@ -1294,6 +1313,7 @@ function policyJSONConfiguration() {
 
         * ) # Catch-all (i.e., used when `welcomeDialog` is set to `video`, `messageOnly` or `false`)
 
+            overlayoverride=""
             policyJSON='
             {
                 "steps": [
@@ -1619,23 +1639,27 @@ function finalise(){
 
             failureMessage="A failure has been detected, ${loggedInUserFirstname}. \n\nPlease complete the following steps:\n1. Reboot and login to your ${modelName}  \n2. Login to Self Service  \n3. Re-run any failed policy listed below  \n\nThe following failed:  \n${jamfProPolicyNameFailures}"
             
-            if [[ -n "$supportTeamName" ]]; then
-                supportContactMessage+="If you need assistance, please contact the ${supportTeamName},"
+            if [[ -n "${supportTeamName}" ]]; then
 
-                if [[ -n "$supportTeamEmail" ]]; then
-                    supportContactMessage+="\n${supportTeamEmail}"
-                fi
+                supportContactMessage+="If you need assistance, please contact the ${supportTeamName}:  \n"
 
                 if [[ -n "${supportTeamPhone}" ]]; then
-                    supportContactMessage+="\n${supportTeamPhone}"
+                    supportContactMessage+="- **Telephone:** ${supportTeamPhone}\n"
+                fi
+
+                if [[ -n "${supportTeamEmail}" ]]; then
+                    supportContactMessage+="- **Email:** $supportTeamEmail\n"
+                fi
+
+                if [[ -n "${supportTeamWebsite}" ]]; then
+                    supportContactMessage+="- **Web**: ${supportTeamHyperlink}\n"
                 fi
 
                 if [[ -n "${supportKB}" ]]; then
-                    supportContactMessage+="\n${supportTeamErrorKB}"
+                    supportContactMessage+="- **Knowledge Base Article:** $supportTeamErrorKB\n"
                 fi
-            supportContactMessage+="."
+            
             fi
-
 
             failureMessage+="\n\n${supportContactMessage}"
 
@@ -2711,6 +2735,9 @@ if [[ "${welcomeDialog}" == "video" ]]; then
 
     eval "${dialogSetupYourMacCMD[*]}" & sleep 0.3
     dialogUpdateSetupYourMac "activate:"
+    if [[ -n "${overlayoverride}" ]]; then
+        dialogUpdateSetupYourMac "overlayicon: ${overlayoverride}"
+    fi
 
 elif [[ "${welcomeDialog}" == "messageOnly" ]]; then
 
@@ -2758,6 +2785,9 @@ elif [[ "${welcomeDialog}" == "messageOnly" ]]; then
     # Display main SYM dialog
     eval "${dialogSetupYourMacCMD[*]}" & sleep 0.3
     dialogUpdateSetupYourMac "activate:"
+    if [[ -n "${overlayoverride}" ]]; then
+        dialogUpdateSetupYourMac "overlayicon: ${overlayoverride}"
+    fi
 
 elif [[ "${welcomeDialog}" == "userInput" ]]; then
 
@@ -2950,6 +2980,9 @@ elif [[ "${welcomeDialog}" == "userInput" ]]; then
             done
             updateScriptLog "WELCOME DIALOG: 'Setup Your Mac' dialog displayed; ensure it's the front-most app"
             runAsUser osascript -e 'tell application "Dialog" to activate'
+            if [[ -n "${overlayoverride}" ]]; then
+                dialogUpdateSetupYourMac "overlayicon: ${overlayoverride}"
+            fi
             ;;
 
         2)  # Process exit code 2 scenario here
@@ -3006,6 +3039,9 @@ else
     done
     updateScriptLog "WELCOME DIALOG: 'Setup Your Mac' dialog displayed; ensure it's the front-most app"
     runAsUser osascript -e 'tell application "Dialog" to activate'
+    if [[ -n "${overlayoverride}" ]]; then
+        dialogUpdateSetupYourMac "overlayicon: ${overlayoverride}"
+    fi
 
 fi
 
@@ -3138,26 +3174,31 @@ if [[ "${symConfiguration}" != *"Catch-all"* ]]; then
 
     if [[ -n ${infoboxConfiguration} ]]; then
 
-        updateScriptLog "Update 'helpmessage' with Configuration: ${infoboxConfiguration} …"
+        if [[ -n "${supportTeamName}" ]]; then
 
-        helpmessage="If you need assistance…  \n\n"
+        updateScriptLog "Update 'helpmessage' with support-related information …"
+
+            helpmessage="If you need assistance, please contact the ${supportTeamName}:  \n"
+            
+            if [[ -n "${supportTeamPhone}" ]]; then
+                helpmessage+="- **Telephone:** $supportTeamPhone\n"
+            fi
+
+            if [[ -n "${supportTeamEmail}" ]]; then
+                helpmessage+="- **Email:** $supportTeamEmail\n"
+            fi
+
+            if [[ -n "${supportTeamWebsite}" ]]; then
+                helpmessage+="- **Web**: ${supportTeamHyperlink}\n"
+            fi
         
-        if [ -n "$supportTeamName" ]; then
-            helpmessage+="Please contact the $supportTeamName:\n"
+            if [[ -n "${supportKB}" ]]; then
+                helpmessage+="- **Knowledge Base Article:** $supportTeamErrorKB\n"
+            fi
+
         fi
 
-        if [ -n "$supportTeamPhone" ]; then
-            helpmessage+="- **Telephone:** $supportTeamPhone\n"
-        fi
-
-        if [ -n "$supportTeamEmail" ]; then
-            helpmessage+="- **Email:** $supportTeamEmail\n"
-        fi
-
-        if [ -n "$supportKB" ]; then
-            helpmessage+="- **Knowledge Base Article:** $supportKB\n"
-        fi
-
+        updateScriptLog "Update 'helpmessage' with Configuration: ${infoboxConfiguration} …"
         helpmessage+="\n**Configuration:**\n- $infoboxConfiguration\n"
         helpmessage+="\n**Computer Information:**\n"
         helpmessage+="- **Operating System:** $macOSproductVersion ($macOSbuildVersion)\n"
