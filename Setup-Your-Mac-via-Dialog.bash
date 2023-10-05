@@ -2969,7 +2969,6 @@ elif [[ "${welcomeDialog}" == "userInput" ]]; then
             ###
 
             eval "${dialogSetupYourMacCMD[*]}" & sleep 0.3
-            # dialogSetupYourMacProcessID=$!
             until pgrep -q -x "Dialog"; do
                 outputLineNumberInVerboseDebugMode
                 updateScriptLog "WELCOME DIALOG: Waiting to display 'Setup Your Mac' dialog; pausing"
@@ -3028,7 +3027,6 @@ else
     ###
 
     eval "${dialogSetupYourMacCMD[*]}" & sleep 0.3
-    # dialogSetupYourMacProcessID=$!
     until pgrep -q -x "Dialog"; do
         outputLineNumberInVerboseDebugMode
         updateScriptLog "WELCOME DIALOG: Waiting to display 'Setup Your Mac' dialog; pausing"
