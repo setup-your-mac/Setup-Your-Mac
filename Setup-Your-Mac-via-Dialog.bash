@@ -739,7 +739,7 @@ welcomeJSON='
     "selectitems" : [
         '${selectItemsJSON}'
     ],
-    "height" : "900"
+    "height" : "800"
 }
 '
 
@@ -782,7 +782,7 @@ if [ -n "$supportTeamWebsite" ]; then
 fi
 
 if [ -n "$supportKB" ]; then
-  helpmessage+="${supportTeamErrorKB}\n"
+  helpmessage+="- **Knowledge Base Article:** $supportTeamErrorKB\n"
 fi
 
 helpmessage+="\n**Computer Information:**\n"
@@ -836,7 +836,7 @@ dialogSetupYourMacCMD="$dialogBinary \
 --infotext \"$scriptVersion\" \
 --titlefont 'shadow=true, size=36, colour=#FFFDF4' \
 --messagefont 'size=14' \
---height '915' \
+--height '800' \
 --position 'centre' \
 --blurscreen \
 --ontop \
@@ -2763,7 +2763,7 @@ elif [[ "${welcomeDialog}" == "messageOnly" ]]; then
         "ontop" : "true",
         "titlefont" : "shadow=true, size=36, colour=#FFFDF4",
         "messagefont" : "size=14",
-        "height" : "700"
+        "height" : "800"
     }
     '
 
