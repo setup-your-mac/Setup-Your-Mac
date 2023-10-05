@@ -18,6 +18,7 @@
 #   - Added `overlayoverride` variable to dynamically override the `overlayicon`, based on which Configuration is selected by the end-user ([Pull Request No. 111](https://github.com/dan-snelson/Setup-Your-Mac/pull/111); thanks yet again, @drtaru!)
 #   - Added `supportTeamWebsite` (Addresses [Issue No. 97](https://github.com/dan-snelson/Setup-Your-Mac/issues/97); thanks, @theahadub!)
 #   - Modified the display of support-related information
+#   - Adjustments to the `wait` flavor of `completionActionOption` (thanks for the heads-up, @Tom!)
 #
 ####################################################################################################
 
@@ -33,7 +34,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.13.0-b7"
+scriptVersion="1.13.0-b8"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -1688,12 +1689,6 @@ function finalise(){
             dialogUpdateSetupYourMac "progress: reset"
             dialogUpdateSetupYourMac "progresstext: Errors detected; please ${progressTextCompletionAction// and } your ${modelName}, ${loggedInUserFirstname}."
 
-            # If either "wait" or "sleep" has been specified for `completionActionOption`, honor that behavior
-            if [[ "${completionActionOption}" == "wait" ]] || [[ "${completionActionOption}" == "[Ss]leep"* ]]; then
-                updateScriptLog "Honoring ${completionActionOption} behavior …"
-                eval "${completionActionOption}" "${dialogSetupYourMacProcessID}"
-            fi
-
             quitScript "1"
 
         fi
@@ -1714,12 +1709,6 @@ function finalise(){
         dialogUpdateSetupYourMac "progress: complete"
         dialogUpdateSetupYourMac "button1text: ${button1textCompletionActionOption}"
         dialogUpdateSetupYourMac "button1: enable"
-
-        # If either "wait" or "sleep" has been specified for `completionActionOption`, honor that behavior
-        if [[ "${completionActionOption}" == "wait" ]] || [[ "${completionActionOption}" == "[Ss]leep"* ]]; then
-            updateScriptLog "Honoring ${completionActionOption} behavior …"
-            eval "${completionActionOption}" "${dialogSetupYourMacProcessID}"
-        fi
 
         quitScript "0"
 
@@ -2239,6 +2228,11 @@ function completionAction() {
                 sleep "${sleepDuration}"
                 killProcess "Dialog"
                 updateScriptLog "Goodnight!"
+                ;;
+
+            "Wait" )
+                updateScriptLog "Waiting for user interaction …"
+                wait
                 ;;
 
             "Quit" )
@@ -2972,7 +2966,7 @@ elif [[ "${welcomeDialog}" == "userInput" ]]; then
             ###
 
             eval "${dialogSetupYourMacCMD[*]}" & sleep 0.3
-            dialogSetupYourMacProcessID=$!
+            # dialogSetupYourMacProcessID=$!
             until pgrep -q -x "Dialog"; do
                 outputLineNumberInVerboseDebugMode
                 updateScriptLog "WELCOME DIALOG: Waiting to display 'Setup Your Mac' dialog; pausing"
@@ -3031,7 +3025,7 @@ else
     ###
 
     eval "${dialogSetupYourMacCMD[*]}" & sleep 0.3
-    dialogSetupYourMacProcessID=$!
+    # dialogSetupYourMacProcessID=$!
     until pgrep -q -x "Dialog"; do
         outputLineNumberInVerboseDebugMode
         updateScriptLog "WELCOME DIALOG: Waiting to display 'Setup Your Mac' dialog; pausing"
@@ -3181,19 +3175,19 @@ if [[ "${symConfiguration}" != *"Catch-all"* ]]; then
             helpmessage="If you need assistance, please contact the ${supportTeamName}:  \n"
             
             if [[ -n "${supportTeamPhone}" ]]; then
-                helpmessage+="- **Telephone:** $supportTeamPhone\n"
+                helpmessage+="- **Telephone:** $supportTeamPhone"
             fi
 
             if [[ -n "${supportTeamEmail}" ]]; then
-                helpmessage+="- **Email:** $supportTeamEmail\n"
+                helpmessage+="- **Email:** $supportTeamEmail"
             fi
 
             if [[ -n "${supportTeamWebsite}" ]]; then
-                helpmessage+="- **Web**: ${supportTeamHyperlink}\n"
+                helpmessage+="- **Web**: ${supportTeamHyperlink}"
             fi
         
             if [[ -n "${supportKB}" ]]; then
-                helpmessage+="- **Knowledge Base Article:** $supportTeamErrorKB\n"
+                helpmessage+="- **Knowledge Base Article:** $supportTeamErrorKB"
             fi
 
         fi
