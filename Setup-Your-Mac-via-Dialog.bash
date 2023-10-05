@@ -33,7 +33,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.13.0-b6"
+scriptVersion="1.13.0-b7"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -739,7 +739,7 @@ welcomeJSON='
     "selectitems" : [
         '${selectItemsJSON}'
     ],
-    "height" : "970"
+    "height" : "900"
 }
 '
 
@@ -778,7 +778,7 @@ if [ -n "$supportTeamEmail" ]; then
 fi
 
 if [ -n "$supportTeamWebsite" ]; then
-    helpmessage+="\n - **Web**: ${supportTeamHyperlink}"
+    helpmessage+="\n - **Web**: ${supportTeamHyperlink}\n"
 fi
 
 if [ -n "$supportKB" ]; then
