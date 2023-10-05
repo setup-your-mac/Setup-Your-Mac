@@ -19,6 +19,9 @@
 #   - Added `supportTeamWebsite` (Addresses [Issue No. 97](https://github.com/dan-snelson/Setup-Your-Mac/issues/97); thanks, @theahadub!)
 #   - Modified the display of support-related information
 #   - Adjustments to the `wait` flavor of `completionActionOption` (thanks for the heads-up, @Tom!)
+#   - Added "COMPLETION ACTION:" to all `completionActionOption`-related log entries
+#   - More adjustments to the display of support-related information
+#   - Adjustments to `messageOnly` `completionActionOption`
 #
 ####################################################################################################
 
@@ -34,7 +37,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.13.0-b8"
+scriptVersion="1.13.0-b9"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -552,7 +555,7 @@ welcomeMessage="Please enter the **required** information for your ${modelName},
 
 if [[ -n "${supportTeamName}" ]]; then
 
-    welcomeMessage+="\n\nIf you need assistance, please contact the ${supportTeamName}:  \n"
+    welcomeMessage+="\n\nIf you need assistance, please contact the **${supportTeamName}**:  \n"
 
     if [[ -n "${supportTeamPhone}" ]]; then
         welcomeMessage+="- **Telephone**: ${supportTeamPhone}\n"
@@ -767,7 +770,7 @@ if [[ "${brandingBannerDisplayText}" == "true" ]] ; then bannerText="Setting up 
 else bannerText=""; fi
 
 if [ -n "$supportTeamName" ]; then
-  helpmessage+="If you need assistance, please contact the ${supportTeamName}:  \n\n"
+  helpmessage+="If you need assistance, please contact  \n\n**${supportTeamName}:**\n"
 fi
 
 if [ -n "$supportTeamPhone" ]; then
@@ -779,11 +782,11 @@ if [ -n "$supportTeamEmail" ]; then
 fi
 
 if [ -n "$supportTeamWebsite" ]; then
-    helpmessage+="\n - **Web**: ${supportTeamHyperlink}\n"
+    helpmessage+="- **Web**: ${supportTeamHyperlink}\n"
 fi
 
 if [ -n "$supportKB" ]; then
-  helpmessage+="- **Knowledge Base Article:** $supportTeamErrorKB\n"
+  helpmessage+="- **Knowledge Base Article:** ${supportTeamErrorKB}\n"
 fi
 
 helpmessage+="\n**Computer Information:**\n"
@@ -1642,7 +1645,7 @@ function finalise(){
             
             if [[ -n "${supportTeamName}" ]]; then
 
-                supportContactMessage+="If you need assistance, please contact the ${supportTeamName}:  \n"
+                supportContactMessage+="If you need assistance, please contact the **${supportTeamName}**:  \n"
 
                 if [[ -n "${supportTeamPhone}" ]]; then
                     supportContactMessage+="- **Telephone:** ${supportTeamPhone}\n"
@@ -2157,7 +2160,7 @@ function completionAction() {
         case ${completionActionOption} in
 
             "Shut Down" )
-                updateScriptLog "Shut Down sans user interaction"
+                updateScriptLog "COMPLETION ACTION: Shut Down sans user interaction"
                 killProcess "Self Service"
                 # runAsUser osascript -e 'tell app "System Events" to shut down'
                 # sleep 5 && runAsUser osascript -e 'tell app "System Events" to shut down' &
@@ -2165,7 +2168,7 @@ function completionAction() {
                 ;;
 
             "Shut Down Attended" )
-                updateScriptLog "Shut Down, requiring user-interaction"
+                updateScriptLog "COMPLETION ACTION: Shut Down, requiring user-interaction"
                 killProcess "Self Service"
                 wait
                 # runAsUser osascript -e 'tell app "System Events" to shut down'
@@ -2174,12 +2177,12 @@ function completionAction() {
                 ;;
 
             "Shut Down Confirm" )
-                updateScriptLog "Shut down, only after macOS time-out or user confirmation"
+                updateScriptLog "COMPLETION ACTION: Shut down, only after macOS time-out or user confirmation"
                 runAsUser osascript -e 'tell app "loginwindow" to «event aevtrsdn»'
                 ;;
 
             "Restart" )
-                updateScriptLog "Restart sans user interaction"
+                updateScriptLog "COMPLETION ACTION: Restart sans user interaction"
                 killProcess "Self Service"
                 # runAsUser osascript -e 'tell app "System Events" to restart'
                 # sleep 5 && runAsUser osascript -e 'tell app "System Events" to restart' &
@@ -2187,7 +2190,7 @@ function completionAction() {
                 ;;
 
             "Restart Attended" )
-                updateScriptLog "Restart, requiring user-interaction"
+                updateScriptLog "COMPLETION ACTION: Restart, requiring user-interaction"
                 killProcess "Self Service"
                 wait
                 # runAsUser osascript -e 'tell app "System Events" to restart'
@@ -2196,12 +2199,12 @@ function completionAction() {
                 ;;
 
             "Restart Confirm" )
-                updateScriptLog "Restart, only after macOS time-out or user confirmation"
+                updateScriptLog "COMPLETION ACTION: Restart, only after macOS time-out or user confirmation"
                 runAsUser osascript -e 'tell app "loginwindow" to «event aevtrrst»'
                 ;;
 
             "Log Out" )
-                updateScriptLog "Log out sans user interaction"
+                updateScriptLog "COMPLETION ACTION: Log out sans user interaction"
                 killProcess "Self Service"
                 # sleep 5 && runAsUser osascript -e 'tell app "loginwindow" to «event aevtrlgo»'
                 # sleep 5 && runAsUser osascript -e 'tell app "loginwindow" to «event aevtrlgo»' &
@@ -2209,7 +2212,7 @@ function completionAction() {
                 ;;
 
             "Log Out Attended" )
-                updateScriptLog "Log out sans user interaction"
+                updateScriptLog "COMPLETION ACTION: Log out sans user interaction"
                 killProcess "Self Service"
                 wait
                 # sleep 5 && runAsUser osascript -e 'tell app "loginwindow" to «event aevtrlgo»'
@@ -2218,30 +2221,30 @@ function completionAction() {
                 ;;
 
             "Log Out Confirm" )
-                updateScriptLog "Log out, only after macOS time-out or user confirmation"
+                updateScriptLog "COMPLETION ACTION: Log out, only after macOS time-out or user confirmation"
                 sleep 5 && runAsUser osascript -e 'tell app "System Events" to log out'
                 ;;
 
             "Sleep"* )
                 sleepDuration=$( awk '{print $NF}' <<< "${1}" )
-                updateScriptLog "Sleeping for ${sleepDuration} seconds …"
+                updateScriptLog "COMPLETION ACTION: Sleeping for ${sleepDuration} seconds …"
                 sleep "${sleepDuration}"
                 killProcess "Dialog"
                 updateScriptLog "Goodnight!"
                 ;;
 
             "Wait" )
-                updateScriptLog "Waiting for user interaction …"
+                updateScriptLog "COMPLETION ACTION: Waiting for user interaction …"
                 wait
                 ;;
 
             "Quit" )
-                updateScriptLog "Quitting script"
+                updateScriptLog "COMPLETION ACTION: Quitting script"
                 exitCode="0"
                 ;;
 
             * )
-                updateScriptLog "Using the default of 'wait'"
+                updateScriptLog "COMPLETION ACTION: Using the default of 'wait'"
                 wait
                 ;;
 
@@ -2751,7 +2754,7 @@ elif [[ "${welcomeDialog}" == "messageOnly" ]]; then
         "infobox" : "",
         "iconsize" : "198.0",
         "button1text" : "Continue",
-        "button2text" : "Quit",
+        "timer" : "60",
         "infotext" : "'"${scriptVersion}"'",
         "blurscreen" : "true",
         "ontop" : "true",
