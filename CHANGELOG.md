@@ -1,18 +1,14 @@
 # CHANGELOG
 
-## 1.13.0-b9
-### 05-Oct-2023
+## 1.13.0-rc1
+### 06-Oct-2023
 - 🔥 **Breaking Change** for users of Setup Your Mac prior to `1.13.0` 🔥 
-  - Removed `setupYourMacPolicyArrayIconPrefixUrl` (in favor using the fully qualified domain name of the server which hosts your icons)
-- Added &ldquo;[SYM-Helper]&rdquo; to identify variables which can be configured in SYM-Helper (0.8.0)
+    - Removed `setupYourMacPolicyArrayIconPrefixUrl` (in favor using the fully qualified domain name of the server which hosts your icons)
+- Added [SYM-Helper] to identify variables which can be configured in SYM-Helper (0.8.0)
 - Updated sample banner image (Image by pikisuperstar on Freepik)
 - Added `overlayoverride` variable to dynamically override the `overlayicon`, based on which Configuration is selected by the end-user ([Pull Request No. 111](https://github.com/dan-snelson/Setup-Your-Mac/pull/111); thanks yet again, @drtaru!)
-- Added `supportTeamWebsite` (Addresses [Issue No. 97](https://github.com/dan-snelson/Setup-Your-Mac/issues/97); thanks, @theahadub!)
-- Modified the display of support-related information
-- Adjustments to the `wait` flavor of `completionActionOption` (thanks for the heads-up, @Tom!)
-- Added "COMPLETION ACTION:" to all `completionActionOption`-related log entries
-- More adjustments to the display of support-related information
-- Adjustments to `messageOnly` `completionActionOption`
+- Modified the display of support-related information (including adding `supportTeamWebsite` (Addresses [Issue No. 97](https://github.com/dan-snelson/Setup-Your-Mac/issues/97); thanks, @theahadub!))
+- Adjustments to Completion Actions (including the `wait` flavor; thanks for the heads-up, @Tom!)
 
 ## 1.12.12
 ### 28-Sep-2023
