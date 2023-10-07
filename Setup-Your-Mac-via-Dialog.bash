@@ -33,7 +33,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.13.0-rc1"
+scriptVersion="1.13.0-rc2"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -761,33 +761,37 @@ if [[ -n "${brandingBanner}" ]]; then
 else
     bannerImage="https://img.freepik.com/free-vector/green-abstract-geometric-wallpaper_52683-29623.jpg" # Image by pikisuperstar on Freepik
 fi
-if [[ "${brandingBannerDisplayText}" == "true" ]] ; then bannerText="Setting up ${loggedInUserFirstname}‘s ${modelName}";
-else bannerText=""; fi
+
+if [[ "${brandingBannerDisplayText}" == "true" ]] ; then
+    bannerText="Setting up ${loggedInUserFirstname}‘s ${modelName}";
+else
+    bannerText=""
+fi
 
 if [ -n "$supportTeamName" ]; then
-  helpmessage+="If you need assistance, please contact  \n\n**${supportTeamName}:**\n"
+  helpmessage+="If you need assistance, please contact:  \n\n**${supportTeamName}**  \n"
 fi
 
 if [ -n "$supportTeamPhone" ]; then
-  helpmessage+="- **Telephone:** ${supportTeamPhone}\n"
+  helpmessage+="- **Telephone:** ${supportTeamPhone}  \n"
 fi
 
 if [ -n "$supportTeamEmail" ]; then
-  helpmessage+="- **Email:** ${supportTeamEmail}\n"
+  helpmessage+="- **Email:** ${supportTeamEmail}  \n"
 fi
 
 if [ -n "$supportTeamWebsite" ]; then
-    helpmessage+="- **Web**: ${supportTeamHyperlink}\n"
+    helpmessage+="- **Web**: ${supportTeamHyperlink}  \n"
 fi
 
 if [ -n "$supportKB" ]; then
-  helpmessage+="- **Knowledge Base Article:** ${supportTeamErrorKB}\n"
+  helpmessage+="- **Knowledge Base Article:** ${supportTeamErrorKB}  \n"
 fi
 
-helpmessage+="\n**Computer Information:**\n"
-helpmessage+="- **Operating System:** ${macOSproductVersion} (${macOSbuildVersion})\n"
-helpmessage+="- **Serial Number:** ${serialNumber}\n"
-helpmessage+="- **Dialog:** ${dialogVersion}\n"
+helpmessage+="\n**Computer Information:**  \n"
+helpmessage+="- **Operating System:** ${macOSproductVersion} (${macOSbuildVersion})  \n"
+helpmessage+="- **Serial Number:** ${serialNumber}  \n"
+helpmessage+="- **Dialog:** ${dialogVersion}  \n"
 helpmessage+="- **Started:** ${timestamp}"
 
 infobox="Analyzing input …" # Customize at "Update Setup Your Mac's infobox"
@@ -3168,33 +3172,34 @@ if [[ "${symConfiguration}" != *"Catch-all"* ]]; then
 
         updateScriptLog "Update 'helpmessage' with support-related information …"
 
-            helpmessage="If you need assistance, please contact the ${supportTeamName}:  \n"
+            helpmessage="If you need assistance, please contact:  \n\n**${supportTeamName}**  \n"
             
             if [[ -n "${supportTeamPhone}" ]]; then
-                helpmessage+="- **Telephone:** $supportTeamPhone"
+                helpmessage+="- **Telephone:** ${supportTeamPhone}  \n"
             fi
 
             if [[ -n "${supportTeamEmail}" ]]; then
-                helpmessage+="- **Email:** $supportTeamEmail"
+                helpmessage+="- **Email:** ${supportTeamEmail}  \n"
             fi
 
             if [[ -n "${supportTeamWebsite}" ]]; then
-                helpmessage+="- **Web**: ${supportTeamHyperlink}"
+                helpmessage+="- **Web**: ${supportTeamHyperlink}  \n"
             fi
         
             if [[ -n "${supportKB}" ]]; then
-                helpmessage+="- **Knowledge Base Article:** $supportTeamErrorKB"
+                helpmessage+="- **Knowledge Base Article:** ${supportTeamErrorKB}  \n"
             fi
 
         fi
 
         updateScriptLog "Update 'helpmessage' with Configuration: ${infoboxConfiguration} …"
         helpmessage+="\n**Configuration:**\n- $infoboxConfiguration\n"
-        helpmessage+="\n**Computer Information:**\n"
-        helpmessage+="- **Operating System:** $macOSproductVersion ($macOSbuildVersion)\n"
-        helpmessage+="- **Serial Number:** $serialNumber\n"
-        helpmessage+="- **Dialog:** $dialogVersion\n"
-        helpmessage+="- **Started:** $timestamp\n"
+
+        helpmessage+="\n**Computer Information:**  \n"
+        helpmessage+="- **Operating System:** ${macOSproductVersion} (${macOSbuildVersion})  \n"
+        helpmessage+="- **Serial Number:** ${serialNumber}  \n"
+        helpmessage+="- **Dialog:** ${dialogVersion}  \n"
+        helpmessage+="- **Started:** ${timestamp}"
         
     fi
 

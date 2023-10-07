@@ -1,7 +1,7 @@
 # CHANGELOG
 
-## 1.13.0-rc1
-### 06-Oct-2023
+## 1.13.0-rc2
+### 07-Oct-2023
 - 🔥 **Breaking Change** for users of Setup Your Mac prior to `1.13.0` 🔥 
     - Removed `setupYourMacPolicyArrayIconPrefixUrl` (in favor using the fully qualified domain name of the server which hosts your icons)
 - Added [SYM-Helper] to identify variables which can be configured in SYM-Helper (0.8.0)
