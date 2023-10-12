@@ -18,6 +18,7 @@
 #   - Added `overlayoverride` variable to dynamically override the `overlayicon`, based on which Configuration is selected by the end-user ([Pull Request No. 111](https://github.com/dan-snelson/Setup-Your-Mac/pull/111); thanks yet again, @drtaru!)
 #   - Modified the display of support-related information (including adding `supportTeamWebsite` (Addresses [Issue No. 97](https://github.com/dan-snelson/Setup-Your-Mac/issues/97); thanks, @theahadub!))
 #   - Adjustments to Completion Actions (including the `wait` flavor; thanks for the heads-up, @Tom!)
+#   - Updated Microsoft Teams filepath validation
 #
 ####################################################################################################
 
@@ -33,7 +34,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.13.0-rc2"
+scriptVersion="1.13.0-rc3"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -861,7 +862,7 @@ dialogSetupYourMacCMD="$dialogBinary \
 # - trigger: The Jamf Pro Policy Custom Event Name
 # - validation: [ {absolute path} | Local | Remote | None | Recon ]
 #   See: https://snelson.us/2023/01/setup-your-mac-validation/
-#       - {absolute path} (simulates pre-v1.6.0 behavior, for example: "/Applications/Microsoft Teams.app/Contents/Info.plist")
+#       - {absolute path} (simulates pre-v1.6.0 behavior, for example: "/Applications/Microsoft Teams classic.app/Contents/Info.plist")
 #       - Local (for validation within this script, for example: "filevault")
 #       - Remote (for validation via a single-script Jamf Pro policy, for example: "symvGlobalProtect")
 #       - None (for triggers which don't require validation; always evaluates as successful)
@@ -1102,7 +1103,7 @@ function policyJSONConfiguration() {
                         "trigger_list": [
                             {
                                 "trigger": "microsoftTeams",
-                                "validation": "/Applications/Microsoft Teams.app/Contents/Info.plist"
+                                "validation": "/Applications/Microsoft Teams classic.app/Contents/Info.plist"
                             }
                         ]
                     },
@@ -1257,7 +1258,7 @@ function policyJSONConfiguration() {
                         "trigger_list": [
                             {
                                 "trigger": "microsoftTeams",
-                                "validation": "/Applications/Microsoft Teams.app/Contents/Info.plist"
+                                "validation": "/Applications/Microsoft Teams classic.app/Contents/Info.plist"
                             }
                         ]
                     },
@@ -1866,7 +1867,7 @@ function validatePolicyResult() {
 
         ###
         # Absolute Path
-        # Simulates pre-v1.6.0 behavior, for example: "/Applications/Microsoft Teams.app/Contents/Info.plist"
+        # Simulates pre-v1.6.0 behavior, for example: "/Applications/Microsoft Teams classic.app/Contents/Info.plist"
         ###
 
         */* ) 
