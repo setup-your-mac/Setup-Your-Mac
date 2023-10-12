@@ -13,6 +13,8 @@
 ### Humbled & Amazed
 
 The response to Setup Your Mac has been both humbling and amazing; my personal thanks to MacAdmins worldwide and the ever-growing number of contributors:
+- drtaru for [121](https://github.com/dan-snelson/Setup-Your-Mac/pull/121) (Best. One. Yet.)
+- astrugatch for [120](https://github.com/dan-snelson/Setup-Your-Mac/issues/120)
 - Tom for heads-up on the `wait` flavor of `completionActionOption`
 - scriptingosx for &ldquo;[SYM-Helper]&rdquo; suggestion
 - drtaru for [117](https://github.com/dan-snelson/Setup-Your-Mac/pull/117)

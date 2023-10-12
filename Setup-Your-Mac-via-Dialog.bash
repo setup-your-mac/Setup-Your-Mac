@@ -19,6 +19,7 @@
 #   - Modified the display of support-related information (including adding `supportTeamWebsite` (Addresses [Issue No. 97](https://github.com/dan-snelson/Setup-Your-Mac/issues/97); thanks, @theahadub!))
 #   - Adjustments to Completion Actions (including the `wait` flavor; thanks for the heads-up, @Tom!)
 #   - Updated Microsoft Teams filepath validation
+#   - Add position prompt (Addresses [Issue No. 120](https://github.com/dan-snelson/Setup-Your-Mac/issues/120); thanks for the suggestion, @astrugatch! [Pull Request No. 121](https://github.com/dan-snelson/Setup-Your-Mac/pull/121); thanks, @drtaru! This has to be your best one yet!)
 #
 ####################################################################################################
 
@@ -34,7 +35,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.13.0-rc3"
+scriptVersion="1.13.0-rc4"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
