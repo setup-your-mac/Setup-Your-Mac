@@ -72,6 +72,7 @@ promptForAssetTag="true"
 promptForRoom="true"
 promptForBuilding="true"
 promptForDepartment="true"
+promptForPosition="true"        # When set to true dynamically prompts the user to select from a list of positions or manually enter one at the welcomeDialog, see "positionListRaw" to define the selection / entry type
 promptForConfiguration="true"   # Removes the Configuration dropdown entirely and uses the "Catch-all (i.e., used when `welcomeDialog` is set to `video` or `false`)" or presetConfiguration policyJSON
 
 # Set to "true" to suppress the Update Inventory option on policies that are called
@@ -91,6 +92,12 @@ departmentListRaw="Asset Management,Sales,Australia Area Office,Purchasing / Sou
 
 # A sorted, unique, JSON-compatible list of departments
 departmentList=$( echo "${departmentListRaw}" | tr ',' '\n' | sort -f | uniq | sed -e 's/^/\"/' -e 's/$/\",/' -e '$ s/.$//' )
+
+# An unsorted, comma-separated list of departments (with possible duplication). If empty and promptForPosition is "true" a user-input box will be shown instead of a dropdown
+positionListRaw="Developer,Management,Sales,Marketing"
+
+# A sorted, unique, JSON-compatible list of positions
+positionList=$( echo "${positionListRaw}" | tr ',' '\n' | sort -f | uniq | sed -e 's/^/\"/' -e 's/$/\",/' -e '$ s/.$//' )
 
 # [SYM-Helper] Branding overrides
 brandingBanner="https://img.freepik.com/free-vector/green-abstract-geometric-wallpaper_52683-29623.jpg" # Image by pikisuperstar on Freepik
@@ -662,9 +669,10 @@ if [ "$promptForAssetTag" == "true" ]; then
         "regexerror" : "Please enter (at least) seven digits for the Asset Tag, optionally preceded by either AP, IP or CD."
     },'
 fi
-if [ "$promptForRoom" == "true" ]; then roomJSON='{ "title" : "Room","required" : false,"prompt" : "Optional" }'; fi
+if [ "$promptForRoom" == "true" ]; then roomJSON='{ "title" : "Room","required" : false,"prompt" : "Optional" },'; fi
+if [[ "$promptForPosition" == "true" && -z "$positionListRaw" ]]; then positionJSON='{ "title" : "Position","required" : false,"prompt" : "Position" },'; fi
 
-textFieldJSON="${usernameJSON}${realNameJSON}${emailJSON}${compNameJSON}${assetTagJSON}${roomJSON}"
+textFieldJSON="${usernameJSON}${realNameJSON}${emailJSON}${compNameJSON}${assetTagJSON}${positionJSON}${roomJSON}"
 textFieldJSON=$( echo ${textFieldJSON} | sed 's/,$//' )
 
 # Dropdowns
@@ -694,6 +702,19 @@ if [ "$promptForDepartment" == "true" ]; then
     fi
 fi
 
+if [ "$promptForPosition" == "true" ]; then
+    if [ -n "${positionListRaw}" ]; then
+    positionSelectJSON='{
+            "title" : "Position",
+            "default" : "",
+            "required" : true,
+            "values" : [
+                '${positionList}'
+            ]
+        },'
+    fi
+fi
+
 if [ "$promptForConfiguration" == "true" ] && [ -z "${presetConfiguration}" ]; then
     configurationJSON='{
             "title" : "Configuration",
@@ -707,7 +728,7 @@ if [ "$promptForConfiguration" == "true" ] && [ -z "${presetConfiguration}" ]; t
         }'
 fi
 
-selectItemsJSON="${buildingJSON}${departmentJSON}${configurationJSON}"
+selectItemsJSON="${buildingJSON}${departmentJSON}${positionSelectJSON}${configurationJSON}"
 selectItemsJSON=$( echo $selectItemsJSON | sed 's/,$//' )
 
 
@@ -2854,6 +2875,13 @@ elif [[ "${welcomeDialog}" == "userInput" ]]; then
             department=$(get_json_value_welcomeDialog "$welcomeResults" "Department" "selectedValue" | grep -v "Please select your department" )
             room=$(get_json_value_welcomeDialog "$welcomeResults" "Room")
             building=$(get_json_value_welcomeDialog "$welcomeResults" "Building" "selectedValue" | grep -v "Please select your building" )
+            
+            if [ -n "${positionListRaw}" ]; then
+                position=$(get_json_value_welcomeDialog "$welcomeResults" "Position" "selectedValue" )
+            else
+                position=$(get_json_value_welcomeDialog "$welcomeResults" "Position")
+            fi
+
 
 
             ###
@@ -2869,6 +2897,7 @@ elif [[ "${welcomeDialog}" == "userInput" ]]; then
             updateScriptLog "WELCOME DIALOG: • Department: $department"
             updateScriptLog "WELCOME DIALOG: • Building: $building"
             updateScriptLog "WELCOME DIALOG: • Room: $room"
+            updateScriptLog "WELCOME DIALOG: • Position: $position"
 
 
             ###
@@ -2960,6 +2989,9 @@ elif [[ "${welcomeDialog}" == "userInput" ]]; then
             
             # Room
             if [[ -n "${room}" ]]; then reconOptions+="-room \"${room}\" "; fi
+
+            # Position
+            if [[ -n "${position}" ]]; then reconOptions+="-position \"${position}\" "; fi
 
             # Output `recon` options to log
             updateScriptLog "WELCOME DIALOG: reconOptions: ${reconOptions}"
@@ -3149,6 +3181,7 @@ if [[ -n ${infoboxConfiguration} ]]; then infobox+="**Configuration:**  \n$infob
 if [[ -n ${department} ]]; then infobox+="**Department:**  \n$department  \n\n" ; fi
 if [[ -n ${building} ]]; then infobox+="**Building:**  \n$building  \n\n" ; fi
 if [[ -n ${room} ]]; then infobox+="**Room:**  \n$room  \n\n" ; fi
+if [[ -n ${position} ]]; then infobox+="**Position:**  \n$position  \n\n" ; fi
 
 if { [[ "${promptForConfiguration}" != "true" ]] && [[ "${configurationDownloadEstimation}" == "true" ]]; } || { [[ "${welcomeDialog}" == "false" ]] || [[ "${welcomeDialog}" == "messageOnly" ]]; } then
     updateScriptLog "SETUP YOUR MAC DIALOG: Purposely NOT updating 'infobox'"
