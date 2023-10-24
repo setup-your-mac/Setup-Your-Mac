@@ -10,7 +10,7 @@
 #
 # HISTORY
 #
-#   Version 1.13.0, 06-Oct-2023, Dan K. Snelson (@dan-snelson)
+#   Version 1.13.0, 24-Oct-2023, Dan K. Snelson (@dan-snelson)
 #   - 🔥 **Breaking Change** for users of Setup Your Mac prior to `1.13.0` 🔥 
 #       - Removed `setupYourMacPolicyArrayIconPrefixUrl` (in favor using the fully qualified domain name of the server which hosts your icons)
 #   - Added [SYM-Helper] to identify variables which can be configured in SYM-Helper (0.8.0)
@@ -35,7 +35,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.13.0-rc4"
+scriptVersion="1.13.0"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
