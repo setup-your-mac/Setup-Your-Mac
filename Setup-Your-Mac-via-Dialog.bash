@@ -20,6 +20,7 @@
 #   - Adjustments to Completion Actions (including the `wait` flavor; thanks for the heads-up, @Tom!)
 #   - Updated Microsoft Teams filepath validation
 #   - Add position prompt (Addresses [Issue No. 120](https://github.com/dan-snelson/Setup-Your-Mac/issues/120); thanks for the suggestion, @astrugatch! [Pull Request No. 121](https://github.com/dan-snelson/Setup-Your-Mac/pull/121); thanks, @drtaru! This has to be your best one yet!)
+#   - Corrections to "Continue" button after Network Quality test [Pull Request No. 115](https://github.com/dan-snelson/Setup-Your-Mac/pull/115); thanks, @delize!
 #
 ####################################################################################################
 
