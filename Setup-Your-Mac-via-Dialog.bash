@@ -22,6 +22,9 @@
 #   - Add position prompt (Addresses [Issue No. 120](https://github.com/dan-snelson/Setup-Your-Mac/issues/120); thanks for the suggestion, @astrugatch! [Pull Request No. 121](https://github.com/dan-snelson/Setup-Your-Mac/pull/121); thanks, @drtaru! This has to be your best one yet!)
 #   - Corrections to "Continue" button after Network Quality test [Pull Request No. 115](https://github.com/dan-snelson/Setup-Your-Mac/pull/115); thanks, @delize!
 #
+#   Version 1.13.1, TBD, Dan K. Snelson (@dan-snelson)
+#   - 
+#
 ####################################################################################################
 
 
@@ -36,7 +39,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.13.0"
+scriptVersion="1.13.1-b0"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]

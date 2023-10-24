@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.13.1-b0
+### 24-Oct-2023
+- 
+
 ## 1.13.0
 ### 24-Oct-2023
 - 🔥 **Breaking Change** for users of Setup Your Mac prior to `1.13.0` 🔥 
