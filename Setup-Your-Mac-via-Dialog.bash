@@ -22,8 +22,9 @@
 #   - Add position prompt (Addresses [Issue No. 120](https://github.com/dan-snelson/Setup-Your-Mac/issues/120); thanks for the suggestion, @astrugatch! [Pull Request No. 121](https://github.com/dan-snelson/Setup-Your-Mac/pull/121); thanks, @drtaru! This has to be your best one yet!)
 #   - Corrections to "Continue" button after Network Quality test [Pull Request No. 115](https://github.com/dan-snelson/Setup-Your-Mac/pull/115); thanks, @delize!
 #
-#   Version 1.13.1, TBD, Dan K. Snelson (@dan-snelson)
-#   - 
+#   Version 1.13.1, 25-Oct-2023, Dan K. Snelson (@dan-snelson)
+#   - Updated Vimeo ID
+#   - Corrected omission of [SYM-Helper] for `moveableInProduction`
 #
 ####################################################################################################
 
@@ -83,7 +84,7 @@ promptForConfiguration="true"   # Removes the Configuration dropdown entirely an
 # Set to "true" to suppress the Update Inventory option on policies that are called
 suppressReconOnPolicy="false"
 
-# Disables the Blurscreen enabled by default in Production
+# [SYM-Helper] Disables the Blurscreen enabled by default in Production
 moveableInProduction="false"
 
 # [SYM-Helper] An unsorted, comma-separated list of buildings (with possible duplication). If empty, this will be hidden from the user info prompt
@@ -600,7 +601,7 @@ fi
 if [[ "${brandingBannerDisplayText}" == "true" ]]; then welcomeBannerText="Happy $( date +'%A' ), ${loggedInUserFirstname}!  \nWelcome to your new ${modelName}";
 else welcomeBannerText=""; fi
 welcomeCaption="Please review the above video, then click Continue."
-welcomeVideoID="vimeoid=844672129"
+welcomeVideoID="vimeoid=877821811"
 
 # Check if the custom welcomeBannerImage is available, and if not, use a alternative image
 if curl -L --output /dev/null --silent --head --fail "$welcomeBannerImage" || [ -f "$welcomeBannerImage" ]; then

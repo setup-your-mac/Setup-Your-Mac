@@ -1,8 +1,9 @@
 # CHANGELOG
 
 ## 1.13.1-b0
-### 24-Oct-2023
-- 
+### 25-Oct-2023
+- Updated Vimeo ID
+- Corrected omission of [SYM-Helper] for `moveableInProduction`
 
 ## 1.13.0
 ### 24-Oct-2023
