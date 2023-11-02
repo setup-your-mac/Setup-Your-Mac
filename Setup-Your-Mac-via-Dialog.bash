@@ -22,9 +22,10 @@
 #   - Add position prompt (Addresses [Issue No. 120](https://github.com/dan-snelson/Setup-Your-Mac/issues/120); thanks for the suggestion, @astrugatch! [Pull Request No. 121](https://github.com/dan-snelson/Setup-Your-Mac/pull/121); thanks, @drtaru! This has to be your best one yet!)
 #   - Corrections to "Continue" button after Network Quality test [Pull Request No. 115](https://github.com/dan-snelson/Setup-Your-Mac/pull/115); thanks, @delize!
 #
-#   Version 1.13.1, 25-Oct-2023, Dan K. Snelson (@dan-snelson)
+#   Version 1.13.1, 02-Nov-2023, Dan K. Snelson (@dan-snelson)
 #   - Updated Vimeo ID
 #   - Corrected omission of [SYM-Helper] for `moveableInProduction`
+#   - Updated "Microsoft Office 365" to "Microsoft 365"
 #
 ####################################################################################################
 
@@ -40,7 +41,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.13.1-b0"
+scriptVersion="1.13.1-b1"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -1109,9 +1110,9 @@ function policyJSONConfiguration() {
                         ]
                     },
                     {
-                        "listitem": "Microsoft Office 365",
-                        "icon": "https://ics.services.jamfcloud.com/icon/hash_10e2ebed512e443189badcaf9143293d447f4a3fd8562cd419f6666ca07eb775",
-                        "progresstext": "Microsoft Office 365 for Mac gives you the essentials to get it all done with the classic versions of the Office applications.",
+                        "listitem": "Microsoft 365",
+                        "icon": "https://ics.services.jamfcloud.com/icon/hash_1801d1fdd81e19ce5eb0e567371377e7995bff32947adb7a94c5feea760edcb5",
+                        "progresstext": "Office is now Microsoft 365. Create, share, and collaborate with your favorite apps — all in one place — with Microsoft 365.",
                         "trigger_list": [
                             {
                                 "trigger": "microsoftOffice365",
@@ -1264,9 +1265,9 @@ function policyJSONConfiguration() {
                         ]
                     },
                     {
-                        "listitem": "Microsoft Office 365",
-                        "icon": "https://ics.services.jamfcloud.com/icon/hash_10e2ebed512e443189badcaf9143293d447f4a3fd8562cd419f6666ca07eb775",
-                        "progresstext": "Microsoft Office 365 for Mac gives you the essentials to get it all done with the classic versions of the Office applications.",
+                        "listitem": "Microsoft 365",
+                        "icon": "https://ics.services.jamfcloud.com/icon/hash_1801d1fdd81e19ce5eb0e567371377e7995bff32947adb7a94c5feea760edcb5",
+                        "progresstext": "Office is now Microsoft 365. Create, share, and collaborate with your favorite apps — all in one place — with Microsoft 365.",
                         "trigger_list": [
                             {
                                 "trigger": "microsoftOffice365",
