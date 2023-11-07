@@ -157,7 +157,7 @@ configurationOneSize="34"                   # Configuration One in Gibibits (i.e
 configurationOneInstallBuffer="0"           # Buffer time added to estimates to include installation time of packages, in seconds. Set to 0 to disable. 
 
 configurationTwoName="Recommended"
-configurationTwoDescription="Required apps and Microsoft Office"
+configurationTwoDescription="Required apps and Microsoft 365"
 configurationTwoSize="62"                   # Configuration Two in Gibibits (i.e., Total File Size in Gigabytes * 7.451) 
 configurationTwoInstallBuffer="0"           # Buffer time added to estimates to include installation time of packages, in seconds. Set to 0 to disable. 
 
