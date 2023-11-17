@@ -2527,7 +2527,7 @@ function webHookMessage() {
                         },
                         {
                             "type": "mrkdwn",
-                            "text": "*OS Version:*\n${osVersion}"
+                            "text": "*OS Version:*\n${osVersion} (${osBuild})"
                         },
                         {
                             "type": "mrkdwn",
@@ -2598,7 +2598,7 @@ EOF
             "value": "${loggedInUser}"
         }, {
             "name": "Operating System Version",
-            "value": "${osVersion}"
+            "value": "${osVersion} (${osBuild})"
         }, {
             "name": "Additional Comments",
             "value": "${jamfProPolicyNameFailures}"
