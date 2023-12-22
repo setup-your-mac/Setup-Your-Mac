@@ -1,5 +1,13 @@
 # CHANGELOG
 
+## 1.13.1-b3
+### 09-Dec-2023
+- Updated Vimeo ID
+- Corrected omission of [SYM-Helper] for `moveableInProduction`
+- Updated "Microsoft Office 365" to "Microsoft 365"
+- Added OS Build number to webhook output [Pull Request No. 124](https://github.com/dan-snelson/Setup-Your-Mac/pull/124); thanks, @drtaru!
+- Changed filepath validation test from `-f` (i.e., "True if file exists and is a regular file") to `-e` (i.e., "True if file exists (regardless of type)."); thanks for the inspiration, @mrmte! [Issue 19](https://github.com/BIG-RAT/SYM-Helper/issues/19); thanks for the code suggestion, @bartreardon!
+
 ## 1.13.0
 ### 24-Oct-2023
 - 🔥 **Breaking Change** for users of Setup Your Mac prior to `1.13.0` 🔥 

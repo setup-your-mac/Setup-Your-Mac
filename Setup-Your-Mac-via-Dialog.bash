@@ -22,6 +22,13 @@
 #   - Add position prompt (Addresses [Issue No. 120](https://github.com/dan-snelson/Setup-Your-Mac/issues/120); thanks for the suggestion, @astrugatch! [Pull Request No. 121](https://github.com/dan-snelson/Setup-Your-Mac/pull/121); thanks, @drtaru! This has to be your best one yet!)
 #   - Corrections to "Continue" button after Network Quality test [Pull Request No. 115](https://github.com/dan-snelson/Setup-Your-Mac/pull/115); thanks, @delize!
 #
+#   Version 1.13.1, 08-Dec-2023, Dan K. Snelson (@dan-snelson)
+#   - Updated Vimeo ID
+#   - Corrected omission of [SYM-Helper] for `moveableInProduction`
+#   - Updated "Microsoft Office 365" to "Microsoft 365"
+#   - Added OS Build number to webhook output [Pull Request No. 124](https://github.com/dan-snelson/Setup-Your-Mac/pull/124); thanks, @drtaru!
+#   - Changed filepath validation test from `-f` (i.e., "True if file exists and is a regular file") to `-e` (i.e., "True if file exists (regardless of type)."); thanks for the inspiration, @mrmte! [Issue 19](https://github.com/BIG-RAT/SYM-Helper/issues/19); thanks for the code suggestion, @bartreardon!
+#
 ####################################################################################################
 
 
@@ -36,7 +43,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.13.0"
+scriptVersion="1.13.1-b3"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -80,7 +87,7 @@ promptForConfiguration="true"   # Removes the Configuration dropdown entirely an
 # Set to "true" to suppress the Update Inventory option on policies that are called
 suppressReconOnPolicy="false"
 
-# Disables the Blurscreen enabled by default in Production
+# [SYM-Helper] Disables the Blurscreen enabled by default in Production
 moveableInProduction="false"
 
 # [SYM-Helper] An unsorted, comma-separated list of buildings (with possible duplication). If empty, this will be hidden from the user info prompt
@@ -152,7 +159,7 @@ configurationOneSize="34"                   # Configuration One in Gibibits (i.e
 configurationOneInstallBuffer="0"           # Buffer time added to estimates to include installation time of packages, in seconds. Set to 0 to disable. 
 
 configurationTwoName="Recommended"
-configurationTwoDescription="Required apps and Microsoft Office"
+configurationTwoDescription="Required apps and Microsoft 365"
 configurationTwoSize="62"                   # Configuration Two in Gibibits (i.e., Total File Size in Gigabytes * 7.451) 
 configurationTwoInstallBuffer="0"           # Buffer time added to estimates to include installation time of packages, in seconds. Set to 0 to disable. 
 
@@ -597,7 +604,7 @@ fi
 if [[ "${brandingBannerDisplayText}" == "true" ]]; then welcomeBannerText="Happy $( date +'%A' ), ${loggedInUserFirstname}!  \nWelcome to your new ${modelName}";
 else welcomeBannerText=""; fi
 welcomeCaption="Please review the above video, then click Continue."
-welcomeVideoID="vimeoid=844672129"
+welcomeVideoID="vimeoid=877821811"
 
 # Check if the custom welcomeBannerImage is available, and if not, use a alternative image
 if curl -L --output /dev/null --silent --head --fail "$welcomeBannerImage" || [ -f "$welcomeBannerImage" ]; then
@@ -1105,9 +1112,9 @@ function policyJSONConfiguration() {
                         ]
                     },
                     {
-                        "listitem": "Microsoft Office 365",
-                        "icon": "https://ics.services.jamfcloud.com/icon/hash_10e2ebed512e443189badcaf9143293d447f4a3fd8562cd419f6666ca07eb775",
-                        "progresstext": "Microsoft Office 365 for Mac gives you the essentials to get it all done with the classic versions of the Office applications.",
+                        "listitem": "Microsoft 365",
+                        "icon": "https://ics.services.jamfcloud.com/icon/hash_1801d1fdd81e19ce5eb0e567371377e7995bff32947adb7a94c5feea760edcb5",
+                        "progresstext": "Office is now Microsoft 365. Create, share, and collaborate with your favorite apps — all in one place — with Microsoft 365.",
                         "trigger_list": [
                             {
                                 "trigger": "microsoftOffice365",
@@ -1260,9 +1267,9 @@ function policyJSONConfiguration() {
                         ]
                     },
                     {
-                        "listitem": "Microsoft Office 365",
-                        "icon": "https://ics.services.jamfcloud.com/icon/hash_10e2ebed512e443189badcaf9143293d447f4a3fd8562cd419f6666ca07eb775",
-                        "progresstext": "Microsoft Office 365 for Mac gives you the essentials to get it all done with the classic versions of the Office applications.",
+                        "listitem": "Microsoft 365",
+                        "icon": "https://ics.services.jamfcloud.com/icon/hash_1801d1fdd81e19ce5eb0e567371377e7995bff32947adb7a94c5feea760edcb5",
+                        "progresstext": "Office is now Microsoft 365. Create, share, and collaborate with your favorite apps — all in one place — with Microsoft 365.",
                         "trigger_list": [
                             {
                                 "trigger": "microsoftOffice365",
@@ -1821,7 +1828,7 @@ function confirmPolicyExecution() {
             if [[ "${debugMode}" == "true" ]] || [[ "${debugMode}" == "verbose" ]] ; then
                 updateScriptLog "SETUP YOUR MAC DIALOG: Confirm Policy Execution: DEBUG MODE: Skipping 'run_jamf_trigger ${trigger}'"
                 sleep "${debugModeSleepAmount}"
-            elif [[ -f "${validation}" ]]; then
+            elif [[ -e "${validation}" ]]; then
                 updateScriptLog "SETUP YOUR MAC DIALOG: Confirm Policy Execution: ${validation} exists; skipping 'run_jamf_trigger ${trigger}'"
                 previouslyInstalled="true"
             else
@@ -1897,7 +1904,7 @@ function validatePolicyResult() {
             updateScriptLog "SETUP YOUR MAC DIALOG: Validate Policy Result: Testing for \"$validation\" …"
             if [[ "${previouslyInstalled}" == "true" ]]; then
                 dialogUpdateSetupYourMac "listitem: index: $i, status: success, statustext: Previously Installed"
-            elif [[ -f "${validation}" ]]; then
+            elif [[ -e "${validation}" ]]; then
                 dialogUpdateSetupYourMac "listitem: index: $i, status: success, statustext: Installed"
             else
                 dialogUpdateSetupYourMac "listitem: index: $i, status: fail, statustext: Failed"
@@ -2522,7 +2529,7 @@ function webHookMessage() {
                         },
                         {
                             "type": "mrkdwn",
-                            "text": "*OS Version:*\n${osVersion}"
+                            "text": "*OS Version:*\n${osVersion} (${osBuild})"
                         },
                         {
                             "type": "mrkdwn",
@@ -2593,7 +2600,7 @@ EOF
             "value": "${loggedInUser}"
         }, {
             "name": "Operating System Version",
-            "value": "${osVersion}"
+            "value": "${osVersion} (${osBuild})"
         }, {
             "name": "Additional Comments",
             "value": "${jamfProPolicyNameFailures}"
