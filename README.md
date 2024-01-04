@@ -1,6 +1,7 @@
- [<img alt="Setup Your Mac (1.13.0)" src="images/SYM_icon.png" width="128" />](https://snelson.us/sym)
+<!-- markdownlint-disable-next-line first-line-heading no-inline-html -->
+[<img align="left" alt="Setup Your Mac (1.13.0)" src="images/SYM_icon.png" width="128" />](https://snelson.us/sym)
  
- # Setup Your Mac (1.13.0) with SYM-Helper via swiftDialog
+# Setup Your Mac (1.13.0) with SYM-Helper via swiftDialog
 
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/dan-snelson/Setup-Your-Mac?display_name=tag) ![GitHub issues](https://img.shields.io/github/issues-raw/dan-snelson/Setup-Your-Mac) ![GitHub closed issues](https://img.shields.io/github/issues-closed-raw/dan-snelson/Setup-Your-Mac) ![GitHub pull requests](https://img.shields.io/github/issues-pr-raw/dan-snelson/Setup-Your-Mac) ![GitHub closed pull requests](https://img.shields.io/github/issues-pr-closed-raw/dan-snelson/Setup-Your-Mac)
 
