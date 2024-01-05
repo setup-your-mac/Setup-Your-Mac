@@ -7,7 +7,7 @@
 
 > Optimized to leverage SYM-Helper, Setup Your Mac (1.13.0) offers MacAdmins under-the-hood, quality-of-life improvements.
 
-[<img alt="Setup Your Mac (1.13.0)" src="images/SYM-Helper_SYM-1.13.0_Hero.png" />](https://snelson.us/sym)
+[<img alt="Setup Your Mac (1.13.0)" src="images/SYM-Helper_1.0.0_SYM-1.13.0_Hero.png" />](https://snelson.us/sym)
 
 ## Introduction
 
