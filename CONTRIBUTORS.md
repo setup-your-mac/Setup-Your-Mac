@@ -1,6 +1,8 @@
 <!-- markdownlint-disable-next-line first-line-heading no-inline-html -->
 [<img align="left" alt="Setup Your Mac (1.13.0)" src="images/SYM_icon.png" width="128" />](https://snelson.us/sym)
 
+<br>
+
 # Setup Your Mac Contributors
 
 > ## `sym-devs`
