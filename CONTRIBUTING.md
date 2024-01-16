@@ -1,6 +1,9 @@
-[<img alt="Setup Your Mac (1.12.0)" src="images/SYM_icon.png" width="128" />](https://snelson.us/sym)
+<!-- markdownlint-disable-next-line first-line-heading no-inline-html -->
+[<img align="left" alt="Setup Your Mac (1.12.0)" src="images/SYM_icon.png" width="128" />](https://snelson.us/sym)
 
 # Contributing to Setup Your Mac
+
+<br>
 
 ## Welcome and Thank You!
 Welcome and thank you for considering contributing _your_ unique talents to [Setup Your Mac](https://snelson.us/sym); this project wouldn't be what it is today without the assistance of MacAdmins worldwide just like you.
