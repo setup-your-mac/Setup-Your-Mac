@@ -1,13 +1,13 @@
 <!-- markdownlint-disable-next-line first-line-heading no-inline-html -->
-[<img align="left" alt="Setup Your Mac (1.13.0)" src="images/SYM_icon.png" width="128" />](https://snelson.us/sym)
+[<img align="left" alt="Setup Your Mac (1.14.0)" src="images/SYM_icon.png" width="128" />](https://snelson.us/sym)
  
-# Setup Your Mac (1.13.0) with SYM-Helper via swiftDialog
+# Setup Your Mac (1.14.0) with SYM-Helper via swiftDialog
 
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/dan-snelson/Setup-Your-Mac?display_name=tag) ![GitHub issues](https://img.shields.io/github/issues-raw/dan-snelson/Setup-Your-Mac) ![GitHub closed issues](https://img.shields.io/github/issues-closed-raw/dan-snelson/Setup-Your-Mac) ![GitHub pull requests](https://img.shields.io/github/issues-pr-raw/dan-snelson/Setup-Your-Mac) ![GitHub closed pull requests](https://img.shields.io/github/issues-pr-closed-raw/dan-snelson/Setup-Your-Mac)
 
-> Optimized to leverage SYM-Helper, Setup Your Mac (1.13.1-b3) offers MacAdmins under-the-hood, quality-of-life improvements.
+> Optimized to leverage SYM-Helper, Setup Your Mac (1.14.0-b1) offers MacAdmins under-the-hood, quality-of-life improvements.
 
-[<img alt="Setup Your Mac (1.13.0)" src="https://github.com/setup-your-mac/Setup-Your-Mac/blob/bb12792de6115e1c5869577b0be8bce77a740779/images/SYM-Helper_1.0.0_SYM-1.13.0_Hero.png" />](https://snelson.us/sym)
+[<img alt="Setup Your Mac (1.14.0)" src="images/SYM-Helper_1.0.0_SYM-1.13.0_Hero.png" />](https://snelson.us/sym)
 
 
 ## Introduction

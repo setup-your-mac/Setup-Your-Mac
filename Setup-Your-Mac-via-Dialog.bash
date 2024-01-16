@@ -10,24 +10,14 @@
 #
 # HISTORY
 #
-#   Version 1.13.0, 24-Oct-2023, Dan K. Snelson (@dan-snelson)
-#   - 🔥 **Breaking Change** for users of Setup Your Mac prior to `1.13.0` 🔥 
-#       - Removed `setupYourMacPolicyArrayIconPrefixUrl` (in favor using the fully qualified domain name of the server which hosts your icons)
-#   - Added [SYM-Helper] to identify variables which can be configured in SYM-Helper (0.8.0)
-#   - Updated sample banner image (Image by pikisuperstar on Freepik)
-#   - Added `overlayoverride` variable to dynamically override the `overlayicon`, based on which Configuration is selected by the end-user ([Pull Request No. 111](https://github.com/dan-snelson/Setup-Your-Mac/pull/111); thanks yet again, @drtaru!)
-#   - Modified the display of support-related information (including adding `supportTeamWebsite` (Addresses [Issue No. 97](https://github.com/dan-snelson/Setup-Your-Mac/issues/97); thanks, @theahadub!))
-#   - Adjustments to Completion Actions (including the `wait` flavor; thanks for the heads-up, @Tom!)
-#   - Updated Microsoft Teams filepath validation
-#   - Add position prompt (Addresses [Issue No. 120](https://github.com/dan-snelson/Setup-Your-Mac/issues/120); thanks for the suggestion, @astrugatch! [Pull Request No. 121](https://github.com/dan-snelson/Setup-Your-Mac/pull/121); thanks, @drtaru! This has to be your best one yet!)
-#   - Corrections to "Continue" button after Network Quality test [Pull Request No. 115](https://github.com/dan-snelson/Setup-Your-Mac/pull/115); thanks, @delize!
-#
-#   Version 1.13.1, 08-Dec-2023, Dan K. Snelson (@dan-snelson)
+#   Version 1.14.0, 16-Jan-2024
 #   - Updated Vimeo ID
 #   - Corrected omission of [SYM-Helper] for `moveableInProduction`
 #   - Updated "Microsoft Office 365" to "Microsoft 365"
 #   - Added OS Build number to webhook output [Pull Request No. 124](https://github.com/dan-snelson/Setup-Your-Mac/pull/124); thanks, @drtaru!
 #   - Changed filepath validation test from `-f` (i.e., "True if file exists and is a regular file") to `-e` (i.e., "True if file exists (regardless of type)."); thanks for the inspiration, @mrmte! [Issue 19](https://github.com/BIG-RAT/SYM-Helper/issues/19); thanks for the code suggestion, @bartreardon!
+#   - Updates to `README.md`, `CONTRIBUTORS.md` and `CONTRIBUTING.md` [Pull Request No. 128](https://github.com/setup-your-mac/Setup-Your-Mac/pull/128); thanks, @robjschroeder!
+#   - Refactored the way `brandingBanner` variable is checked [Pull Request No. 131](https://github.com/setup-your-mac/Setup-Your-Mac/pull/131); thanks, @drtaru!
 #
 ####################################################################################################
 
@@ -43,7 +33,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.13.1-b3"
+scriptVersion="1.14.0-b1"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -606,38 +596,38 @@ welcomeVideoID="vimeoid=877821811"
 case ${brandingBanner} in
 
     *"https"* )
-    welcomeBannerImage="${brandingBanner}"
-    bannerImage="${brandingBanner}"
-    if curl -L --output /dev/null --silent --head --fail "$welcomeBannerImage" || [ -f "$welcomeBannerImage" ]; then
-        updateScriptLog "WELCOME DIALOG: brandingBanner is available, using it"
-    else
-        updateScriptLog "WELCOME DIALOG: brandingBanner is not available, using a default image"
-        welcomeBannerImage="https://img.freepik.com/free-vector/green-abstract-geometric-wallpaper_52683-29623.jpg" # Image by pikisuperstar on Freepik
-        bannerImage="https://img.freepik.com/free-vector/green-abstract-geometric-wallpaper_52683-29623.jpg" # Image by pikisuperstar on Freepik
-    fi
+        welcomeBannerImage="${brandingBanner}"
+        bannerImage="${brandingBanner}"
+        if curl -L --output /dev/null --silent --head --fail "$welcomeBannerImage" || [ -f "$welcomeBannerImage" ]; then
+            updateScriptLog "WELCOME DIALOG: brandingBanner is available, using it"
+        else
+            updateScriptLog "WELCOME DIALOG: brandingBanner is not available, using a default image"
+            welcomeBannerImage="https://img.freepik.com/free-vector/green-abstract-geometric-wallpaper_52683-29623.jpg" # Image by pikisuperstar on Freepik
+            bannerImage="https://img.freepik.com/free-vector/green-abstract-geometric-wallpaper_52683-29623.jpg" # Image by pikisuperstar on Freepik
+        fi
 
-    welcomeBannerImageFileName=$( echo ${welcomeBannerImage} | awk -F '/' '{print $NF}' )
-    updateScriptLog "WELCOME DIALOG: Auto-caching hosted '$welcomeBannerImageFileName' …"
-    curl -L --location --silent "$welcomeBannerImage" -o "/var/tmp/${welcomeBannerImageFileName}"
-    welcomeBannerImage="/var/tmp/${welcomeBannerImageFileName}"
-    bannerImage="/var/tmp/${welcomeBannerImageFileName}"
-    ;;
+        welcomeBannerImageFileName=$( echo ${welcomeBannerImage} | awk -F '/' '{print $NF}' )
+        updateScriptLog "WELCOME DIALOG: Auto-caching hosted '$welcomeBannerImageFileName' …"
+        curl -L --location --silent "$welcomeBannerImage" -o "/var/tmp/${welcomeBannerImageFileName}"
+        welcomeBannerImage="/var/tmp/${welcomeBannerImageFileName}"
+        bannerImage="/var/tmp/${welcomeBannerImageFileName}"
+        ;;
 
     */* )
-    updateScriptLog "WELCOME DIALOG: brandingBanner is local file, using it"
-    welcomeBannerImage="${brandingBanner}"
-    bannerImage="${brandingBanner}"
-    ;;
+        updateScriptLog "WELCOME DIALOG: brandingBanner is local file, using it"
+        welcomeBannerImage="${brandingBanner}"
+        bannerImage="${brandingBanner}"
+        ;;
 
     "None" | "none" | "" )
-    updateScriptLog "WELCOME DIALOG: brandingBanner set to \"None\", or empty"
-    welcomeBannerImage="${brandingBanner}"
-    bannerImage="${brandingBanner}"
-    ;;
+        updateScriptLog "WELCOME DIALOG: brandingBanner set to \"None\", or empty"
+        welcomeBannerImage="${brandingBanner}"
+        bannerImage="${brandingBanner}"
+        ;;
 
     * )
-    updateScriptLog "WELCOME DIALOG: brandingBanner set to \"None\""
-    ;;
+        updateScriptLog "WELCOME DIALOG: brandingBanner set to \"None\""
+        ;;
 
 esac
 

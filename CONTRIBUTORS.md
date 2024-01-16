@@ -16,6 +16,8 @@
 ### Humbled & Amazed
 
 The response to Setup Your Mac has been both humbling and amazing; my personal thanks to MacAdmins worldwide and the ever-growing number of contributors:
+- robjschroeder for [Pull Request No. 128](https://github.com/setup-your-mac/Setup-Your-Mac/pull/128)
+- drtaru for [Pull Request No. 131](https://github.com/setup-your-mac/Setup-Your-Mac/pull/131)
 - bartreardon for suggesting changing filepath validation test from `-f` (i.e., "True if file exists and is a regular file") to `-e` (i.e., "True if file exists (regardless of type).")
 - mrmte for [Issue 19](https://github.com/BIG-RAT/SYM-Helper/issues/19)
 - drtaru for [124](https://github.com/dan-snelson/Setup-Your-Mac/pull/124)
