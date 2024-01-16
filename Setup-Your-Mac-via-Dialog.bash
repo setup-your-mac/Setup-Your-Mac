@@ -595,32 +595,53 @@ else
     welcomeMessage=${welcomeMessage//", select your preferred **Configuration**"/}
 fi
 
-if [[ -n "${brandingBanner}" ]]; then
-    welcomeBannerImage="${brandingBanner}"
-else
-    welcomeBannerImage="https://img.freepik.com/free-vector/green-abstract-geometric-wallpaper_52683-29623.jpg" # Image by pikisuperstar on Freepik
-fi
 
 if [[ "${brandingBannerDisplayText}" == "true" ]]; then welcomeBannerText="Happy $( date +'%A' ), ${loggedInUserFirstname}!  \nWelcome to your new ${modelName}";
 else welcomeBannerText=""; fi
 welcomeCaption="Please review the above video, then click Continue."
 welcomeVideoID="vimeoid=877821811"
 
-# Check if the custom welcomeBannerImage is available, and if not, use a alternative image
-if curl -L --output /dev/null --silent --head --fail "$welcomeBannerImage" || [ -f "$welcomeBannerImage" ]; then
-    updateScriptLog "WELCOME DIALOG: welcomeBannerImage is available, using it"
-else
-    updateScriptLog "WELCOME DIALOG: welcomeBannerImage is not available, using a default image"
-    welcomeBannerImage="https://img.freepik.com/free-vector/green-abstract-geometric-wallpaper_52683-29623.jpg" # Image by pikisuperstar on Freepik
-fi
 
-# Cache the hosted custom welcomeBannerImage
-if [[ $welcomeBannerImage == *"http"* ]]; then
+# Check brandingBanner and cache if necessary
+case ${brandingBanner} in
+
+    *"https"* )
+    welcomeBannerImage="${brandingBanner}"
+    bannerImage="${brandingBanner}"
+    if curl -L --output /dev/null --silent --head --fail "$welcomeBannerImage" || [ -f "$welcomeBannerImage" ]; then
+        updateScriptLog "WELCOME DIALOG: brandingBanner is available, using it"
+    else
+        updateScriptLog "WELCOME DIALOG: brandingBanner is not available, using a default image"
+        welcomeBannerImage="https://img.freepik.com/free-vector/green-abstract-geometric-wallpaper_52683-29623.jpg" # Image by pikisuperstar on Freepik
+        bannerImage="https://img.freepik.com/free-vector/green-abstract-geometric-wallpaper_52683-29623.jpg" # Image by pikisuperstar on Freepik
+    fi
+
     welcomeBannerImageFileName=$( echo ${welcomeBannerImage} | awk -F '/' '{print $NF}' )
     updateScriptLog "WELCOME DIALOG: Auto-caching hosted '$welcomeBannerImageFileName' …"
     curl -L --location --silent "$welcomeBannerImage" -o "/var/tmp/${welcomeBannerImageFileName}"
     welcomeBannerImage="/var/tmp/${welcomeBannerImageFileName}"
-fi
+    bannerImage="/var/tmp/${welcomeBannerImageFileName}"
+    ;;
+
+    */* )
+    updateScriptLog "WELCOME DIALOG: brandingBanner is local file, using it"
+    welcomeBannerImage="${brandingBanner}"
+    bannerImage="${brandingBanner}"
+    ;;
+
+    "None" | "none" | "" )
+    updateScriptLog "WELCOME DIALOG: brandingBanner set to \"None\", or empty"
+    welcomeBannerImage="${brandingBanner}"
+    bannerImage="${brandingBanner}"
+    ;;
+
+    * )
+    updateScriptLog "WELCOME DIALOG: brandingBanner set to \"None\""
+    ;;
+
+esac
+
+
 
 # Welcome icon set to either light or dark, based on user's Apperance setting (thanks, @mm2270!)
 appleInterfaceStyle=$( /usr/bin/defaults read /Users/"${loggedInUser}"/Library/Preferences/.GlobalPreferences.plist AppleInterfaceStyle 2>&1 )
@@ -787,11 +808,6 @@ welcomeJSON='
 
 title="Setting up ${loggedInUserFirstname}‘s ${modelName}"
 message="Please wait while the following apps are installed …"
-if [[ -n "${brandingBanner}" ]]; then
-    bannerImage="${brandingBanner}"
-else
-    bannerImage="https://img.freepik.com/free-vector/green-abstract-geometric-wallpaper_52683-29623.jpg" # Image by pikisuperstar on Freepik
-fi
 
 if [[ "${brandingBannerDisplayText}" == "true" ]] ; then
     bannerText="Setting up ${loggedInUserFirstname}‘s ${modelName}";
@@ -827,13 +843,6 @@ helpmessage+="- **Started:** ${timestamp}"
 
 infobox="Analyzing input …" # Customize at "Update Setup Your Mac's infobox"
 
-# Check if the custom bannerImage is available, and if not, use a alternative image
-if curl -L --output /dev/null --silent --head --fail "$bannerImage" || [ -f "$bannerImage" ]; then
-    updateScriptLog "WELCOME DIALOG: bannerImage is available"
-else
-    updateScriptLog "WELCOME DIALOG: bannerImage is not available, using alternative image"
-    bannerImage="https://img.freepik.com/free-vector/green-abstract-geometric-wallpaper_52683-29623.jpg" # Image by pikisuperstar on Freepik
-fi
 
 # Create `overlayicon` from Self Service's custom icon (thanks, @meschwartz!)
 xxd -p -s 260 "$(defaults read /Library/Preferences/com.jamfsoftware.jamf self_service_app_path)"/Icon$'\r'/..namedfork/rsrc | xxd -r -p > /var/tmp/overlayicon.icns
