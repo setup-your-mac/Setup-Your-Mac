@@ -937,7 +937,7 @@ function policyJSONConfiguration() {
                 "steps": [
                     {
                         "listitem": "Rosetta",
-                        "subtitle": "Subtitle goes here",
+                        "subtitle": "Enables a Mac with Apple silicon to use apps built for an Intel processor",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_8bac19160fabb0c8e7bac97b37b51d2ac8f38b7100b6357642d9505645d37b52",
                         "progresstext": "Rosetta enables a Mac with Apple silicon to use apps built for a Mac with an Intel processor.",
                         "trigger_list": [
@@ -953,7 +953,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "FileVault Disk Encryption",
-                        "subtitle": "Subtitle goes here",
+                        "subtitle": "FileVault provides full-disk encryption",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_f9ba35bd55488783456d64ec73372f029560531ca10dfa0e8154a46d7732b913",
                         "progresstext": "FileVault is built-in to macOS and provides full-disk encryption to help prevent unauthorized access to your Mac.",
                         "trigger_list": [
@@ -965,7 +965,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "Sophos Endpoint",
-                        "subtitle": "Subtitle goes here",
+                        "subtitle": "Catches malware without relying on signatures",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_c70f1acf8c96b99568fec83e165d2a534d111b0510fb561a283d32aa5b01c60c",
                         "progresstext": "You’ll enjoy next-gen protection with Sophos Endpoint which doesn’t rely on signatures to catch malware.",
                         "trigger_list": [
@@ -977,7 +977,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "Sophos Endpoint Services (Remote)",
-                        "subtitle": "Subtitle goes here",
+                        "subtitle": "Ensures Sophos Endpoint services are running",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_0f68be689684a00a3a054d71a31e43e2362f96c16efa5a560fb61bc1bf41901c",
                         "progresstext": "Remotely validating Sophos Endpoint services …",
                         "trigger_list": [
@@ -989,7 +989,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "Palo Alto GlobalProtect",
-                        "subtitle": "Subtitle goes here",
+                        "subtitle": "Virtual Private Network (VPN) connection to Church headquarters",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_acbf39d8904ad1a772cf71c45d93e373626d379a24f8b1283b88134880acb8ef",
                         "progresstext": "Use Palo Alto GlobalProtect to establish a Virtual Private Network (VPN) connection to Church headquarters.",
                         "trigger_list": [
@@ -1001,7 +1001,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "Palo Alto GlobalProtect Services (Remote)",
-                        "subtitle": "Subtitle goes here",
+                        "subtitle": "Ensures GlobalProtect services are running",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_709e8bdf0019e8faf9df85ec0a68545bfdb8bfa1227ac9bed9bba40a1fa8ff42",
                         "progresstext": "Remotely validating Palo Alto GlobalProtect services …",
                         "trigger_list": [
@@ -1013,7 +1013,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "Final Configuration",
-                        "subtitle": "Subtitle goes here",
+                        "subtitle": "Configures remaining Church settings",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_4723e3e341a7e11e6881e418cf91b157fcc081bdb8948697750e5da3562df728",
                         "progresstext": "Finalizing Configuration …",
                         "trigger_list": [
@@ -1029,7 +1029,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "Computer Inventory",
-                        "subtitle": "Subtitle goes here",
+                        "subtitle": "The listing of your Mac’s apps and settings",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_ff2147a6c09f5ef73d1c4406d00346811a9c64c0b6b7f36eb52fcb44943d26f9",
                         "progresstext": "A listing of your Mac’s apps and settings — its inventory — is sent automatically to the Jamf Pro server daily.",
                         "trigger_list": [
@@ -1052,7 +1052,7 @@ function policyJSONConfiguration() {
                 "steps": [
                     {
                         "listitem": "Rosetta",
-                        "subtitle": "Subtitle goes here",
+                        "subtitle": "Enables a Mac with Apple silicon to use apps built for an Intel processor",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_8bac19160fabb0c8e7bac97b37b51d2ac8f38b7100b6357642d9505645d37b52",
                         "progresstext": "Rosetta enables a Mac with Apple silicon to use apps built for a Mac with an Intel processor.",
                         "trigger_list": [
@@ -1068,7 +1068,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "FileVault Disk Encryption",
-                        "subtitle": "Subtitle goes here",
+                        "subtitle": "FileVault provides full-disk encryption",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_f9ba35bd55488783456d64ec73372f029560531ca10dfa0e8154a46d7732b913",
                         "progresstext": "FileVault is built-in to macOS and provides full-disk encryption to help prevent unauthorized access to your Mac.",
                         "trigger_list": [
@@ -1080,7 +1080,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "Sophos Endpoint",
-                        "subtitle": "Subtitle goes here",
+                        "subtitle": "Catches malware without relying on signatures",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_c70f1acf8c96b99568fec83e165d2a534d111b0510fb561a283d32aa5b01c60c",
                         "progresstext": "You’ll enjoy next-gen protection with Sophos Endpoint which doesn’t rely on signatures to catch malware.",
                         "trigger_list": [
@@ -1092,7 +1092,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "Sophos Endpoint Services (Local)",
-                        "subtitle": "Subtitle goes here",
+                        "subtitle": "Ensures Sophos Endpoint services are running",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_0f68be689684a00a3a054d71a31e43e2362f96c16efa5a560fb61bc1bf41901c",
                         "progresstext": "Locally validating Sophos Endpoint services …",
                         "trigger_list": [
@@ -1104,7 +1104,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "Palo Alto GlobalProtect",
-                        "subtitle": "Subtitle goes here",
+                        "subtitle": "Virtual Private Network (VPN) connection to Church headquarters",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_acbf39d8904ad1a772cf71c45d93e373626d379a24f8b1283b88134880acb8ef",
                         "progresstext": "Use Palo Alto GlobalProtect to establish a Virtual Private Network (VPN) connection to Church headquarters.",
                         "trigger_list": [
@@ -1116,7 +1116,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "Palo Alto GlobalProtect Services (Local)",
-                        "subtitle": "Subtitle goes here",
+                        "subtitle": "Ensures GlobalProtect services are running",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_709e8bdf0019e8faf9df85ec0a68545bfdb8bfa1227ac9bed9bba40a1fa8ff42",
                         "progresstext": "Locally validating Palo Alto GlobalProtect services …",
                         "trigger_list": [
@@ -1128,7 +1128,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "Microsoft 365",
-                        "subtitle": "Subtitle goes here",
+                        "subtitle": "Microsoft Office is now Microsoft 365",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_1801d1fdd81e19ce5eb0e567371377e7995bff32947adb7a94c5feea760edcb5",
                         "progresstext": "Office is now Microsoft 365. Create, share, and collaborate with your favorite apps — all in one place — with Microsoft 365.",
                         "trigger_list": [
@@ -1144,9 +1144,9 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "Microsoft Teams",
-                        "subtitle": "Subtitle goes here",
+                        "subtitle": "The hub for teamwork in Microsoft 365",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_dcb65709dba6cffa90a5eeaa54cb548d5ecc3b051f39feadd39e02744f37c19e",
-                        "progresstext": "Microsoft Teams is a hub for teamwork in Office 365. Keep all your team’s chats, meetings and files together in one place.",
+                        "progresstext": "Microsoft Teams is a hub for teamwork in Microsoft 365. Keep all your team’s chats, meetings and files together in one place.",
                         "trigger_list": [
                             {
                                 "trigger": "microsoftTeams",
@@ -1156,7 +1156,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "Final Configuration",
-                        "subtitle": "Subtitle goes here",
+                        "subtitle": "Configures remaining Church settings",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_4723e3e341a7e11e6881e418cf91b157fcc081bdb8948697750e5da3562df728",
                         "progresstext": "Finalizing Configuration …",
                         "trigger_list": [
@@ -1172,7 +1172,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "Computer Inventory",
-                        "subtitle": "Subtitle goes here",
+                        "subtitle": "The listing of your Mac’s apps and settings",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_ff2147a6c09f5ef73d1c4406d00346811a9c64c0b6b7f36eb52fcb44943d26f9",
                         "progresstext": "A listing of your Mac’s apps and settings — its inventory — is sent automatically to the Jamf Pro server daily.",
                         "trigger_list": [
@@ -1195,7 +1195,7 @@ function policyJSONConfiguration() {
                 "steps": [
                     {
                         "listitem": "Rosetta",
-                        "subtitle": "Subtitle goes here",
+                        "subtitle": "Enables a Mac with Apple silicon to use apps built for an Intel processor",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_8bac19160fabb0c8e7bac97b37b51d2ac8f38b7100b6357642d9505645d37b52",
                         "progresstext": "Rosetta enables a Mac with Apple silicon to use apps built for a Mac with an Intel processor.",
                         "trigger_list": [
@@ -1211,7 +1211,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "FileVault Disk Encryption",
-                        "subtitle": "Subtitle goes here",
+                        "subtitle": "FileVault provides full-disk encryption",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_f9ba35bd55488783456d64ec73372f029560531ca10dfa0e8154a46d7732b913",
                         "progresstext": "FileVault is built-in to macOS and provides full-disk encryption to help prevent unauthorized access to your Mac.",
                         "trigger_list": [
@@ -1223,7 +1223,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "Sophos Endpoint",
-                        "subtitle": "Subtitle goes here",
+                        "subtitle": "Catches malware without relying on signatures",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_c70f1acf8c96b99568fec83e165d2a534d111b0510fb561a283d32aa5b01c60c",
                         "progresstext": "You’ll enjoy next-gen protection with Sophos Endpoint which doesn’t rely on signatures to catch malware.",
                         "trigger_list": [
@@ -1235,7 +1235,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "Sophos Endpoint Services (Local)",
-                        "subtitle": "Subtitle goes here",
+                        "subtitle": "Ensures Sophos Endpoint services are running",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_0f68be689684a00a3a054d71a31e43e2362f96c16efa5a560fb61bc1bf41901c",
                         "progresstext": "Locally validating Sophos Endpoint services …",
                         "trigger_list": [
@@ -1247,7 +1247,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "Sophos Endpoint Services (Remote)",
-                        "subtitle": "Subtitle goes here",
+                        "subtitle": "Ensures Sophos Endpoint services are running",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_0f68be689684a00a3a054d71a31e43e2362f96c16efa5a560fb61bc1bf41901c",
                         "progresstext": "Remotely validating Sophos Endpoint services …",
                         "trigger_list": [
@@ -1259,7 +1259,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "Palo Alto GlobalProtect",
-                        "subtitle": "Subtitle goes here",
+                        "subtitle": "Virtual Private Network (VPN) connection to Church headquarters",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_acbf39d8904ad1a772cf71c45d93e373626d379a24f8b1283b88134880acb8ef",
                         "progresstext": "Use Palo Alto GlobalProtect to establish a Virtual Private Network (VPN) connection to Church headquarters.",
                         "trigger_list": [
@@ -1271,7 +1271,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "Palo Alto GlobalProtect Services (Local)",
-                        "subtitle": "Subtitle goes here",
+                        "subtitle": "Ensures GlobalProtect services are running",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_709e8bdf0019e8faf9df85ec0a68545bfdb8bfa1227ac9bed9bba40a1fa8ff42",
                         "progresstext": "Locally validating Palo Alto GlobalProtect services …",
                         "trigger_list": [
@@ -1283,7 +1283,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "Palo Alto GlobalProtect Services (Remote)",
-                        "subtitle": "Subtitle goes here",
+                        "subtitle": "Ensures GlobalProtect services are running",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_709e8bdf0019e8faf9df85ec0a68545bfdb8bfa1227ac9bed9bba40a1fa8ff42",
                         "progresstext": "Remotely validating Palo Alto GlobalProtect services …",
                         "trigger_list": [
@@ -1295,7 +1295,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "Microsoft 365",
-                        "subtitle": "Subtitle goes here",
+                        "subtitle": "Microsoft Office is now Microsoft 365",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_1801d1fdd81e19ce5eb0e567371377e7995bff32947adb7a94c5feea760edcb5",
                         "progresstext": "Office is now Microsoft 365. Create, share, and collaborate with your favorite apps — all in one place — with Microsoft 365.",
                         "trigger_list": [
@@ -1311,9 +1311,9 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "Microsoft Teams",
-                        "subtitle": "Subtitle goes here",
+                        "subtitle": "The hub for teamwork in Microsoft 365",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_dcb65709dba6cffa90a5eeaa54cb548d5ecc3b051f39feadd39e02744f37c19e",
-                        "progresstext": "Microsoft Teams is a hub for teamwork in Office 365. Keep all your team’s chats, meetings and files together in one place.",
+                        "progresstext": "Microsoft Teams is a hub for teamwork in Microsoft 365. Keep all your team’s chats, meetings and files together in one place.",
                         "trigger_list": [
                             {
                                 "trigger": "microsoftTeams",
@@ -1323,7 +1323,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "Adobe Acrobat Reader",
-                        "subtitle": "Subtitle goes here",
+                        "subtitle": "Full-featured PDF reader",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_988b669ca27eab93a9bcd53bb7e2873fb98be4eaa95ae8974c14d611bea1d95f",
                         "progresstext": "Views, prints, and comments on PDF documents, and connects to Adobe Document Cloud.",
                         "trigger_list": [
@@ -1335,7 +1335,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "Google Chrome",
-                        "subtitle": "Subtitle goes here",
+                        "subtitle": "Third-party Web browser",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_12d3d198f40ab2ac237cff3b5cb05b09f7f26966d6dffba780e4d4e5325cc701",
                         "progresstext": "Google Chrome is a browser that combines a minimal design with sophisticated technology to make the Web faster.",
                         "trigger_list": [
@@ -1347,7 +1347,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "Final Configuration",
-                        "subtitle": "Subtitle goes here",
+                        "subtitle": "Configures remaining Church settings",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_4723e3e341a7e11e6881e418cf91b157fcc081bdb8948697750e5da3562df728",
                         "progresstext": "Finalizing Configuration …",
                         "trigger_list": [
@@ -1363,7 +1363,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "Computer Inventory",
-                        "subtitle": "Subtitle goes here",
+                        "subtitle": "The listing of your Mac’s apps and settings",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_ff2147a6c09f5ef73d1c4406d00346811a9c64c0b6b7f36eb52fcb44943d26f9",
                         "progresstext": "A listing of your Mac’s apps and settings — its inventory — is sent automatically to the Jamf Pro server daily.",
                         "trigger_list": [
@@ -1386,7 +1386,7 @@ function policyJSONConfiguration() {
                 "steps": [
                     {
                         "listitem": "Rosetta",
-                        "subtitle": "Subtitle goes here",
+                        "subtitle": "Enables a Mac with Apple silicon to use apps built for an Intel processor",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_8bac19160fabb0c8e7bac97b37b51d2ac8f38b7100b6357642d9505645d37b52",
                         "progresstext": "Rosetta enables a Mac with Apple silicon to use apps built for a Mac with an Intel processor.",
                         "trigger_list": [
@@ -1402,7 +1402,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "FileVault Disk Encryption",
-                        "subtitle": "Subtitle goes here",
+                        "subtitle": "FileVault provides full-disk encryption",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_f9ba35bd55488783456d64ec73372f029560531ca10dfa0e8154a46d7732b913",
                         "progresstext": "FileVault is built-in to macOS and provides full-disk encryption to help prevent unauthorized access to your Mac.",
                         "trigger_list": [
@@ -1414,7 +1414,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "Sophos Endpoint",
-                        "subtitle": "Subtitle goes here",
+                        "subtitle": "Catches malware without relying on signatures",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_c70f1acf8c96b99568fec83e165d2a534d111b0510fb561a283d32aa5b01c60c",
                         "progresstext": "You’ll enjoy next-gen protection with Sophos Endpoint which doesn’t rely on signatures to catch malware.",
                         "trigger_list": [
@@ -1430,7 +1430,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "Palo Alto GlobalProtect",
-                        "subtitle": "Subtitle goes here",
+                        "subtitle": "Virtual Private Network (VPN) connection to Church headquarters",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_acbf39d8904ad1a772cf71c45d93e373626d379a24f8b1283b88134880acb8ef",
                         "progresstext": "Use Palo Alto GlobalProtect to establish a Virtual Private Network (VPN) connection to Church headquarters.",
                         "trigger_list": [
@@ -1446,7 +1446,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "Final Configuration",
-                        "subtitle": "Subtitle goes here",
+                        "subtitle": "Configures remaining Church settings",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_4723e3e341a7e11e6881e418cf91b157fcc081bdb8948697750e5da3562df728",
                         "progresstext": "Finalizing Configuration …",
                         "trigger_list": [
@@ -1462,7 +1462,7 @@ function policyJSONConfiguration() {
                     },
                     {
                         "listitem": "Computer Inventory",
-                        "subtitle": "Subtitle goes here",
+                        "subtitle": "The listing of your Mac’s apps and settings",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_ff2147a6c09f5ef73d1c4406d00346811a9c64c0b6b7f36eb52fcb44943d26f9",
                         "progresstext": "A listing of your Mac’s apps and settings — its inventory — is sent automatically to the Jamf Pro server daily.",
                         "trigger_list": [
