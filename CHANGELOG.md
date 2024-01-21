@@ -1,7 +1,7 @@
 # CHANGELOG
 
-## 1.14.0-b1
-### 16-Jan-2024
+## 1.14.0-b2
+### 21-Jan-2024
 - Updated Vimeo ID
 - Corrected omission of [SYM-Helper] for `moveableInProduction`
 - Updated "Microsoft Office 365" to "Microsoft 365"
@@ -9,6 +9,8 @@
 - Changed filepath validation test from `-f` (i.e., "True if file exists and is a regular file") to `-e` (i.e., "True if file exists (regardless of type)."); thanks for the inspiration, @mrmte! [Issue 19](https://github.com/BIG-RAT/SYM-Helper/issues/19); thanks for the code suggestion, @bartreardon!
 - Updates to `README.md`, `CONTRIBUTORS.md` and `CONTRIBUTING.md` [Pull Request No. 128](https://github.com/setup-your-mac/Setup-Your-Mac/pull/128); thanks, @robjschroeder!
 - Refactored the way `brandingBanner` variable is checked [Pull Request No. 131](https://github.com/setup-your-mac/Setup-Your-Mac/pull/131); thanks, @drtaru!
+- Increased minimum required version of swiftDialog to `2.4.0.4748`
+- (Started code to) Leverage the new `subtitle` in `listitem` (using `progresstext`, but probably needs a dedicated `subtitle` field in `policyJSON`)
 
 ## 1.13.0
 ### 24-Oct-2023
