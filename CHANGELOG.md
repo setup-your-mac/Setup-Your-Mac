@@ -10,7 +10,7 @@
 - Updates to `README.md`, `CONTRIBUTORS.md` and `CONTRIBUTING.md` [Pull Request No. 128](https://github.com/setup-your-mac/Setup-Your-Mac/pull/128); thanks, @robjschroeder!
 - Refactored the way `brandingBanner` variable is checked [Pull Request No. 131](https://github.com/setup-your-mac/Setup-Your-Mac/pull/131); thanks, @drtaru!
 - Increased minimum required version of swiftDialog to `2.4.0.4748`
-- (Started code to) Leverage the new `subtitle` in `listitem` (using `progresstext`, but probably needs a dedicated `subtitle` field in `policyJSON`)
+- Leveraged the new `listitem: subtitle` option with a dedicated `subtitle` field in `policyJSON`
 
 ## 1.13.0
 ### 24-Oct-2023
