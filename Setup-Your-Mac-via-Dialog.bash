@@ -10,7 +10,7 @@
 #
 # HISTORY
 #
-#   Version 1.14.0, 21-Jan-2024
+#   Version 1.14.0, 03-Feb-2024
 #   - Updated Vimeo ID
 #   - Corrected omission of [SYM-Helper] for `moveableInProduction`
 #   - Updated "Microsoft Office 365" to "Microsoft 365"
@@ -18,8 +18,10 @@
 #   - Changed filepath validation test from `-f` (i.e., "True if file exists and is a regular file") to `-e` (i.e., "True if file exists (regardless of type)."); thanks for the inspiration, @mrmte! [Issue 19](https://github.com/BIG-RAT/SYM-Helper/issues/19); thanks for the code suggestion, @bartreardon!
 #   - Updates to `README.md`, `CONTRIBUTORS.md` and `CONTRIBUTING.md` [Pull Request No. 128](https://github.com/setup-your-mac/Setup-Your-Mac/pull/128); thanks, @robjschroeder!
 #   - Refactored the way `brandingBanner` variable is checked [Pull Request No. 131](https://github.com/setup-your-mac/Setup-Your-Mac/pull/131); thanks, @drtaru!
-#   - Increased minimum required version of swiftDialog to 2.4.0.4748
+#   - Increased minimum required version of swiftDialog to 2.4.0.4750
 #   - Leveraged the new `listitem: subtitle` option with a dedicated `subtitle` field in `policyJSON`
+#   - Corrected misspelling of "policies" in log entries [Issue No. 134](https://github.com/setup-your-mac/Setup-Your-Mac/issues/134); thanks, @Honestpuck!
+#   - Updated `brandingBanner` to [image by benzoix on Freepik](https://www.freepik.com/author/benzoix)
 #
 ####################################################################################################
 
@@ -35,7 +37,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.14.0-b3"
+scriptVersion="1.14.0-rc1"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -45,7 +47,7 @@ requiredMinimumBuild="${8:-"disabled"}"                                         
 outdatedOsAction="${9:-"/System/Library/CoreServices/Software Update.app"}"     # Parameter 9: Outdated OS Action [ /System/Library/CoreServices/Software Update.app (default) | jamfselfservice://content?entity=policy&id=117&action=view ] (i.e., Jamf Pro Self Service policy ID for operating system ugprades)
 webhookURL="${10:-""}"                                                          # Parameter 10: Microsoft Teams or Slack Webhook URL [ Leave blank to disable (default) | https://microsoftTeams.webhook.com/URL | https://hooks.slack.com/services/URL ] Can be used to send a success or failure message to Microsoft Teams or Slack via Webhook. (Function will automatically detect if Webhook URL is for Slack or Teams; can be modified to include other communication tools that support functionality.)
 presetConfiguration="${11:-""}"                                                 # Parameter 11: Specify a Configuration (i.e., `policyJSON`; NOTE: If set, `promptForConfiguration` will be automatically suppressed and the preselected configuration will be used instead)
-swiftDialogMinimumRequiredVersion="2.4.0.4748"                                  # This will be set and updated as dependancies on newer features change.
+swiftDialogMinimumRequiredVersion="2.4.0.4750"                                  # This will be set and updated as dependancies on newer features change.
 
 
 
@@ -101,7 +103,7 @@ positionListRaw="Developer,Management,Sales,Marketing"
 positionList=$( echo "${positionListRaw}" | tr ',' '\n' | sort -f | uniq | sed -e 's/^/\"/' -e 's/$/\",/' -e '$ s/.$//' )
 
 # [SYM-Helper] Branding overrides
-brandingBanner="https://img.freepik.com/free-vector/green-abstract-geometric-wallpaper_52683-29623.jpg" # Image by pikisuperstar on Freepik
+brandingBanner="https://img.freepik.com/free-photo/liquid-marbling-paint-texture-background-fluid-painting-abstract-texture-intensive-color-mix-wallpaper_1258-101465.jpg" # [Image by benzoix on Freepik](https://www.freepik.com/author/benzoix)
 brandingBannerDisplayText="true"
 brandingIconLight="https://cdn-icons-png.flaticon.com/512/979/979585.png"
 brandingIconDark="https://cdn-icons-png.flaticon.com/512/740/740878.png"
@@ -1680,7 +1682,7 @@ function finalise(){
     if [[ "${jamfProPolicyTriggerFailure}" == "failed" ]]; then
 
         outputLineNumberInVerboseDebugMode
-        updateScriptLog "Failed polcies detected …"
+        updateScriptLog "Failed policies detected …"
         if [[ -n "${webhookURL}" ]]; then
             updateScriptLog "Display Failure dialog: Sending webhook message"
             webhookStatus="Failures detected"
@@ -1768,7 +1770,7 @@ function finalise(){
     else
 
         outputLineNumberInVerboseDebugMode
-        updateScriptLog "All polcies executed successfully"
+        updateScriptLog "All policies executed successfully"
         if [[ -n "${webhookURL}" ]]; then
             webhookStatus="Successful"
             updateScriptLog "Sending success webhook message"
