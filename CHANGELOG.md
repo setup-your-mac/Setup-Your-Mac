@@ -1,7 +1,7 @@
 # CHANGELOG
 
-## 1.14.0-b4
-### 03-Feb-2024
+## 1.14.0
+### 05-Feb-2024
 - Updated Vimeo ID
 - Corrected omission of [SYM-Helper] for `moveableInProduction`
 - Updated "Microsoft Office 365" to "Microsoft 365"

@@ -10,7 +10,7 @@
 #
 # HISTORY
 #
-#   Version 1.14.0, 03-Feb-2024
+#   Version 1.14.0, 05-Feb-2024
 #   - Updated Vimeo ID
 #   - Corrected omission of [SYM-Helper] for `moveableInProduction`
 #   - Updated "Microsoft Office 365" to "Microsoft 365"
@@ -37,7 +37,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.14.0-rc1"
+scriptVersion="1.14.0"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -593,7 +593,7 @@ fi
 if [[ "${brandingBannerDisplayText}" == "true" ]]; then welcomeBannerText="Happy $( date +'%A' ), ${loggedInUserFirstname}!  \nWelcome to your new ${modelName}";
 else welcomeBannerText=""; fi
 welcomeCaption="Please review the above video, then click Continue."
-welcomeVideoID="vimeoid=877821811"
+welcomeVideoID="vimeoid=909473114"
 
 
 # Check brandingBanner and cache if necessary
