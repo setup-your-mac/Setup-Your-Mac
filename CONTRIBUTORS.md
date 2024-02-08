@@ -16,6 +16,7 @@
 ### Humbled & Amazed
 
 The response to Setup Your Mac has been both humbling and amazing; my personal thanks to MacAdmins worldwide and the ever-growing number of contributors:
+- robjschroeder for [Pull Request No. 137](https://github.com/setup-your-mac/Setup-Your-Mac/pull/137)
 - Honestpuck for [Issue No. 134](https://github.com/setup-your-mac/Setup-Your-Mac/issues/134)
 - robjschroeder for [Pull Request No. 128](https://github.com/setup-your-mac/Setup-Your-Mac/pull/128)
 - drtaru for [Pull Request No. 131](https://github.com/setup-your-mac/Setup-Your-Mac/pull/131)

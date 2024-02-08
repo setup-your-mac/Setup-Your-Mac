@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.15.0
+### 06-Feb-2024
+- Added logging functions [Pull Request No. 137](https://github.com/setup-your-mac/Setup-Your-Mac/pull/137); thanks, @robjschroeder!
+
 ## 1.14.0
 ### 05-Feb-2024
 - Updated Vimeo ID
