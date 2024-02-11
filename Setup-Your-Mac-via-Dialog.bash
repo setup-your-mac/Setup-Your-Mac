@@ -23,6 +23,9 @@
 #   - Corrected misspelling of "policies" in log entries [Issue No. 134](https://github.com/setup-your-mac/Setup-Your-Mac/issues/134); thanks, @Honestpuck!
 #   - Updated `brandingBanner` to [image by benzoix on Freepik](https://www.freepik.com/author/benzoix)
 #
+#   Version 1.14.1, 11-Feb-2024
+#   - Addressed an issue where icons were not displaying (thanks, @bartreardon!)
+#
 ####################################################################################################
 
 
@@ -37,7 +40,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.14.0"
+scriptVersion="1.14.1"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -770,7 +773,7 @@ welcomeJSON='
     "message" : "'"${welcomeMessage}"'",
     "icon" : "'"${welcomeIcon}"'",
     "infobox" : "Analyzing …",
-    "iconsize" : "198.0",
+    "iconsize" : "198",
     "button1text" : "Continue",
     "button2text" : "Quit",
     "infotext" : "'"${scriptVersion}"'",
@@ -2823,7 +2826,7 @@ elif [[ "${welcomeDialog}" == "messageOnly" ]]; then
         "message" : "'"${welcomeMessage}"'",
         "icon" : "'"${welcomeIcon}"'",
         "infobox" : "",
-        "iconsize" : "198.0",
+        "iconsize" : "198",
         "button1text" : "Continue",
         "timer" : "60",
         "infotext" : "'"${scriptVersion}"'",
