@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.14.1
+### 11-Feb-2024
+- Addressed an issue where icons were not displaying (thanks, @bartreardon!)
+
 ## 1.14.0
 ### 05-Feb-2024
 - Updated Vimeo ID
