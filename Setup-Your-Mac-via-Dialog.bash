@@ -10,7 +10,7 @@
 #
 # HISTORY
 #
-#   Version 1.15.0, 06-Feb-2024
+#   Version 1.15.0, 12-Feb-2024
 #   - Added logging functions
 #
 ####################################################################################################
@@ -27,7 +27,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.15.0-b1"
+scriptVersion="1.15.0-b2"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -1984,7 +1984,7 @@ welcomeJSON='
     "message" : "'"${welcomeMessage}"'",
     "icon" : "'"${welcomeIcon}"'",
     "infobox" : "Analyzing …",
-    "iconsize" : "198.0",
+    "iconsize" : "198",
     "button1text" : "Continue",
     "button2text" : "Quit",
     "infotext" : "'"${scriptVersion}"'",
@@ -2864,7 +2864,7 @@ elif [[ "${welcomeDialog}" == "messageOnly" ]]; then
         "message" : "'"${welcomeMessage}"'",
         "icon" : "'"${welcomeIcon}"'",
         "infobox" : "",
-        "iconsize" : "198.0",
+        "iconsize" : "198",
         "button1text" : "Continue",
         "timer" : "60",
         "infotext" : "'"${scriptVersion}"'",
