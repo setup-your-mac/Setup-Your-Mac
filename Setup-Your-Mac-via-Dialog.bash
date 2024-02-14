@@ -593,8 +593,11 @@ else
 fi
 
 
-if [[ "${brandingBannerDisplayText}" == "true" ]]; then welcomeBannerText="Happy $( date +'%A' ), ${loggedInUserFirstname}!  \nWelcome to your new ${modelName}";
-else welcomeBannerText=""; fi
+if [[ "${brandingBannerDisplayText}" == "true" ]]; then
+    welcomeBannerText="Happy $( date +'%A' ), ${loggedInUserFirstname}!  \nWelcome to your new ${modelName}"
+else
+    welcomeBannerText=" "
+fi
 welcomeCaption="Please review the above video, then click Continue."
 welcomeVideoID="vimeoid=909473114"
 
@@ -809,7 +812,7 @@ message="Please wait while the following apps are installed …"
 if [[ "${brandingBannerDisplayText}" == "true" ]] ; then
     bannerText="Setting up ${loggedInUserFirstname}‘s ${modelName}";
 else
-    bannerText=""
+    bannerText=" "
 fi
 
 if [ -n "$supportTeamName" ]; then
