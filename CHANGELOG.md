@@ -1,5 +1,10 @@
 # CHANGELOG
 
+## 1.14.2
+### 15-Feb-2024
+- Addresses [Issue 139](https://github.com/setup-your-mac/Setup-Your-Mac/issues/139) `brandingBannerDisplayText=false` not working (thanks for the report, @seaneldridge7!)
+  Thanks for the fix, @drtaru! [Pull Request No. 140](https://github.com/setup-your-mac/Setup-Your-Mac/pull/140)
+
 ## 1.14.1
 ### 11-Feb-2024
 - Addressed an issue where icons were not displaying (thanks, @bartreardon!)
