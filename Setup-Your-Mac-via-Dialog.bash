@@ -26,6 +26,10 @@
 #   Version 1.14.1, 11-Feb-2024
 #   - Addressed an issue where icons were not displaying (thanks, @bartreardon!)
 #
+#   Version 1.14.2, 15-Feb-2024
+#   - Addresses [Issue 139](https://github.com/setup-your-mac/Setup-Your-Mac/issues/139) `brandingBannerDisplayText=false` not working (thanks for the report, @seaneldridge7!)
+#     Thanks for the fix, @drtaru! [Pull Request No. 140](https://github.com/setup-your-mac/Setup-Your-Mac/pull/140)
+#
 ####################################################################################################
 
 
@@ -40,7 +44,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.14.1"
+scriptVersion="1.14.2"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -593,8 +597,11 @@ else
 fi
 
 
-if [[ "${brandingBannerDisplayText}" == "true" ]]; then welcomeBannerText="Happy $( date +'%A' ), ${loggedInUserFirstname}!  \nWelcome to your new ${modelName}";
-else welcomeBannerText=""; fi
+if [[ "${brandingBannerDisplayText}" == "true" ]]; then
+    welcomeBannerText="Happy $( date +'%A' ), ${loggedInUserFirstname}!  \nWelcome to your new ${modelName}"
+else
+    welcomeBannerText=" "
+fi
 welcomeCaption="Please review the above video, then click Continue."
 welcomeVideoID="vimeoid=909473114"
 
@@ -809,7 +816,7 @@ message="Please wait while the following apps are installed …"
 if [[ "${brandingBannerDisplayText}" == "true" ]] ; then
     bannerText="Setting up ${loggedInUserFirstname}‘s ${modelName}";
 else
-    bannerText=""
+    bannerText=" "
 fi
 
 if [ -n "$supportTeamName" ]; then
