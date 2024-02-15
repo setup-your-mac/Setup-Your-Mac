@@ -17,6 +17,8 @@
 
 The response to Setup Your Mac has been both humbling and amazing; my personal thanks to MacAdmins worldwide and the ever-growing number of contributors:
 - robjschroeder for [Pull Request No. 137](https://github.com/setup-your-mac/Setup-Your-Mac/pull/137)
+- drtaru for [Pull Request No. 140](https://github.com/setup-your-mac/Setup-Your-Mac/pull/140)
+- seaneldridge7 for [Issue No. 139](https://github.com/setup-your-mac/Setup-Your-Mac/issues/139)
 - bartreardon for helping to resolve an issue when icons were not displaying as expected
 - Honestpuck for [Issue No. 134](https://github.com/setup-your-mac/Setup-Your-Mac/issues/134)
 - robjschroeder for [Pull Request No. 128](https://github.com/setup-your-mac/Setup-Your-Mac/pull/128)

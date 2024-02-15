@@ -1,8 +1,13 @@
 # CHANGELOG
 
 ## 1.15.0
-### 12-Feb-2024
+### 15-Feb-2024
 - Added logging functions [Pull Request No. 137](https://github.com/setup-your-mac/Setup-Your-Mac/pull/137); thanks, @robjschroeder!
+
+## 1.14.2
+### 15-Feb-2024
+- Addresses [Issue 139](https://github.com/setup-your-mac/Setup-Your-Mac/issues/139) `brandingBannerDisplayText=false` not working (thanks for the report, @seaneldridge7!)
+  Thanks for the fix, @drtaru! [Pull Request No. 140](https://github.com/setup-your-mac/Setup-Your-Mac/pull/140)
 
 ## 1.14.1
 ### 11-Feb-2024

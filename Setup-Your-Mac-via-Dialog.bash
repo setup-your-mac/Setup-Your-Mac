@@ -10,7 +10,7 @@
 #
 # HISTORY
 #
-#   Version 1.15.0, 12-Feb-2024
+#   Version 1.15.0, 15-Feb-2024
 #   - Added logging functions
 #
 ####################################################################################################
@@ -27,7 +27,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.15.0-b2"
+scriptVersion="1.15.0-b3"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -45,10 +45,10 @@ swiftDialogMinimumRequiredVersion="2.4.0.4750"                                  
 # Various Feature Variables
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-humanReadableScriptName="Setup Your Mac" # Script Human-readable Name
-organizationScriptName="sym"   # Organization's Script Name
-debugModeSleepAmount="3"    # Delay for various actions when running in Debug Mode
-failureDialog="true"        # Display the so-called "Failure" dialog (after the main SYM dialog) [ true | false ]
+humanReadableScriptName="Setup Your Mac"    # Script Human-readable Name
+organizationScriptName="sym"                # Organization's Script Name
+debugModeSleepAmount="3"                    # Delay for various actions when running in Debug Mode
+failureDialog="true"                        # Display the so-called "Failure" dialog (after the main SYM dialog) [ true | false ]
 
 
 
@@ -1803,9 +1803,11 @@ else
     welcomeMessage=${welcomeMessage//", select your preferred **Configuration**"/}
 fi
 
-
-if [[ "${brandingBannerDisplayText}" == "true" ]]; then welcomeBannerText="Happy $( date +'%A' ), ${loggedInUserFirstname}!  \nWelcome to your new ${modelName}";
-else welcomeBannerText=""; fi
+if [[ "${brandingBannerDisplayText}" == "true" ]]; then
+    welcomeBannerText="Happy $( date +'%A' ), ${loggedInUserFirstname}!  \nWelcome to your new ${modelName}"
+else
+    welcomeBannerText=" "
+fi
 welcomeCaption="Please review the above video, then click Continue."
 welcomeVideoID="vimeoid=909473114"
 
@@ -2020,7 +2022,7 @@ message="Please wait while the following apps are installed …"
 if [[ "${brandingBannerDisplayText}" == "true" ]] ; then
     bannerText="Setting up ${loggedInUserFirstname}‘s ${modelName}";
 else
-    bannerText=""
+    bannerText=" "
 fi
 
 if [ -n "$supportTeamName" ]; then
