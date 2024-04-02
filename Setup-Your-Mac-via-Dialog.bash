@@ -106,6 +106,9 @@ departmentList=$( echo "${departmentListRaw}" | tr ',' '\n' | sort -f | uniq | s
 # An unsorted, comma-separated list of departments (with possible duplication). If empty and promptForPosition is "true" a user-input box will be shown instead of a dropdown
 positionListRaw="Developer,Management,Sales,Marketing"
 
+# Email ending variable
+emailEnding="@company.com"
+
 # A sorted, unique, JSON-compatible list of positions
 positionList=$( echo "${positionListRaw}" | tr ',' '\n' | sort -f | uniq | sed -e 's/^/\"/' -e 's/$/\",/' -e '$ s/.$//' )
 
@@ -686,15 +689,18 @@ if [ "$prefillUsername" == "true" ]; then usernamePrefil=',"value" : "'${loggedI
 if [ "$prefillRealname" == "true" ]; then realnamePrefil=',"value" : "'${loggedInUserFullname}'"'; fi
 if [ "$promptForUsername" == "true" ]; then usernameJSON='{ "title" : "User Name","required" : false,"prompt" : "User Name"'${usernamePrefil}'},'; fi
 if [ "$promptForRealName" == "true" ]; then realNameJSON='{ "title" : "Full Name","required" : false,"prompt" : "Full Name"'${realnamePrefil}'},'; fi
+if [ "$prefillEmail" == "true" ]; then emailPrefil=',"value" : "'${loggedInUser}${emailEnding}'"'; fi
+
 if [ "$promptForEmail" == "true" ]; then
     emailJSON='{   "title" : "E-mail",
         "required" : true,
-        "prompt" : "E-mail Address",
+        "prompt" : "E-mail Address"'${emailPrefil}',
         "regex" : "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$",
         "regexerror" : "Please enter a valid email address."
     },'
 fi
-if [ "$promptForComputerName" == "true" ]; then compNameJSON='{ "title" : "Computer Name","required" : false,"prompt" : "Computer Name" },'; fi
+if [ "$prefillComputerName" == "true" ]; then computerNamePrefill=',"value" : "'${serialNumber}'"'; fi
+if [ "$promptForComputerName" == "true" ]; then compNameJSON='{ "title" : "Computer Name","required" : false,"prompt" : "Computer Name"'${computerNamePrefill}'},'; fi
 if [ "$promptForAssetTag" == "true" ]; then
     assetTagJSON='{   "title" : "Asset Tag",
         "required" : true,
