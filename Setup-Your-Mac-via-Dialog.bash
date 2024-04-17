@@ -10,8 +10,10 @@
 #
 # HISTORY
 #
-#   Version 1.15.0, 04-Mar-2024
+#   Version 1.15.0, 17-Mar-2024
 #   - Added logging functions
+#   - Modified Microsoft Teams Message `activitySubtitle`
+#   - Activated main "Setup Your Mac" dialog with each `listitem` 
 #
 ####################################################################################################
 
@@ -27,7 +29,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.15.0-b4"
+scriptVersion="1.15.0-b5"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -37,7 +39,7 @@ requiredMinimumBuild="${8:-"disabled"}"                                         
 outdatedOsAction="${9:-"/System/Library/CoreServices/Software Update.app"}"     # Parameter 9: Outdated OS Action [ /System/Library/CoreServices/Software Update.app (default) | jamfselfservice://content?entity=policy&id=117&action=view ] (i.e., Jamf Pro Self Service policy ID for operating system ugprades)
 webhookURL="${10:-""}"                                                          # Parameter 10: Microsoft Teams or Slack Webhook URL [ Leave blank to disable (default) | https://microsoftTeams.webhook.com/URL | https://hooks.slack.com/services/URL ] Can be used to send a success or failure message to Microsoft Teams or Slack via Webhook. (Function will automatically detect if Webhook URL is for Slack or Teams; can be modified to include other communication tools that support functionality.)
 presetConfiguration="${11:-""}"                                                 # Parameter 11: Specify a Configuration (i.e., `policyJSON`; NOTE: If set, `promptForConfiguration` will be automatically suppressed and the preselected configuration will be used instead)
-swiftDialogMinimumRequiredVersion="2.4.0.4750"                                  # This will be set and updated as dependancies on newer features change.
+swiftDialogMinimumRequiredVersion="2.4.2.4755"                                  # This will be set and updated as dependancies on newer features change.
 
 
 
@@ -1142,8 +1144,9 @@ function webHookMessage() {
 
     jamfProURL=$(/usr/bin/defaults read /Library/Preferences/com.jamfsoftware.jamf.plist jss_url)
 
-    # # Jamf Pro URL for on-prem, multi-node, clustered environments
+    # Jamf Pro URL for on-prem, multi-node, clustered environments
     # case ${jamfProURL} in
+    #     *"dev"*    ) jamfProURL="https://jamfpro-dev.internal.company.com/" ;;
     #     *"beta"*    ) jamfProURL="https://jamfpro-beta.internal.company.com/" ;;
     #     *           ) jamfProURL="https://jamfpro-prod.internal.company.com/" ;;
     # esac
@@ -1247,12 +1250,9 @@ EOF
     "summary": "New Mac Enrollment: '${webhookStatus}'",
     "sections": [{
         "activityTitle": "New Mac Enrollment: ${webhookStatus}",
-        "activitySubtitle": "${jamfProURL}",
+        "activitySubtitle": "${serialNumber}",
         "activityImage": "${activityImage}",
         "facts": [{
-            "name": "Mac Serial",
-            "value": "${serialNumber}"
-        }, {
             "name": "Computer Name",
             "value": "$( scutil --get ComputerName )"
         }, {
@@ -3360,6 +3360,7 @@ for (( i=0; i<dialog_step_length; i++ )); do
     # If there's a value in the variable, update running swiftDialog
     if [[ -n "$listitem" ]]; then
         updateSetupYourMacDialog "\n\n# # #\n# policyJSON > listitem: ${listitem}\n# # #\n"
+        dialogUpdateSetupYourMac "activate:"
         dialogUpdateSetupYourMac "listitem: index: $i, status: wait, statustext: Installing …, "
     fi
     if [[ -n "$icon" ]]; then dialogUpdateSetupYourMac "icon: ${icon}"; fi

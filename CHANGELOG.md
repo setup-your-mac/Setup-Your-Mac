@@ -1,8 +1,10 @@
 # CHANGELOG
 
 ## 1.15.0
-### 15-Feb-2024
+### 17-Apr-2024
 - Added logging functions [Pull Request No. 137](https://github.com/setup-your-mac/Setup-Your-Mac/pull/137); thanks, @robjschroeder!
+- Modified Microsoft Teams Message `activitySubtitle`
+- Activated main "Setup Your Mac" dialog with each `listitem`
 
 ## 1.14.2
 ### 15-Feb-2024

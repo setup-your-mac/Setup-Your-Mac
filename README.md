@@ -7,7 +7,7 @@
 
 > Optimized to leverage SYM-Helper (1.1.1), Setup Your Mac (1.15.0) leverages new features of swiftDialog (2.4.2)
 
-[<img alt="Setup Your Mac (1.14.0)" src="images/SYM-Helper_1.1.1_SYM-1.14.0_Hero.png" />](https://snelson.us/sym)
+[<img alt="Setup Your Mac (1.15.0)" src="images/SYM-Helper_1.1.1_SYM-1.14.0_Hero.png" />](https://snelson.us/sym)
 
 
 ## Introduction
