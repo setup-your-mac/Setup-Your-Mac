@@ -106,10 +106,13 @@ brandingIconDark="https://cdn-icons-png.flaticon.com/512/740/740878.png"
 supportTeamName="Support Team Name"
 supportTeamPhone="+1 (801) 555-1212"
 supportTeamEmail="support@domain.com"
+supportTeamChat="chat.support.domain.com"
+supportTeamChatHyperlink="[${supportTeamChat}](https://${supportTeamChat})"
 supportTeamWebsite="support.domain.com"
 supportTeamHyperlink="[${supportTeamWebsite}](https://${supportTeamWebsite})"
 supportKB="KB8675309"
 supportTeamErrorKB="[${supportKB}](https://servicenow.company.com/support?id=kb_article_view&sysparm_article=${supportKB}#Failures)"
+supportTeamHours="Monday - Friday 8:00am-5:00pm"
 
 # Disable the "Continue" button in the User Input "Welcome" dialog until Dynamic Download Estimates have complete [ true | false ] (thanks, @Eltord!)
 lockContinueBeforeEstimations="false"
@@ -350,7 +353,11 @@ function finalise(){
                 fi
 
                 if [[ -n "${supportTeamEmail}" ]]; then
-                    supportContactMessage+="- **Email:** $supportTeamEmail\n"
+                    supportContactMessage+="- **Email:** ${supportTeamEmail}\n"
+                fi
+                
+                if [[ -n "${supportTeamChat}" ]]; then
+                    supportContactMessage+="- **Online Chat:** ${supportTeamChatHyperlink}\n"
                 fi
 
                 if [[ -n "${supportTeamWebsite}" ]]; then
@@ -358,7 +365,11 @@ function finalise(){
                 fi
 
                 if [[ -n "${supportKB}" ]]; then
-                    supportContactMessage+="- **Knowledge Base Article:** $supportTeamErrorKB\n"
+                    supportContactMessage+="- **Knowledge Base Article:** ${supportTeamErrorKB}\n"
+                fi
+                
+                if [[ -n "${supportTeamHours}" ]]; then
+                    supportContactMessage+="- **Support Hours:** ${supportTeamHours}\n"
                 fi
             
             fi
@@ -1702,7 +1713,7 @@ if [[ -z $supportTeamName ]]; then
     exit 1
 fi
 
-if [[ -z $supportTeamPhone && -z $supportTeamEmail && -z $supportKB ]]; then
+if [[ -z $supportTeamPhone && -z $supportTeamEmail && -z $supportTeamChat && -z $supportKB ]]; then
     preFlight "At least ONE 'supportTeam' variable must be populated to proceed; exiting"
     exit 1
 fi
@@ -1784,6 +1795,10 @@ if [[ -n "${supportTeamName}" ]]; then
     if [[ -n "${supportTeamEmail}" ]]; then
         welcomeMessage+="- **Email**: ${supportTeamEmail}\n"
     fi
+    
+    if [[ -n "${supportTeamChat}" ]]; then
+        welcomeMessage+="- **Online Chat:** ${supportTeamChatHyperlink}\n"
+    fi
 
     if [[ -n "${supportTeamWebsite}" ]]; then
         welcomeMessage+="- **Web**: ${supportTeamHyperlink}\n"
@@ -1793,6 +1808,10 @@ if [[ -n "${supportTeamName}" ]]; then
         welcomeMessage+="- **Knowledge Base Article:** ${supportTeamErrorKB}\n"
     fi
 
+    if [[ -n "${supportTeamHours}" ]]; then
+        welcomeMessage+="- **Support Hours:** ${supportTeamHours}\n"
+    fi
+    
 fi
 
 welcomeMessage+="\n\n---"
@@ -2029,20 +2048,28 @@ if [ -n "$supportTeamName" ]; then
   helpmessage+="If you need assistance, please contact:  \n\n**${supportTeamName}**  \n"
 fi
 
-if [ -n "$supportTeamPhone" ]; then
+if [ -n "${supportTeamPhone}" ]; then
   helpmessage+="- **Telephone:** ${supportTeamPhone}  \n"
 fi
 
-if [ -n "$supportTeamEmail" ]; then
+if [ -n "${supportTeamEmail}" ]; then
   helpmessage+="- **Email:** ${supportTeamEmail}  \n"
 fi
-
-if [ -n "$supportTeamWebsite" ]; then
-    helpmessage+="- **Web**: ${supportTeamHyperlink}  \n"
+    
+if [ -n "${supportTeamChat}" ]; then
+  helpmessage+="- **Online Chat:** ${supportTeamChatHyperlink}  \n"
 fi
 
-if [ -n "$supportKB" ]; then
+if [ -n "${supportTeamWebsite}" ]; then
+  helpmessage+="- **Web**: ${supportTeamHyperlink}  \n"
+fi
+        
+if [ -n "${supportKB}" ]; then
   helpmessage+="- **Knowledge Base Article:** ${supportTeamErrorKB}  \n"
+fi
+            
+if [ -n "${supportTeamHours}" ]; then
+  helpmessage+="- **Support Hours:** ${supportTeamHours}  \n"
 fi
 
 helpmessage+="\n**Computer Information:**  \n"
@@ -3312,6 +3339,10 @@ if [[ "${symConfiguration}" != *"Catch-all"* ]]; then
             if [[ -n "${supportTeamEmail}" ]]; then
                 helpmessage+="- **Email:** ${supportTeamEmail}  \n"
             fi
+    
+            if [[ -n "${supportTeamChat}" ]]; then
+                helpmessage+="- **Online Chat:** ${supportTeamChatHyperlink}  \n"
+            fi
 
             if [[ -n "${supportTeamWebsite}" ]]; then
                 helpmessage+="- **Web**: ${supportTeamHyperlink}  \n"
@@ -3319,6 +3350,10 @@ if [[ "${symConfiguration}" != *"Catch-all"* ]]; then
         
             if [[ -n "${supportKB}" ]]; then
                 helpmessage+="- **Knowledge Base Article:** ${supportTeamErrorKB}  \n"
+            fi
+            
+            if [[ -n "${supportTeamHours}" ]]; then
+                helpmessage+="- **Support Hours:** ${supportTeamHours}  \n"
             fi
 
         fi
