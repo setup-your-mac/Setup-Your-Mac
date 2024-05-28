@@ -16,6 +16,7 @@
 ### Humbled & Amazed
 
 The response to Setup Your Mac has been both humbling and amazing; my personal thanks to MacAdmins worldwide and the ever-growing number of contributors:
+- jcmbowman for suggesting a fix to arnoldtaw's [Issue No. 149](https://github.com/setup-your-mac/Setup-Your-Mac/issues/149)
 - robjschroeder for [Pull Request No. 137](https://github.com/setup-your-mac/Setup-Your-Mac/pull/137)
 - Mazi for helping to identify a logging typo in "Log Out Attended" completionActionOption
 - drtaru for [Pull Request No. 140](https://github.com/setup-your-mac/Setup-Your-Mac/pull/140)

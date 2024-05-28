@@ -1,10 +1,13 @@
 # CHANGELOG
 
 ## 1.15.0
-### 17-Apr-2024
+### 28-May-2024
 - Added logging functions [Pull Request No. 137](https://github.com/setup-your-mac/Setup-Your-Mac/pull/137); thanks, @robjschroeder!
 - Modified Microsoft Teams Message `activitySubtitle`
 - Activated main "Setup Your Mac" dialog with each `listitem`
+- Added swiftDialog `2.5.0` `--verbose` flag to `verbose` debugMode
+- Failure Message: Increased `sleep` value from `0.3` to `0.7` (thanks, for the report, @arnoldtaw; thanks for the code suggestion, @jcmbowman)
+- Miscellaneous formatting and clean-up
 
 ## 1.14.2
 ### 15-Feb-2024

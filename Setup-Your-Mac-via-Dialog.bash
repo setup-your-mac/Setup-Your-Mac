@@ -1,5 +1,5 @@
 #!/bin/bash
-# shellcheck disable=SC2001,SC1111,SC1112,SC2143,SC2145,SC2086,SC2089,SC2090
+# shellcheck disable=SC2001,SC1111,SC1112,SC2143,SC2145,SC2086,SC2089,SC2090,SC2269
 
 ####################################################################################################
 #
@@ -10,10 +10,13 @@
 #
 # HISTORY
 #
-#   Version 1.15.0, 17-Mar-2024
+#   Version 1.15.0, 28-May-2024
 #   - Added logging functions
 #   - Modified Microsoft Teams Message `activitySubtitle`
-#   - Activated main "Setup Your Mac" dialog with each `listitem` 
+#   - Activated main "Setup Your Mac" dialog with each `listitem`
+#   - Added swiftDialog `2.5.0` `--verbose` flag to `verbose` debugMode
+#   - Failure Message: Increased `sleep` value from `0.3` to `0.7` (thanks, for the report, @arnoldtaw; thanks for the code suggestion, @jcmbowman)
+#   - Miscellaneous formatting and clean-up
 #
 ####################################################################################################
 
@@ -29,17 +32,17 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.15.0-b5"
+scriptVersion="1.15.0-b6"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
 welcomeDialog="${6:-"userInput"}"                                               # Parameter 6: Welcome dialog [ userInput (default) | video | messageOnly | false ]
 completionActionOption="${7:-"Restart Attended"}"                               # Parameter 7: Completion Action [ wait | sleep (with seconds) | Shut Down | Shut Down Attended | Shut Down Confirm | Restart | Restart Attended (default) | Restart Confirm | Log Out | Log Out Attended | Log Out Confirm ]
-requiredMinimumBuild="${8:-"disabled"}"                                         # Parameter 8: Required Minimum Build [ disabled (default) | 22E ] (i.e., Your organization's required minimum build of macOS to allow users to proceed; use "22E" for macOS 13.3)
+requiredMinimumBuild="${8:-"disabled"}"                                         # Parameter 8: Required Minimum Build [ disabled (default) | 23F ] (i.e., Your organization's required minimum build of macOS to allow users to proceed; use "23F" for macOS 14.5)
 outdatedOsAction="${9:-"/System/Library/CoreServices/Software Update.app"}"     # Parameter 9: Outdated OS Action [ /System/Library/CoreServices/Software Update.app (default) | jamfselfservice://content?entity=policy&id=117&action=view ] (i.e., Jamf Pro Self Service policy ID for operating system ugprades)
 webhookURL="${10:-""}"                                                          # Parameter 10: Microsoft Teams or Slack Webhook URL [ Leave blank to disable (default) | https://microsoftTeams.webhook.com/URL | https://hooks.slack.com/services/URL ] Can be used to send a success or failure message to Microsoft Teams or Slack via Webhook. (Function will automatically detect if Webhook URL is for Slack or Teams; can be modified to include other communication tools that support functionality.)
 presetConfiguration="${11:-""}"                                                 # Parameter 11: Specify a Configuration (i.e., `policyJSON`; NOTE: If set, `promptForConfiguration` will be automatically suppressed and the preselected configuration will be used instead)
-swiftDialogMinimumRequiredVersion="2.4.2.4755"                                  # This will be set and updated as dependancies on newer features change.
+swiftDialogMinimumRequiredVersion="2.5.0.4760"                                  # This will be set and updated as dependancies on newer features change.
 
 
 
@@ -156,6 +159,8 @@ configurationThreeDescription="Recommended apps, Adobe Acrobat Reader and Google
 configurationThreeSize="106"                # Configuration Three in Gibibits (i.e., Total File Size in Gigabytes * 7.451) 
 configurationThreeInstallBuffer="0"         # Buffer time added to estimates to include installation time of packages, in seconds. Set to 0 to disable. 
 
+
+
 ####################################################################################################
 #
 # Functions
@@ -262,7 +267,6 @@ function calculateFreeDiskSpace() {
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 function dialogUpdateWelcome(){
-    # welcomeDialog "$1"
     echo "$1" >> "$welcomeCommandFile"
 }
 
@@ -333,7 +337,7 @@ function finalise(){
             wait
 
             dialogUpdateSetupYourMac "quit:"
-            eval "${dialogFailureCMD}" & sleep 0.3
+            eval "${dialogFailureCMD}" & sleep 0.7
 
             updateFailureDialog "\n\n# # #\n# FAILURE DIALOG\n# # #\n"
             updateFailureDialog "Jamf Pro Policy Name Failures:"
@@ -424,11 +428,9 @@ function finalise(){
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 function get_json_value() {
-    # set -x
     JSON="$1" osascript -l 'JavaScript' \
         -e 'const env = $.NSProcessInfo.processInfo.environment.objectForKey("JSON").js' \
         -e "JSON.parse(env).$2"
-    # set +x
 }
 
 
@@ -438,12 +440,10 @@ function get_json_value() {
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 function get_json_value_welcomeDialog() {
-    # set -x
     for var in "${@:2}"; do jsonkey="${jsonkey}['${var}']"; done
     JSON="$1" osascript -l 'JavaScript' \
         -e 'const env = $.NSProcessInfo.processInfo.environment.objectForKey("JSON").js' \
         -e "JSON.parse(env)$jsonkey"
-    # set +x
 }
 
 
@@ -1747,11 +1747,22 @@ esac
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Set JAMF binary, Dialog path and Command Files
+# Dialog binary (and enable swiftDialog's `--verbose` mode with SYM's debugMode)
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+dialogBinary="/usr/local/bin/dialog"
+case ${debugMode} in
+    "true"      ) dialogBinary="${dialogBinary}" ;;
+    "verbose"   ) dialogBinary="${dialogBinary} --verbose" ;;
+esac
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Set JAMF binary, Dialog Command Files
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 jamfBinary="/usr/local/bin/jamf"
-dialogBinary="/usr/local/bin/dialog"
 welcomeJSONFile=$( mktemp -u /var/tmp/welcomeJSONFile.XXX )
 welcomeCommandFile=$( mktemp -u /var/tmp/dialogCommandFileWelcome.XXX )
 setupYourMacCommandFile=$( mktemp -u /var/tmp/dialogCommandFileSetupYourMac.XXX )
