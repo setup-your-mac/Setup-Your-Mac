@@ -17,6 +17,7 @@
 #   - Added swiftDialog `2.5.0` `--verbose` flag to `verbose` debugMode
 #   - Failure Message: Increased `sleep` value from `0.3` to `0.7` (thanks, for the report, @arnoldtaw; thanks for the code suggestion, @jcmbowman)
 #   - Miscellaneous formatting and clean-up
+#   - Add Support Team fields (thanks, @HowardGMac!)
 #
 ####################################################################################################
 
@@ -32,7 +33,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.15.0-b6"
+scriptVersion="1.15.0-b7"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -115,7 +116,7 @@ supportTeamWebsite="support.domain.com"
 supportTeamHyperlink="[${supportTeamWebsite}](https://${supportTeamWebsite})"
 supportKB="KB8675309"
 supportTeamErrorKB="[${supportKB}](https://servicenow.company.com/support?id=kb_article_view&sysparm_article=${supportKB}#Failures)"
-supportTeamHours="Monday - Friday 8:00am-5:00pm"
+supportTeamHours="Monday through Friday, 8 a.m. to 5 p.m."
 
 # Disable the "Continue" button in the User Input "Welcome" dialog until Dynamic Download Estimates have complete [ true | false ] (thanks, @Eltord!)
 lockContinueBeforeEstimations="false"
@@ -179,48 +180,52 @@ function updateScriptLog() {
 }
 
 function preFlight() {
-    updateScriptLog "[PRE-FLIGHT]      ${1}"
+    updateScriptLog "[PRE-FLIGHT]                ${1}"
+}
+
+function logComment() {
+    updateScriptLog "                            ${1}"
 }
 
 function welcomeDialog() {
-    updateScriptLog "[WELCOME DIALOG]    ${1}"
+    updateScriptLog "[WELCOME DIALOG]            ${1}"
 }
 
 function error() {
-    updateScriptLog "[ERROR]    ${1}"
+    updateScriptLog "[ERROR]                     ${1}"
 }
 
 function fatal() {
-    updateScriptLog "[FATAL ERROR]     ${1}"
+    updateScriptLog "[FATAL ERROR]               ${1}"
     exit 1
 }
 
 function info() {
-    updateScriptLog "[INFO]            ${1}"
+    updateScriptLog "[INFO]                      ${1}"
 }
 
 function updateSetupYourMacDialog() {
-    updateScriptLog "[SETUP YOUR MAC DIALOG]    ${1}"
+    updateScriptLog "[SETUP YOUR MAC DIALOG]     ${1}"
 }
 
 function updateFailureDialog() {
-    updateScriptLog "[FAILURE DIALOG]    ${1}"
+    updateScriptLog "[FAILURE DIALOG]            ${1}"
 }
 
 function updateSuccessDialog() {
-    updateScriptLog "[SUCCESS]  ${1}"
+    updateScriptLog "[SUCCESS]                   ${1}"
 }
 
 function finaliseUserExperience() {
-    updateScriptLog "[FINALISE USER EXPERIENCE] ${1}"
+    updateScriptLog "[FINALISE USER EXPERIENCE]  ${1}"
 }
 
 function completionActionOut() {
-    updateScriptLog "[COMPLETION ACTION]    ${1}"
+    updateScriptLog "[COMPLETION ACTION]         ${1}"
 }
 
 function quitOut() {
-    updateScriptLog "[QUIT SCRIPT]  ${1}"
+    updateScriptLog "[QUIT SCRIPT]               ${1}"
 }
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
@@ -2959,11 +2964,13 @@ elif [[ "${welcomeDialog}" == "userInput" ]]; then
         # If option to lock the continue button is set to true, open welcome dialog with button 1 disabled
         if [[ "${lockContinueBeforeEstimations}" == "true" ]]; then
             
+            outputLineNumberInVerboseDebugMode
             welcomeDialog "Display 'Welcome' dialog with disabled Continue Button …"
             welcomeResults=$( eval "${dialogBinary} --jsonfile ${welcomeJSONFile} --json --button1disabled" )
             
         else
 
+            outputLineNumberInVerboseDebugMode
             welcomeDialog "Display 'Welcome' dialog …"
             welcomeResults=$( eval "${dialogBinary} --jsonfile ${welcomeJSONFile} --json" )
 
@@ -2972,6 +2979,7 @@ elif [[ "${welcomeDialog}" == "userInput" ]]; then
     else
 
         # Display Welcome dialog, sans estimation of Configuration download times
+        outputLineNumberInVerboseDebugMode
         welcomeDialog "Skipping estimation of Configuration download times"
         
         # Write Welcome JSON to disk
@@ -2982,6 +2990,8 @@ elif [[ "${welcomeDialog}" == "userInput" ]]; then
     fi
 
     # Evaluate User Input
+    outputLineNumberInVerboseDebugMode
+    logComment "welcomeResults: ${welcomeResults}"
     if [[ -z "${welcomeResults}" ]]; then
         welcomeReturnCode="2"
     else

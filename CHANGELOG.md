@@ -8,6 +8,7 @@
 - Added swiftDialog `2.5.0` `--verbose` flag to `verbose` debugMode
 - Failure Message: Increased `sleep` value from `0.3` to `0.7` (thanks, for the report, @arnoldtaw; thanks for the code suggestion, @jcmbowman)
 - Miscellaneous formatting and clean-up
+- Add Support Team fields (thanks, @HowardGMac!)
 
 ## 1.14.2
 ### 15-Feb-2024
