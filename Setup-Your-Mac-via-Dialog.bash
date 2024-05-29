@@ -14,7 +14,7 @@
 #   - Added logging functions
 #   - Modified Microsoft Teams Message `activitySubtitle`
 #   - Activated main "Setup Your Mac" dialog with each `listitem`
-#   - Added swiftDialog `2.5.0`'s `--verbose` and `--debug` flags to debugModes
+#   - Added swiftDialog `2.5.0`'s `--verbose`, `--debug` and `--resizable` flags to debugModes
 #   - Failure Message: Increased `sleep` value from `0.3` to `0.7` (thanks, for the report, @arnoldtaw; thanks for the code suggestion, @jcmbowman)
 #   - Miscellaneous formatting and clean-up
 #   - Added Support Team fields (thanks, @HowardGMac!)
@@ -35,7 +35,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.15.0-b9"
+scriptVersion="1.15.0-b10"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -1771,7 +1771,7 @@ esac
 dialogBinary="/usr/local/bin/dialog"
 case ${debugMode} in
     "true"      ) dialogBinary="${dialogBinary} --verbose" ;;
-    "verbose"   ) dialogBinary="${dialogBinary} --verbose --debug red" ;;
+    "verbose"   ) dialogBinary="${dialogBinary} --verbose --resizable --debug red" ;;
 esac
 
 
