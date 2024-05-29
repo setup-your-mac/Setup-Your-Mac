@@ -20,6 +20,7 @@
 #   - Added Support Team fields (thanks, @HowardGMac!)
 #   - Set `swiftDialogMinimumRequiredVersion` to `2.5.0.4761`
 #   - Improved exit code processing for 'Welcome' dialog
+#   - Added pre-flight check for AC power (thanks for the suggestion, @arnoldtaw!)
 #
 ####################################################################################################
 
@@ -35,7 +36,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.15.0-b10"
+scriptVersion="1.15.0-b11"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -1164,7 +1165,7 @@ function webHookMessage() {
 
     # Jamf Pro URL for on-prem, multi-node, clustered environments
     # case ${jamfProURL} in
-    #     *"dev"*    ) jamfProURL="https://jamfpro-dev.internal.company.com/" ;;
+    #     *"dev"*     ) jamfProURL="https://jamfpro-dev.internal.company.com/" ;;
     #     *"beta"*    ) jamfProURL="https://jamfpro-beta.internal.company.com/" ;;
     #     *           ) jamfProURL="https://jamfpro-prod.internal.company.com/" ;;
     # esac
@@ -1569,6 +1570,27 @@ fi
 symPID="$$"
 preFlight "Caffeinating this script (PID: $symPID)"
 caffeinate -dimsu -w $symPID &
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Pre-flight Check: Ensure computer is connected to AC power (thanks, @grahampugh!)
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+function acPowerCheck() {
+
+    preFlight "Ensure computer is connected to AC power"
+    if /usr/bin/pmset -g ps | /usr/bin/grep "AC Power" > /dev/null ; then
+        preFlight "AC power detected; proceeding …"
+    else
+        preFlight "No AC power detected, exiting"
+        osascript -e 'display dialog "Setup Your Mac requires AC power to be connected before proceeding.\r\rPlease connect AC power and try again.\r\r" with title "Setup Your Mac: No AC power detected" buttons {"OK"} with icon caution'
+        exit 1
+    fi
+
+}
+
+acPowerCheck # Comment-out to disable
 
 
 

@@ -11,6 +11,8 @@
 - Added Support Team fields (thanks, @HowardGMac!)
 - Set `swiftDialogMinimumRequiredVersion` to `2.5.0.4761`
 - Improved exit code processing for 'Welcome' dialog
+- Added pre-flight check for AC power (thanks for the suggestion, @arnoldtaw!)
+
 
 ## 1.14.2
 ### 15-Feb-2024
