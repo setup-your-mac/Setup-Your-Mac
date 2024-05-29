@@ -1,5 +1,8 @@
 # CHANGELOG
 
+## 1.14.3, 29-May-2024
+- Improved exit code processing for 'Welcome' dialog
+
 ## 1.14.2
 ### 15-Feb-2024
 - Addresses [Issue 139](https://github.com/setup-your-mac/Setup-Your-Mac/issues/139) `brandingBannerDisplayText=false` not working (thanks for the report, @seaneldridge7!)

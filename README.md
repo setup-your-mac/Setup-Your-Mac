@@ -1,11 +1,11 @@
 <!-- markdownlint-disable-next-line first-line-heading no-inline-html -->
 [<img align="left" alt="Setup Your Mac (1.14.0)" src="images/SYM_icon.png" width="128" />](https://snelson.us/sym)
  
-# Setup Your Mac (1.14.1) with SYM-Helper (1.1.1) via swiftDialog (2.4.1)
+# Setup Your Mac (1.14.3) with SYM-Helper (1.1.2) via swiftDialog (2.5.0)
 
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/dan-snelson/Setup-Your-Mac?display_name=tag) ![GitHub issues](https://img.shields.io/github/issues-raw/dan-snelson/Setup-Your-Mac) ![GitHub closed issues](https://img.shields.io/github/issues-closed-raw/dan-snelson/Setup-Your-Mac) ![GitHub pull requests](https://img.shields.io/github/issues-pr-raw/dan-snelson/Setup-Your-Mac) ![GitHub closed pull requests](https://img.shields.io/github/issues-pr-closed-raw/dan-snelson/Setup-Your-Mac)
 
-> Optimized to leverage SYM-Helper (1.1.1), Setup Your Mac (1.14.0) leverages new features of swiftDialog (2.4.0)
+> Optimized to leverage SYM-Helper (1.1.2), Setup Your Mac (1.14.3) includes a break-fix for swiftDialog (2.5.0)
 
 [<img alt="Setup Your Mac (1.14.1)" src="images/SYM-Helper_1.1.1_SYM-1.14.0_Hero.png" />](https://snelson.us/sym)
 
