@@ -1,7 +1,7 @@
 # CHANGELOG
 
 ## 1.15.0
-### 28-May-2024
+### 29-May-2024
 - Added logging functions [Pull Request No. 137](https://github.com/setup-your-mac/Setup-Your-Mac/pull/137); thanks, @robjschroeder!
 - Modified Microsoft Teams Message `activitySubtitle`
 - Activated main "Setup Your Mac" dialog with each `listitem`
@@ -10,6 +10,7 @@
 - Miscellaneous formatting and clean-up
 - Added Support Team fields (thanks, @HowardGMac!)
 - Set `swiftDialogMinimumRequiredVersion` to `2.5.0.4761`
+- Improved exit code processing for 'Welcome' dialog
 
 ## 1.14.2
 ### 15-Feb-2024

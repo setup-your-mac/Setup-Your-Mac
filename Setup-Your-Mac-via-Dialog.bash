@@ -19,6 +19,7 @@
 #   - Miscellaneous formatting and clean-up
 #   - Added Support Team fields (thanks, @HowardGMac!)
 #   - Set `swiftDialogMinimumRequiredVersion` to `2.5.0.4761`
+#   - Improved exit code processing for 'Welcome' dialog
 #
 ####################################################################################################
 
@@ -34,7 +35,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.15.0-b8"
+scriptVersion="1.15.0-b9"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -2968,12 +2969,14 @@ elif [[ "${welcomeDialog}" == "userInput" ]]; then
             outputLineNumberInVerboseDebugMode
             welcomeDialog "Display 'Welcome' dialog with disabled Continue Button …"
             welcomeResults=$( eval "${dialogBinary} --jsonfile ${welcomeJSONFile} --json --button1disabled" )
+            welcomeResultsExitCode=$?
             
         else
 
             outputLineNumberInVerboseDebugMode
             welcomeDialog "Display 'Welcome' dialog …"
             welcomeResults=$( eval "${dialogBinary} --jsonfile ${welcomeJSONFile} --json" )
+            welcomeResultsExitCode=$?
 
         fi
 
@@ -2987,19 +2990,15 @@ elif [[ "${welcomeDialog}" == "userInput" ]]; then
         welcomeJSON=${welcomeJSON//Analyzing …/}
         echo "$welcomeJSON" > "$welcomeJSONFile"
         welcomeResults=$( eval "${dialogBinary} --jsonfile ${welcomeJSONFile} --json" )
+        welcomeResultsExitCode=$?
 
     fi
 
     # Evaluate User Input
     outputLineNumberInVerboseDebugMode
-    logComment "welcomeResults: ${welcomeResults}"
-    if [[ -z "${welcomeResults}" ]]; then
-        welcomeReturnCode="2"
-    else
-        welcomeReturnCode="0"
-    fi
+    logComment "welcomeResultsExitCode: ${welcomeResultsExitCode}"
 
-    case "${welcomeReturnCode}" in
+    case "${welcomeResultsExitCode}" in
 
         0)  # Process exit code 0 scenario here
             welcomeDialog "${loggedInUser} entered information and clicked Continue"
