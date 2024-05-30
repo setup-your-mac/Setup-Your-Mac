@@ -10,7 +10,7 @@
 #
 # HISTORY
 #
-#   Version 1.15.0, 29-May-2024
+#   Version 1.15.0, 30-May-2024
 #   - Added logging functions
 #   - Modified Microsoft Teams Message `activitySubtitle`
 #   - Activated main "Setup Your Mac" dialog with each `listitem`
@@ -20,7 +20,7 @@
 #   - Added Support Team fields (thanks, @HowardGMac!)
 #   - Set `swiftDialogMinimumRequiredVersion` to `2.5.0.4762`
 #   - Improved exit code processing for 'Welcome' dialog
-#   - Added pre-flight check for AC power (thanks for the suggestion, @arnoldtaw!)
+#   - Added pre-flight check for AC power (thanks for the suggestion, @arnoldtaw; thanks for the code, Obi-Josh!)
 #   - Added Variables for Prefill Email and Computer Name (thanks, @AndrewMBarnett!)
 #
 ####################################################################################################
@@ -37,7 +37,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.15.0-b15"
+scriptVersion="1.15.0-b16"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -1580,18 +1580,63 @@ caffeinate -dimsu -w $symPID &
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Pre-flight Check: Ensure computer is connected to AC power (thanks, @grahampugh!)
+# Pre-flight Check: Ensure computer is connected to AC power (thanks, Josh!)
+# https://github.com/kc9wwh/macOSUpgrade/blob/master/macOSUpgrade.sh
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 function acPowerCheck() {
 
     preFlight "Ensure computer is connected to AC power"
-    if /usr/bin/pmset -g ps | /usr/bin/grep "AC Power" > /dev/null ; then
-        preFlight "AC power detected; proceeding …"
-    else
+
+    # Amount of time (in seconds) to allow a user to connect to AC power before exiting
+    # If 0, then the user will not have the opportunity to connect to AC power
+    acPowerWaitTimer="300"
+    humanReadablePowerWaitTimer=$(printf '%dh:%dm:%ds\n' $((acPowerWaitTimer/3600)) $((acPowerWaitTimer%3600/60)) $((acPowerWaitTimer%60)))
+
+    function waitForPower() {
+
+        preFlight "Waiting for AC power …"
+
+        while [[ "$acPowerWaitTimer" -gt "0" ]]; do
+            if pmset -g ps | grep "AC Power" > /dev/null ; then
+                preFlight "AC power detected; proceeding …"
+                killProcess "osascript"
+                return
+            fi
+            sleep 1
+            ((acPowerWaitTimer--))
+        done
+        killProcess "osascript"
         preFlight "No AC power detected, exiting"
-        osascript -e 'display dialog "Setup Your Mac requires AC power to be connected before proceeding.\r\rPlease connect AC power and try again.\r\r" with title "Setup Your Mac: No AC power detected" buttons {"OK"} with icon caution'
+        osascript -e 'display dialog "Setup Your Mac requires AC power to be connected before proceeding and waited for '${humanReadablePowerWaitTimer}'.\r\rPlease connect AC power and try again.\r\r" with title "Setup Your Mac: No AC power detected" buttons {"OK"} with icon caution'
         exit 1
+
+    }
+
+
+
+    # Check if computer is on AC power
+    # If not — and the `acPowerWaitTimer` is greater than 1 — allow user to connect to power for the specified time period
+
+    if pmset -g ps | grep "AC Power" > /dev/null ; then
+
+        preFlight "AC power detected; proceeding …"
+
+    else
+
+        if [[ "$acPowerWaitTimer" -gt 0 ]]; then
+
+            osascript -e 'display dialog "Setup Your Mac requires AC power to be connected before proceeding.\r\rPlease connect your computer to power using an AC power adapter.\r\rThis process will wait for '${humanReadablePowerWaitTimer}' for AC power to be connected.\r\r" with title "Setup Your Mac: No AC power detected" buttons {"OK"} with icon caution' &
+            waitForPower
+
+        else
+
+            preFlight "No AC power detected, exiting"
+            osascript -e 'display dialog "Setup Your Mac requires AC power to be connected before proceeding and waited for '${humanReadablePowerWaitTimer}'.\r\rPlease connect AC power and try again.\r\r" with title "Setup Your Mac: No AC power detected" buttons {"OK"} with icon caution'
+            exit 1
+
+        fi
+
     fi
 
 }

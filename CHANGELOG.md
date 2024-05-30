@@ -1,7 +1,7 @@
 # CHANGELOG
 
 ## 1.15.0
-### 29-May-2024
+### 30-May-2024
 - Added logging functions [Pull Request No. 137](https://github.com/setup-your-mac/Setup-Your-Mac/pull/137); thanks, @robjschroeder!
 - Modified Microsoft Teams Message `activitySubtitle`
 - Activated main "Setup Your Mac" dialog with each `listitem`
@@ -11,7 +11,7 @@
 - Added Support Team fields (thanks, @HowardGMac!)
 - Set `swiftDialogMinimumRequiredVersion` to `2.5.0.4761`
 - Improved exit code processing for 'Welcome' dialog
-- Added pre-flight check for AC power (thanks for the suggestion, @arnoldtaw!)
+- Added pre-flight check for AC power (thanks for the suggestion, @arnoldtaw; thanks for the code, Obi-Josh!)
 - Added Variables for Prefill Email and Computer Name (thanks, @AndrewMBarnett!)
 
 ## 1.14.2
