@@ -10,7 +10,7 @@
 #
 # HISTORY
 #
-#   Version 1.15.0, 30-May-2024
+#   Version 1.15.0, 07-Jun-2024
 #   - Added logging functions
 #   - Modified Microsoft Teams Message `activitySubtitle`
 #   - Activated main "Setup Your Mac" dialog with each `listitem`
@@ -22,6 +22,7 @@
 #   - Improved exit code processing for 'Welcome' dialog
 #   - Added pre-flight check for AC power (thanks for the suggestion, @arnoldtaw; thanks for the code, Obi-Josh!)
 #   - Added Variables for Prefill Email and Computer Name (thanks, @AndrewMBarnett!)
+#   - Improved Remote Validation error-checking
 #
 ####################################################################################################
 
@@ -37,7 +38,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.15.0-b16"
+scriptVersion="1.15.0-b17"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -782,12 +783,17 @@ function validatePolicyResult() {
                 updateSetupYourMacDialog "Remotely Validate '${trigger}' '${validation}'"
                 dialogUpdateSetupYourMac "listitem: index: $i, status: wait, statustext: Checking …"
                 result=$( "${jamfBinary}" policy -event "${trigger}" | grep "Script result:" )
-                if [[ "${result}" == *"Running"* ]]; then
+                if [[ "${result}" == *"Failed"* ]]; then
+                    dialogUpdateSetupYourMac "listitem: index: $i, status: fail, statustext: Failed"
+                    jamfProPolicyTriggerFailure="failed"
+                    exitCode="1"
+                    jamfProPolicyNameFailures+="• $listitem  \n"
+                elif [[ "${result}" == *"Running"* ]]; then
                     dialogUpdateSetupYourMac "listitem: index: $i, status: success, statustext: Running"
                 elif [[ "${result}" == *"Installed"* || "${result}" == *"Success"*  ]]; then
                     dialogUpdateSetupYourMac "listitem: index: $i, status: success, statustext: Installed"
                 else
-                    dialogUpdateSetupYourMac "listitem: index: $i, status: fail, statustext: Failed"
+                    dialogUpdateSetupYourMac "listitem: index: $i, status: fail, statustext: Unknown"
                     jamfProPolicyTriggerFailure="failed"
                     exitCode="1"
                     jamfProPolicyNameFailures+="• $listitem  \n"
