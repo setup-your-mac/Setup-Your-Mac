@@ -2917,7 +2917,7 @@ elif [[ "${welcomeDialog}" == "userInput" ]]; then
 
     # Evaluate User Input
     outputLineNumberInVerboseDebugMode
-    logComment "welcomeResultsExitCode: ${welcomeResultsExitCode}"
+    updateScriptLog "welcomeResultsExitCode: ${welcomeResultsExitCode}"
 
     case "${welcomeResultsExitCode}" in
 
