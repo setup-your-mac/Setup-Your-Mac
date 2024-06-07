@@ -30,6 +30,9 @@
 #   - Addresses [Issue 139](https://github.com/setup-your-mac/Setup-Your-Mac/issues/139) `brandingBannerDisplayText=false` not working (thanks for the report, @seaneldridge7!)
 #     Thanks for the fix, @drtaru! [Pull Request No. 140](https://github.com/setup-your-mac/Setup-Your-Mac/pull/140)
 #
+#   Version 1.14.3, 29-May-2024
+#   - Improved exit code processing for 'Welcome' dialog
+#
 ####################################################################################################
 
 
@@ -44,7 +47,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.14.2"
+scriptVersion="1.14.3"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -2738,7 +2741,7 @@ function quitScript() {
     fi
 
     # Check for user clicking "Quit" at Welcome dialog
-    if [[ "${welcomeReturnCode}" == "2" ]]; then
+    if [[ "${welcomeResultsExitCode}" == "2" ]]; then
         
         # Remove custom welcomeBannerImageFileName
         if [[ -e "/var/tmp/${welcomeBannerImageFileName}" ]]; then
@@ -2889,11 +2892,13 @@ elif [[ "${welcomeDialog}" == "userInput" ]]; then
             
             updateScriptLog "WELCOME DIALOG: Display 'Welcome' dialog with disabled Continue Button …"
             welcomeResults=$( eval "${dialogBinary} --jsonfile ${welcomeJSONFile} --json --button1disabled" )
-            
+            welcomeResultsExitCode=$?            
+
         else
 
             updateScriptLog "WELCOME DIALOG: Display 'Welcome' dialog …"
             welcomeResults=$( eval "${dialogBinary} --jsonfile ${welcomeJSONFile} --json" )
+            welcomeResultsExitCode=$?            
 
         fi
 
@@ -2906,17 +2911,15 @@ elif [[ "${welcomeDialog}" == "userInput" ]]; then
         welcomeJSON=${welcomeJSON//Analyzing …/}
         echo "$welcomeJSON" > "$welcomeJSONFile"
         welcomeResults=$( eval "${dialogBinary} --jsonfile ${welcomeJSONFile} --json" )
+        welcomeResultsExitCode=$?            
 
     fi
 
     # Evaluate User Input
-    if [[ -z "${welcomeResults}" ]]; then
-        welcomeReturnCode="2"
-    else
-        welcomeReturnCode="0"
-    fi
+    outputLineNumberInVerboseDebugMode
+    updateScriptLog "welcomeResultsExitCode: ${welcomeResultsExitCode}"
 
-    case "${welcomeReturnCode}" in
+    case "${welcomeResultsExitCode}" in
 
         0)  # Process exit code 0 scenario here
             updateScriptLog "WELCOME DIALOG: ${loggedInUser} entered information and clicked Continue"
@@ -3091,7 +3094,7 @@ elif [[ "${welcomeDialog}" == "userInput" ]]; then
             ;;
 
         *)  # Catch all processing
-            updateScriptLog "WELCOME DIALOG: Something else happened; Exit code: ${welcomeReturnCode}"
+            updateScriptLog "WELCOME DIALOG: Something else happened; Exit code: ${welcomeResultsExitCode}"
             quitScript "1"
             ;;
 
