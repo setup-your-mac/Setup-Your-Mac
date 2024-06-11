@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.15.1
+### 11-Jun-2024
+- 
+
 ## 1.15.0
 ### 11-Jun-2024
 - Added logging functions [Pull Request No. 137](https://github.com/setup-your-mac/Setup-Your-Mac/pull/137); thanks, @robjschroeder!

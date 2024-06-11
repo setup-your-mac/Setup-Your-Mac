@@ -25,6 +25,9 @@
 #   - Improved Remote Validation error-checking
 #   - Updated Dynamic Download Estimates for macOS 15 Sequoia
 #
+#   Version 1.15.1, 11-Jun-2024
+#   - 
+#
 ####################################################################################################
 
 
@@ -39,7 +42,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.15.0"
+scriptVersion="1.15.1-b1"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
