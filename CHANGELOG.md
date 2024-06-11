@@ -9,7 +9,7 @@
 - Failure Message: Increased `sleep` value from `0.3` to `0.7` (thanks, for the report, @arnoldtaw; thanks for the code suggestion, @jcmbowman)
 - Miscellaneous formatting and clean-up
 - Added Support Team fields (thanks, @HowardGMac!)
-- Set `swiftDialogMinimumRequiredVersion` to `2.5.0.4767`
+- Set `swiftDialogMinimumRequiredVersion` to `2.5.0.4768`
 - Improved exit code processing for 'Welcome' dialog
 - Added pre-flight check for AC power (thanks for the suggestion, @arnoldtaw; thanks for the code, Obi-Josh!)
 - Added Variables for Prefill Email and Computer Name (thanks, @AndrewMBarnett!)
