@@ -1,7 +1,20 @@
 # CHANGELOG
 
-## 1.14.3, 29-May-2024
+## 1.15.0
+### 11-Jun-2024
+- Added logging functions [Pull Request No. 137](https://github.com/setup-your-mac/Setup-Your-Mac/pull/137); thanks, @robjschroeder!
+- Modified Microsoft Teams Message `activitySubtitle`
+- Activated main "Setup Your Mac" dialog with each `listitem`
+- Added swiftDialog `2.5.0`'s `--verbose`, `--debug` and `--resizable` flags to debugModes
+- Failure Message: Increased `sleep` value from `0.3` to `0.7` (thanks, for the report, @arnoldtaw; thanks for the code suggestion, @jcmbowman)
+- Miscellaneous formatting and clean-up
+- Added Support Team fields (thanks, @HowardGMac!)
+- Set `swiftDialogMinimumRequiredVersion` to `2.5.0.4768`
 - Improved exit code processing for 'Welcome' dialog
+- Added pre-flight check for AC power (thanks for the suggestion, @arnoldtaw; thanks for the code, Obi-Josh!)
+- Added Variables for Prefill Email and Computer Name (thanks, @AndrewMBarnett!)
+- Improved Remote Validation error-checking
+- Updated Dynamic Download Estimates for macOS 15 Sequoia
 
 ## 1.14.2
 ### 15-Feb-2024
