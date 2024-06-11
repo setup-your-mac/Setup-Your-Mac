@@ -8,8 +8,8 @@
 ########################################################################################################################################
 
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin/
-scriptVersion="0.0.3"
-RESULT="Not Installed"
+scriptVersion="0.0.5"
+RESULT="Failed: Not Installed"
 lastConnectedVariance="7" # The number of days before reporting device has not connected to the CrowdStrike Cloud.
 
 ###
@@ -34,6 +34,21 @@ report_result() {
     exit 0
 
 }
+
+###
+# Pre-flight: Check the Locale; this will affect the output of falconctl stats
+###
+
+lib_locale=$( /usr/bin/defaults read "/Library/Preferences/.GlobalPreferences.plist" AppleLocale )
+root_locale=$( /usr/bin/defaults read "/var/root/Library/Preferences/.GlobalPreferences.plist" AppleLocale )
+
+if [[ "${lib_locale}" != "en_US" ]]; then
+	/usr/bin/defaults write "/Library/Preferences/.GlobalPreferences.plist" AppleLocale "en_US"
+fi
+
+if [[ "${root_locale}" != "en_US" ]]; then
+	/usr/bin/defaults write "/var/root/Library/Preferences/.GlobalPreferences.plist" AppleLocale "en_US"
+fi
 
 ###
 # Program
