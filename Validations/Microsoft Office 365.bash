@@ -34,7 +34,7 @@
 #
 ####################################################################################################
 
-# Set Apps to check, valid options are: "Microsoft Excel" "Microsoft OneNote" "Microsoft Outlook" "Microsoft PowerPoint" "Microsoft Word" "OneDrive" & "Microsoft Teams"
+# Set Apps to check, valid options are: "Microsoft Excel" "Microsoft OneNote" "Microsoft Outlook" "Microsoft PowerPoint" "Microsoft Word" "OneDrive"
 appsToCheck=("Microsoft Excel" "Microsoft OneNote" "Microsoft Outlook" "Microsoft PowerPoint" "Microsoft Word" "OneDrive")
 appChecks=""
 RESULT=""
