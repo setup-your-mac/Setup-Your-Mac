@@ -12,6 +12,8 @@
 #
 #   Version 1.16.0, 29-Jul-2024
 #   - Added proof-of-concept validations for swiftDialog `2.5.1`'s "blurscreen" control
+#   - Removed vendor-specific Local Validations (in favor of Remote Validations)
+#   - Updated Configuration `policyJSON` to better match internal usage 
 #
 ####################################################################################################
 
@@ -27,7 +29,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.16.0-b1"
+scriptVersion="1.16.0-b2"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -100,7 +102,7 @@ emailEnding="@company.com"
 positionList=$( echo "${positionListRaw}" | tr ',' '\n' | sort -f | uniq | sed -e 's/^/\"/' -e 's/$/\",/' -e '$ s/.$//' )
 
 # [SYM-Helper] Branding overrides
-brandingBanner="https://img.freepik.com/free-photo/liquid-marbling-paint-texture-background-fluid-painting-abstract-texture-intensive-color-mix-wallpaper_1258-101465.jpg" # [Image by benzoix on Freepik](https://www.freepik.com/author/benzoix)
+brandingBanner="https://img.freepik.com/free-photo/liquid-purple-art-painting-abstract-colorful-background-with-color-splash-paints-modern-art_1258-102943.jpg" # [Image by benzoix on Freepik](https://www.freepik.com/author/benzoix)
 brandingBannerDisplayText="true"
 brandingIconLight="https://cdn-icons-png.flaticon.com/512/979/979585.png"
 brandingIconDark="https://cdn-icons-png.flaticon.com/512/740/740878.png"
@@ -685,88 +687,6 @@ function validatePolicyResult() {
                         jamfProPolicyNameFailures+="• $listitem  \n"
                     fi
                     ;;
-                sophosEndpointServices )
-                    updateSetupYourMacDialog "Locally Validate Policy Result: Sophos Endpoint RTS Status … "
-                    dialogUpdateSetupYourMac "listitem: index: $i, status: wait, statustext: Checking …"
-                    if [[ -d /Applications/Sophos/Sophos\ Endpoint.app ]]; then
-                        if [[ -f /Library/Preferences/com.sophos.sav.plist ]]; then
-                            sophosOnAccessRunning=$( /usr/bin/defaults read /Library/Preferences/com.sophos.sav.plist OnAccessRunning )
-                            case ${sophosOnAccessRunning} in
-                                "0" ) 
-                                    updateSetupYourMacDialog "Locally Validate Policy Result: Sophos Endpoint RTS Status: Disabled"
-                                    dialogUpdateSetupYourMac "listitem: index: $i, status: fail, statustext: Failed"
-                                    jamfProPolicyTriggerFailure="failed"
-                                    exitCode="1"
-                                    jamfProPolicyNameFailures+="• $listitem  \n"
-                                    ;;
-                                "1" )
-                                    updateSetupYourMacDialog "Locally Validate Policy Result: Sophos Endpoint RTS Status: Enabled"
-                                    dialogUpdateSetupYourMac "listitem: index: $i, status: success, statustext: Running"
-                                    ;;
-                                *  )
-                                    updateSetupYourMacDialog "Locally Validate Policy Result: Sophos Endpoint RTS Status: Unknown"
-                                    dialogUpdateSetupYourMac "listitem: index: $i, status: fail, statustext: Unknown"
-                                    jamfProPolicyTriggerFailure="failed"
-                                    exitCode="1"
-                                    jamfProPolicyNameFailures+="• $listitem  \n"
-                                    ;;
-                            esac
-                        else
-                            updateSetupYourMacDialog "Locally Validate Policy Result: Sophos Endpoint Not Found"
-                            dialogUpdateSetupYourMac "listitem: index: $i, status: fail, statustext: Failed"
-                            jamfProPolicyTriggerFailure="failed"
-                            exitCode="1"
-                            jamfProPolicyNameFailures+="• $listitem  \n"
-                        fi
-                    else
-                        dialogUpdateSetupYourMac "listitem: index: $i, status: fail, statustext: Failed"
-                        jamfProPolicyTriggerFailure="failed"
-                        exitCode="1"
-                        jamfProPolicyNameFailures+="• $listitem  \n"
-                    fi
-                    ;;
-                globalProtect )
-                    updateSetupYourMacDialog "Locally Validate Policy Result: Palo Alto Networks GlobalProtect Status … "
-                    dialogUpdateSetupYourMac "listitem: index: $i, status: wait, statustext: Checking …"
-                    if [[ -d /Applications/GlobalProtect.app ]]; then
-                        updateSetupYourMacDialog "Locally Validate Policy Result: Pausing for 10 seconds to allow Palo Alto Networks GlobalProtect Services … "
-                        sleep 10 # Arbitrary value; tuning needed
-                        if [[ -f /Library/Preferences/com.paloaltonetworks.GlobalProtect.settings.plist ]]; then
-                            globalProtectStatus=$( /usr/libexec/PlistBuddy -c "print :Palo\ Alto\ Networks:GlobalProtect:PanGPS:disable-globalprotect" /Library/Preferences/com.paloaltonetworks.GlobalProtect.settings.plist )
-                            case "${globalProtectStatus}" in
-                                "0" )
-                                    updateSetupYourMacDialog "Locally Validate Policy Result: Palo Alto Networks GlobalProtect Status: Enabled"
-                                    dialogUpdateSetupYourMac "listitem: index: $i, status: success, statustext: Running"
-                                    ;;
-                                "1" )
-                                    updateSetupYourMacDialog "Locally Validate Policy Result: Palo Alto Networks GlobalProtect Status: Disabled"
-                                    dialogUpdateSetupYourMac "listitem: index: $i, status: fail, statustext: Failed"
-                                    jamfProPolicyTriggerFailure="failed"
-                                    exitCode="1"
-                                    jamfProPolicyNameFailures+="• $listitem  \n"
-                                    ;;
-                                *  )
-                                    updateSetupYourMacDialog "Locally Validate Policy Result: Palo Alto Networks GlobalProtect Status: Unknown"
-                                    dialogUpdateSetupYourMac "listitem: index: $i, status: fail, statustext: Unknown"
-                                    jamfProPolicyTriggerFailure="failed"
-                                    exitCode="1"
-                                    jamfProPolicyNameFailures+="• $listitem  \n"
-                                    ;;
-                            esac
-                        else
-                            updateSetupYourMacDialog "Locally Validate Policy Result: Palo Alto Networks GlobalProtect Not Found"
-                            dialogUpdateSetupYourMac "listitem: index: $i, status: fail, statustext: Failed"
-                            jamfProPolicyTriggerFailure="failed"
-                            exitCode="1"
-                            jamfProPolicyNameFailures+="• $listitem  \n"
-                        fi
-                    else
-                        dialogUpdateSetupYourMac "listitem: index: $i, status: fail, statustext: Failed"
-                        jamfProPolicyTriggerFailure="failed"
-                        exitCode="1"
-                        jamfProPolicyNameFailures+="• $listitem  \n"
-                    fi
-                    ;;
                 * )
                     updateSetupYourMacDialog "Locally Validate Policy Result: Local Validation “${validation}” Missing"
                     dialogUpdateSetupYourMac "listitem: index: $i, status: fail, statustext: Missing Local “${validation}” Validation"
@@ -819,7 +739,7 @@ function validatePolicyResult() {
         # (Always evaluates as: 'success' and 'Installed')
         ###
 
-        "None" | "none")
+        "None" | "none" | *"Blurscreen"* | *"blurscreen"* )
 
             outputLineNumberInVerboseDebugMode
             updateSetupYourMacDialog "Confirm Policy Execution: ${validation}"
@@ -2320,25 +2240,49 @@ function policyJSONConfiguration() {
                         ]
                     },
                     {
-                        "listitem": "Sophos Endpoint",
-                        "subtitle": "Catches malware without relying on signatures",
-                        "icon": "https://ics.services.jamfcloud.com/icon/hash_c70f1acf8c96b99568fec83e165d2a534d111b0510fb561a283d32aa5b01c60c",
-                        "progresstext": "You’ll enjoy next-gen protection with Sophos Endpoint which doesn’t rely on signatures to catch malware.",
+                        "listitem": "BeyondTrust Privilege Management",
+                        "subtitle": "Least-privilege management and application control",
+                        "icon": "https://ics.services.jamfcloud.com/icon/hash_891ec8508f5cf1335911fc5aba5de17b1aa7739d27e07caaf81dd4482e100697",
+                        "progresstext": "Privilege Management for Mac pairs powerful least-privilege management and application control.",
                         "trigger_list": [
                             {
-                                "trigger": "sophosEndpoint",
-                                "validation": "/Applications/Sophos/Sophos Endpoint.app/Contents/Info.plist"
+                                "trigger": "beyondTrustPMfM",
+                                "validation": "/Applications/PrivilegeManagement.app"
+                            },
+                            {
+                                "trigger": "symvBeyondTrustPMfM",
+                                "validation": "Remote"
                             }
                         ]
                     },
                     {
-                        "listitem": "Sophos Endpoint Services (Remote)",
-                        "subtitle": "Ensures Sophos Endpoint services are running",
-                        "icon": "https://ics.services.jamfcloud.com/icon/hash_0f68be689684a00a3a054d71a31e43e2362f96c16efa5a560fb61bc1bf41901c",
-                        "progresstext": "Remotely validating Sophos Endpoint services …",
+                        "listitem": "CrowdStrike Falcon",
+                        "subtitle": "Endpoint Detection and Response (EDR)",
+                        "icon": "https://ics.services.jamfcloud.com/icon/hash_cfde710641259f3a6014739d86893b18feabeb11497e774edbdf3c50b98c378d",
+                        "progresstext": "Technology, intelligence, and expertise come together in CrowdStrike Falcon to deliver security that works.",
                         "trigger_list": [
                             {
-                                "trigger": "symvSophosEndpointRTS",
+                                "trigger": "crowdStrikeFalcon",
+                                "validation": "/Applications/Falcon.app"
+                            },
+                            {
+                                "trigger": "symvCrowdStrikeFalcon",
+                                "validation": "Remote"
+                            }
+                        ]
+                    },
+                    {
+                        "listitem": "Cisco Umbrella",
+                        "subtitle": "Cloud-based Content Filtering",
+                        "icon": "https://ics.services.jamfcloud.com/icon/hash_020cfcf7b86343ec3d66653aa630ec9fd1afad75f51729cb8b18ae9e6ed3c3c8",
+                        "progresstext": "Cisco Umbrella combines multiple security functions so you can extend data protection anywhere.",
+                        "trigger_list": [
+                            {
+                                "trigger": "ciscoUmbrella",
+                                "validation": "/Applications/Cisco/Cisco Secure Client.app"
+                            },
+                            {
+                                "trigger": "symvCiscoUmbrella",
                                 "validation": "Remote"
                             }
                         ]
@@ -2346,24 +2290,24 @@ function policyJSONConfiguration() {
                     {
                         "listitem": "Palo Alto GlobalProtect",
                         "subtitle": "Virtual Private Network (VPN) connection to Church headquarters",
-                        "icon": "https://ics.services.jamfcloud.com/icon/hash_acbf39d8904ad1a772cf71c45d93e373626d379a24f8b1283b88134880acb8ef",
+                        "icon": "https://ics.services.jamfcloud.com/icon/hash_ca1ee7bc394882e26b8c4b380d4eac39ce5fc7d25d7d90e35984d14756fe57fc",
                         "progresstext": "Use Palo Alto GlobalProtect to establish a Virtual Private Network (VPN) connection to Church headquarters.",
                         "trigger_list": [
                             {
                                 "trigger": "globalProtect",
-                                "validation": "/Applications/GlobalProtect.app/Contents/Info.plist"
+                                "validation": "/Applications/GlobalProtect.app"
                             }
                         ]
                     },
                     {
-                        "listitem": "Palo Alto GlobalProtect Services (Remote)",
-                        "subtitle": "Ensures GlobalProtect services are running",
-                        "icon": "https://ics.services.jamfcloud.com/icon/hash_709e8bdf0019e8faf9df85ec0a68545bfdb8bfa1227ac9bed9bba40a1fa8ff42",
-                        "progresstext": "Remotely validating Palo Alto GlobalProtect services …",
+                        "listitem": "Microsoft Teams",
+                        "subtitle": "The hub for teamwork in Microsoft 365",
+                        "icon": "https://ics.services.jamfcloud.com/icon/hash_dcb65709dba6cffa90a5eeaa54cb548d5ecc3b051f39feadd39e02744f37c19e",
+                        "progresstext": "Microsoft Teams is a hub for teamwork in Microsoft 365. Keep all your team’s chats, meetings and files together in one place.",
                         "trigger_list": [
                             {
-                                "trigger": "symvGlobalProtect",
-                                "validation": "Remote"
+                                "trigger": "microsoftteamsnew",
+                                "validation": "/Applications/Microsoft Teams.app"
                             }
                         ]
                     },
@@ -2435,50 +2379,62 @@ function policyJSONConfiguration() {
                         ]
                     },
                     {
-                        "listitem": "Sophos Endpoint",
-                        "subtitle": "Catches malware without relying on signatures",
-                        "icon": "https://ics.services.jamfcloud.com/icon/hash_c70f1acf8c96b99568fec83e165d2a534d111b0510fb561a283d32aa5b01c60c",
-                        "progresstext": "You’ll enjoy next-gen protection with Sophos Endpoint which doesn’t rely on signatures to catch malware.",
+                        "listitem": "BeyondTrust Privilege Management",
+                        "subtitle": "Least-privilege management and application control",
+                        "icon": "https://ics.services.jamfcloud.com/icon/hash_891ec8508f5cf1335911fc5aba5de17b1aa7739d27e07caaf81dd4482e100697",
+                        "progresstext": "Privilege Management for Mac pairs powerful least-privilege management and application control.",
                         "trigger_list": [
                             {
-                                "trigger": "sophosEndpoint",
-                                "validation": "/Applications/Sophos/Sophos Endpoint.app/Contents/Info.plist"
+                                "trigger": "beyondTrustPMfM",
+                                "validation": "/Applications/PrivilegeManagement.app"
+                            },
+                            {
+                                "trigger": "symvBeyondTrustPMfM",
+                                "validation": "Remote"
                             }
                         ]
                     },
                     {
-                        "listitem": "Sophos Endpoint Services (Local)",
-                        "subtitle": "Ensures Sophos Endpoint services are running",
-                        "icon": "https://ics.services.jamfcloud.com/icon/hash_0f68be689684a00a3a054d71a31e43e2362f96c16efa5a560fb61bc1bf41901c",
-                        "progresstext": "Locally validating Sophos Endpoint services …",
+                        "listitem": "CrowdStrike Falcon",
+                        "subtitle": "Endpoint Detection and Response (EDR)",
+                        "icon": "https://ics.services.jamfcloud.com/icon/hash_cfde710641259f3a6014739d86893b18feabeb11497e774edbdf3c50b98c378d",
+                        "progresstext": "Technology, intelligence, and expertise come together in CrowdStrike Falcon to deliver security that works.",
                         "trigger_list": [
                             {
-                                "trigger": "sophosEndpointServices",
-                                "validation": "Local"
+                                "trigger": "crowdStrikeFalcon",
+                                "validation": "/Applications/Falcon.app"
+                            },
+                            {
+                                "trigger": "symvCrowdStrikeFalcon",
+                                "validation": "Remote"
+                            }
+                        ]
+                    },
+                    {
+                        "listitem": "Cisco Umbrella",
+                        "subtitle": "Cloud-based Content Filtering",
+                        "icon": "https://ics.services.jamfcloud.com/icon/hash_020cfcf7b86343ec3d66653aa630ec9fd1afad75f51729cb8b18ae9e6ed3c3c8",
+                        "progresstext": "Cisco Umbrella combines multiple security functions so you can extend data protection anywhere.",
+                        "trigger_list": [
+                            {
+                                "trigger": "ciscoUmbrella",
+                                "validation": "/Applications/Cisco/Cisco Secure Client.app"
+                            },
+                            {
+                                "trigger": "symvCiscoUmbrella",
+                                "validation": "Remote"
                             }
                         ]
                     },
                     {
                         "listitem": "Palo Alto GlobalProtect",
                         "subtitle": "Virtual Private Network (VPN) connection to Church headquarters",
-                        "icon": "https://ics.services.jamfcloud.com/icon/hash_acbf39d8904ad1a772cf71c45d93e373626d379a24f8b1283b88134880acb8ef",
+                        "icon": "https://ics.services.jamfcloud.com/icon/hash_ca1ee7bc394882e26b8c4b380d4eac39ce5fc7d25d7d90e35984d14756fe57fc",
                         "progresstext": "Use Palo Alto GlobalProtect to establish a Virtual Private Network (VPN) connection to Church headquarters.",
                         "trigger_list": [
                             {
                                 "trigger": "globalProtect",
-                                "validation": "/Applications/GlobalProtect.app/Contents/Info.plist"
-                            }
-                        ]
-                    },
-                    {
-                        "listitem": "Palo Alto GlobalProtect Services (Local)",
-                        "subtitle": "Ensures GlobalProtect services are running",
-                        "icon": "https://ics.services.jamfcloud.com/icon/hash_709e8bdf0019e8faf9df85ec0a68545bfdb8bfa1227ac9bed9bba40a1fa8ff42",
-                        "progresstext": "Locally validating Palo Alto GlobalProtect services …",
-                        "trigger_list": [
-                            {
-                                "trigger": "globalProtect",
-                                "validation": "Local"
+                                "validation": "/Applications/GlobalProtect.app"
                             }
                         ]
                     },
@@ -2490,7 +2446,7 @@ function policyJSONConfiguration() {
                         "trigger_list": [
                             {
                                 "trigger": "microsoftOffice365",
-                                "validation": "/Applications/Microsoft Outlook.app/Contents/Info.plist"
+                                "validation": "/Applications/Microsoft Outlook.app"
                             },
                             {
                                 "trigger": "symvMicrosoftOffice365",
@@ -2502,11 +2458,11 @@ function policyJSONConfiguration() {
                         "listitem": "Microsoft Teams",
                         "subtitle": "The hub for teamwork in Microsoft 365",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_dcb65709dba6cffa90a5eeaa54cb548d5ecc3b051f39feadd39e02744f37c19e",
-                        "progresstext": "Microsoft Teams is a hub for teamwork in Microsoft 365. Keep all your team’s chats, meetings and files together in one place.",
+                        "progresstext": "Microsoft Teams is a hub for teamwork in Office 365. Keep all your team’s chats, meetings and files together in one place.",
                         "trigger_list": [
                             {
-                                "trigger": "microsoftTeams",
-                                "validation": "/Applications/Microsoft Teams classic.app/Contents/Info.plist"
+                                "trigger": "microsoftteamsnew",
+                                "validation": "/Applications/Microsoft Teams.app"
                             }
                         ]
                     },
@@ -2578,37 +2534,49 @@ function policyJSONConfiguration() {
                         ]
                     },
                     {
-                        "listitem": "Sophos Endpoint",
-                        "subtitle": "Catches malware without relying on signatures",
-                        "icon": "https://ics.services.jamfcloud.com/icon/hash_c70f1acf8c96b99568fec83e165d2a534d111b0510fb561a283d32aa5b01c60c",
-                        "progresstext": "You’ll enjoy next-gen protection with Sophos Endpoint which doesn’t rely on signatures to catch malware.",
+                        "listitem": "BeyondTrust Privilege Management",
+                        "subtitle": "Least-privilege management and application control",
+                        "icon": "https://ics.services.jamfcloud.com/icon/hash_891ec8508f5cf1335911fc5aba5de17b1aa7739d27e07caaf81dd4482e100697",
+                        "progresstext": "Privilege Management for Mac pairs powerful least-privilege management and application control.",
                         "trigger_list": [
                             {
-                                "trigger": "sophosEndpoint",
-                                "validation": "/Applications/Sophos/Sophos Endpoint.app/Contents/Info.plist"
+                                "trigger": "beyondTrustPMfM",
+                                "validation": "/Applications/PrivilegeManagement.app"
+                            },
+                            {
+                                "trigger": "symvBeyondTrustPMfM",
+                                "validation": "Remote"
                             }
                         ]
                     },
                     {
-                        "listitem": "Sophos Endpoint Services (Local)",
-                        "subtitle": "Ensures Sophos Endpoint services are running",
-                        "icon": "https://ics.services.jamfcloud.com/icon/hash_0f68be689684a00a3a054d71a31e43e2362f96c16efa5a560fb61bc1bf41901c",
-                        "progresstext": "Locally validating Sophos Endpoint services …",
+                        "listitem": "CrowdStrike Falcon",
+                        "subtitle": "Endpoint Detection and Response (EDR)",
+                        "icon": "https://ics.services.jamfcloud.com/icon/hash_cfde710641259f3a6014739d86893b18feabeb11497e774edbdf3c50b98c378d",
+                        "progresstext": "Technology, intelligence, and expertise come together in CrowdStrike Falcon to deliver security that works.",
                         "trigger_list": [
                             {
-                                "trigger": "sophosEndpointServices",
-                                "validation": "Local"
+                                "trigger": "crowdStrikeFalcon",
+                                "validation": "/Applications/Falcon.app"
+                            },
+                            {
+                                "trigger": "symvCrowdStrikeFalcon",
+                                "validation": "Remote"
                             }
                         ]
                     },
                     {
-                        "listitem": "Sophos Endpoint Services (Remote)",
-                        "subtitle": "Ensures Sophos Endpoint services are running",
-                        "icon": "https://ics.services.jamfcloud.com/icon/hash_0f68be689684a00a3a054d71a31e43e2362f96c16efa5a560fb61bc1bf41901c",
-                        "progresstext": "Remotely validating Sophos Endpoint services …",
+                        "listitem": "Cisco Umbrella",
+                        "subtitle": "Cloud-based Content Filtering",
+                        "icon": "https://ics.services.jamfcloud.com/icon/hash_020cfcf7b86343ec3d66653aa630ec9fd1afad75f51729cb8b18ae9e6ed3c3c8",
+                        "progresstext": "Cisco Umbrella combines multiple security functions so you can extend data protection anywhere.",
                         "trigger_list": [
                             {
-                                "trigger": "symvSophosEndpointRTS",
+                                "trigger": "ciscoUmbrella",
+                                "validation": "/Applications/Cisco/Cisco Secure Client.app"
+                            },
+                            {
+                                "trigger": "symvCiscoUmbrella",
                                 "validation": "Remote"
                             }
                         ]
@@ -2616,36 +2584,12 @@ function policyJSONConfiguration() {
                     {
                         "listitem": "Palo Alto GlobalProtect",
                         "subtitle": "Virtual Private Network (VPN) connection to Church headquarters",
-                        "icon": "https://ics.services.jamfcloud.com/icon/hash_acbf39d8904ad1a772cf71c45d93e373626d379a24f8b1283b88134880acb8ef",
+                        "icon": "https://ics.services.jamfcloud.com/icon/hash_ca1ee7bc394882e26b8c4b380d4eac39ce5fc7d25d7d90e35984d14756fe57fc",
                         "progresstext": "Use Palo Alto GlobalProtect to establish a Virtual Private Network (VPN) connection to Church headquarters.",
                         "trigger_list": [
                             {
                                 "trigger": "globalProtect",
-                                "validation": "/Applications/GlobalProtect.app/Contents/Info.plist"
-                            }
-                        ]
-                    },
-                    {
-                        "listitem": "Palo Alto GlobalProtect Services (Local)",
-                        "subtitle": "Ensures GlobalProtect services are running",
-                        "icon": "https://ics.services.jamfcloud.com/icon/hash_709e8bdf0019e8faf9df85ec0a68545bfdb8bfa1227ac9bed9bba40a1fa8ff42",
-                        "progresstext": "Locally validating Palo Alto GlobalProtect services …",
-                        "trigger_list": [
-                            {
-                                "trigger": "globalProtect",
-                                "validation": "Local"
-                            }
-                        ]
-                    },
-                    {
-                        "listitem": "Palo Alto GlobalProtect Services (Remote)",
-                        "subtitle": "Ensures GlobalProtect services are running",
-                        "icon": "https://ics.services.jamfcloud.com/icon/hash_709e8bdf0019e8faf9df85ec0a68545bfdb8bfa1227ac9bed9bba40a1fa8ff42",
-                        "progresstext": "Remotely validating Palo Alto GlobalProtect services …",
-                        "trigger_list": [
-                            {
-                                "trigger": "symvGlobalProtect",
-                                "validation": "Remote"
+                                "validation": "/Applications/GlobalProtect.app"
                             }
                         ]
                     },
@@ -2657,7 +2601,7 @@ function policyJSONConfiguration() {
                         "trigger_list": [
                             {
                                 "trigger": "microsoftOffice365",
-                                "validation": "/Applications/Microsoft Outlook.app/Contents/Info.plist"
+                                "validation": "/Applications/Microsoft Outlook.app"
                             },
                             {
                                 "trigger": "symvMicrosoftOffice365",
@@ -2669,11 +2613,11 @@ function policyJSONConfiguration() {
                         "listitem": "Microsoft Teams",
                         "subtitle": "The hub for teamwork in Microsoft 365",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_dcb65709dba6cffa90a5eeaa54cb548d5ecc3b051f39feadd39e02744f37c19e",
-                        "progresstext": "Microsoft Teams is a hub for teamwork in Microsoft 365. Keep all your team’s chats, meetings and files together in one place.",
+                        "progresstext": "Microsoft Teams is a hub for teamwork in Office 365. Keep all your team’s chats, meetings and files together in one place.",
                         "trigger_list": [
                             {
-                                "trigger": "microsoftTeams",
-                                "validation": "/Applications/Microsoft Teams classic.app/Contents/Info.plist"
+                                "trigger": "microsoftteamsnew",
+                                "validation": "/Applications/Microsoft Teams.app"
                             }
                         ]
                     },
@@ -2685,7 +2629,7 @@ function policyJSONConfiguration() {
                         "trigger_list": [
                             {
                                 "trigger": "adobeAcrobatReader",
-                                "validation": "/Applications/Adobe Acrobat Reader.app/Contents/Info.plist"
+                                "validation": "/Applications/Adobe Acrobat Reader.app"
                             }
                         ]
                     },
@@ -2697,7 +2641,7 @@ function policyJSONConfiguration() {
                         "trigger_list": [
                             {
                                 "trigger": "googleChrome",
-                                "validation": "/Applications/Google Chrome.app/Contents/Info.plist"
+                                "validation": "/Applications/Google Chrome.app"
                             }
                         ]
                     },
@@ -2769,17 +2713,49 @@ function policyJSONConfiguration() {
                         ]
                     },
                     {
-                        "listitem": "Sophos Endpoint",
-                        "subtitle": "Catches malware without relying on signatures",
-                        "icon": "https://ics.services.jamfcloud.com/icon/hash_c70f1acf8c96b99568fec83e165d2a534d111b0510fb561a283d32aa5b01c60c",
-                        "progresstext": "You’ll enjoy next-gen protection with Sophos Endpoint which doesn’t rely on signatures to catch malware.",
+                        "listitem": "BeyondTrust Privilege Management",
+                        "subtitle": "Least-privilege management and application control",
+                        "icon": "https://ics.services.jamfcloud.com/icon/hash_891ec8508f5cf1335911fc5aba5de17b1aa7739d27e07caaf81dd4482e100697",
+                        "progresstext": "Privilege Management for Mac pairs powerful least-privilege management and application control.",
                         "trigger_list": [
                             {
-                                "trigger": "sophosEndpoint",
-                                "validation": "Blurscreen Off"
+                                "trigger": "beyondTrustPMfM",
+                                "validation": "/Applications/PrivilegeManagement.app"
                             },
                             {
-                                "trigger": "symvSophosEndpointRTS",
+                                "trigger": "symvBeyondTrustPMfM",
+                                "validation": "Remote"
+                            }
+                        ]
+                    },
+                    {
+                        "listitem": "CrowdStrike Falcon",
+                        "subtitle": "Endpoint Detection and Response (EDR)",
+                        "icon": "https://ics.services.jamfcloud.com/icon/hash_cfde710641259f3a6014739d86893b18feabeb11497e774edbdf3c50b98c378d",
+                        "progresstext": "Technology, intelligence, and expertise come together in CrowdStrike Falcon to deliver security that works.",
+                        "trigger_list": [
+                            {
+                                "trigger": "crowdStrikeFalcon",
+                                "validation": "/Applications/Falcon.app"
+                            },
+                            {
+                                "trigger": "symvCrowdStrikeFalcon",
+                                "validation": "Remote"
+                            }
+                        ]
+                    },
+                    {
+                        "listitem": "Cisco Umbrella",
+                        "subtitle": "Cloud-based Content Filtering",
+                        "icon": "https://ics.services.jamfcloud.com/icon/hash_020cfcf7b86343ec3d66653aa630ec9fd1afad75f51729cb8b18ae9e6ed3c3c8",
+                        "progresstext": "Cisco Umbrella combines multiple security functions so you can extend data protection anywhere.",
+                        "trigger_list": [
+                            {
+                                "trigger": "ciscoUmbrella",
+                                "validation": "/Applications/Cisco/Cisco Secure Client.app"
+                            },
+                            {
+                                "trigger": "symvCiscoUmbrella",
                                 "validation": "Remote"
                             }
                         ]
@@ -2787,16 +2763,12 @@ function policyJSONConfiguration() {
                     {
                         "listitem": "Palo Alto GlobalProtect",
                         "subtitle": "Virtual Private Network (VPN) connection to Church headquarters",
-                        "icon": "https://ics.services.jamfcloud.com/icon/hash_acbf39d8904ad1a772cf71c45d93e373626d379a24f8b1283b88134880acb8ef",
+                        "icon": "https://ics.services.jamfcloud.com/icon/hash_ca1ee7bc394882e26b8c4b380d4eac39ce5fc7d25d7d90e35984d14756fe57fc",
                         "progresstext": "Use Palo Alto GlobalProtect to establish a Virtual Private Network (VPN) connection to Church headquarters.",
                         "trigger_list": [
                             {
                                 "trigger": "globalProtect",
-                                "validation": "/Applications/GlobalProtect.app/Contents/Info.plist"
-                            },
-                            {
-                                "trigger": "symvGlobalProtect",
-                                "validation": "Remote"
+                                "validation": "/Applications/GlobalProtect.app"
                             }
                         ]
                     },
@@ -2808,7 +2780,7 @@ function policyJSONConfiguration() {
                         "trigger_list": [
                             {
                                 "trigger": "finalConfiguration",
-                                "validation": "Blurscreen On"
+                                "validation": "Blurscreen Off"
                             },
                             {
                                 "trigger": "reconAtReboot",
@@ -2866,7 +2838,7 @@ dialogFailureCMD="$dialogBinary \
 --icon \"$failureIcon\" \
 --iconsize 125 \
 --width 625 \
---height 45% \
+--height 600 \
 --position topright \
 --button1text \"Close\" \
 --infotext \"$scriptVersion\" \
