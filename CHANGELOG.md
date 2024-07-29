@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 1.15.1
+## 1.16.0
 ### 29-Jul-2024
 - Added proof-of-concept validations for swiftDialog `2.5.1`'s "blurscreen" control
 
