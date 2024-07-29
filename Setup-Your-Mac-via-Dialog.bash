@@ -26,7 +26,7 @@
 #   - Updated Dynamic Download Estimates for macOS 15 Sequoia
 #
 #   Version 1.15.1, 29-Jul-2024
-#   - Added validations for swiftDialog `2.5.1`'s "blurscreen" control
+#   - Added proof-of-concept validations for swiftDialog `2.5.1`'s "blurscreen" control
 #
 ####################################################################################################
 
