@@ -25,8 +25,8 @@
 #   - Improved Remote Validation error-checking
 #   - Updated Dynamic Download Estimates for macOS 15 Sequoia
 #
-#   Version 1.15.1, 11-Jun-2024
-#   - 
+#   Version 1.15.1, 29-Jul-2024
+#   - Added validations for swiftDialog `2.5.1`'s "blurscreen" control
 #
 ####################################################################################################
 
@@ -559,6 +559,28 @@ function confirmPolicyExecution() {
                 dialogUpdateSetupYourMac "listitem: index: $i, status: wait, statustext: Updating …, "
                 reconRaw=$( eval "${jamfBinary} recon ${reconOptions} -verbose | tee -a ${scriptLog}" )
                 computerID=$( echo "${reconRaw}" | grep '<computer_id>' | xmllint --xpath xmllint --xpath '/computer_id/text()' - )
+            fi
+            ;;
+
+        "Blurscreen On" | "blurscreen on" )
+
+            outputLineNumberInVerboseDebugMode
+            updateSetupYourMacDialog "Confirm Policy Execution: ${validation}"
+            if [[ "${debugMode}" == "true" ]] || [[ "${debugMode}" == "verbose" ]] ; then
+                sleep "${debugModeSleepAmount}"
+            else
+                dialogUpdateSetupYourMac "blurscreen: enable"
+            fi
+            ;;
+
+        "Blurscreen Off" | "blurscreen off" )
+
+            outputLineNumberInVerboseDebugMode
+            updateSetupYourMacDialog "Confirm Policy Execution: ${validation}"
+            if [[ "${debugMode}" == "true" ]] || [[ "${debugMode}" == "verbose" ]] ; then
+                sleep "${debugModeSleepAmount}"
+            else
+                dialogUpdateSetupYourMac "blurscreen: disable"
             fi
             ;;
 
@@ -2729,7 +2751,7 @@ function policyJSONConfiguration() {
 
         * ) # Catch-all (i.e., used when `welcomeDialog` is set to `video`, `messageOnly` or `false`)
 
-            overlayoverride=""
+            overlayoverride="/System/Library/CoreServices/Finder.app"
             policyJSON='
             {
                 "steps": [
@@ -2769,7 +2791,7 @@ function policyJSONConfiguration() {
                         "trigger_list": [
                             {
                                 "trigger": "sophosEndpoint",
-                                "validation": "/Applications/Sophos/Sophos Endpoint.app/Contents/Info.plist"
+                                "validation": "Blurscreen Off"
                             },
                             {
                                 "trigger": "symvSophosEndpointRTS",
@@ -2801,7 +2823,7 @@ function policyJSONConfiguration() {
                         "trigger_list": [
                             {
                                 "trigger": "finalConfiguration",
-                                "validation": "None"
+                                "validation": "Blurscreen On"
                             },
                             {
                                 "trigger": "reconAtReboot",
