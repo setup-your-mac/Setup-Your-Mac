@@ -10,10 +10,11 @@
 #
 # HISTORY
 #
-#   Version 1.16.0, 29-Jul-2024
+#   Version 1.16.0, 13-Sep-2024
 #   - Added proof-of-concept validations for swiftDialog `2.5.1`'s "blurscreen" control
 #   - Removed vendor-specific Local Validations (in favor of Remote Validations)
-#   - Updated Configuration `policyJSON` to better match internal usage 
+#   - Updated Configuration `policyJSON` to better match internal usage
+#   - Added "activate" command to Validations
 #
 ####################################################################################################
 
@@ -29,7 +30,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.16.0-b2"
+scriptVersion="1.16.0-b3"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -39,7 +40,7 @@ requiredMinimumBuild="${8:-"disabled"}"                                         
 outdatedOsAction="${9:-"/System/Library/CoreServices/Software Update.app"}"     # Parameter 9: Outdated OS Action [ /System/Library/CoreServices/Software Update.app (default) | jamfselfservice://content?entity=policy&id=117&action=view ] (i.e., Jamf Pro Self Service policy ID for operating system ugprades)
 webhookURL="${10:-""}"                                                          # Parameter 10: Microsoft Teams or Slack Webhook URL [ Leave blank to disable (default) | https://microsoftTeams.webhook.com/URL | https://hooks.slack.com/services/URL ] Can be used to send a success or failure message to Microsoft Teams or Slack via Webhook. (Function will automatically detect if Webhook URL is for Slack or Teams; can be modified to include other communication tools that support functionality.)
 presetConfiguration="${11:-""}"                                                 # Parameter 11: Specify a Configuration (i.e., `policyJSON`; NOTE: If set, `promptForConfiguration` will be automatically suppressed and the preselected configuration will be used instead)
-swiftDialogMinimumRequiredVersion="2.5.1.4770"                                  # This will be set and updated as dependancies on newer features change.
+swiftDialogMinimumRequiredVersion="2.5.2.4777"                                  # This will be set and updated as dependancies on newer features change.
 
 
 
@@ -633,6 +634,7 @@ function validatePolicyResult() {
                 rosetta ) 
                     updateSetupYourMacDialog "Locally Validate Policy Result: Rosetta 2 … " # Thanks, @smithjw!
                     dialogUpdateSetupYourMac "listitem: index: $i, status: wait, statustext: Checking …"
+                    dialogUpdateSetupYourMac "activate:"
                     arch=$( /usr/bin/arch )
                     if [[ "${arch}" == "arm64" ]]; then
                         # Mac with Apple silicon; check for Rosetta
@@ -658,6 +660,7 @@ function validatePolicyResult() {
                 filevault )
                     updateSetupYourMacDialog "Locally Validate Policy Result: Validate FileVault … "
                     dialogUpdateSetupYourMac "listitem: index: $i, status: wait, statustext: Checking …"
+                    dialogUpdateSetupYourMac "activate:"
                     updateSetupYourMacDialog "Validate Policy Result: Pausing for 5 seconds for FileVault … "
                     sleep 5 # Arbitrary value; tuning needed
                     fileVaultCheck=$( fdesetup isactive )
@@ -713,6 +716,7 @@ function validatePolicyResult() {
             else
                 updateSetupYourMacDialog "Remotely Validate '${trigger}' '${validation}'"
                 dialogUpdateSetupYourMac "listitem: index: $i, status: wait, statustext: Checking …"
+                dialogUpdateSetupYourMac "activate:"
                 result=$( "${jamfBinary}" policy -event "${trigger}" | grep "Script result:" )
                 if [[ "${result}" == *"Failed"* ]]; then
                     dialogUpdateSetupYourMac "listitem: index: $i, status: fail, statustext: Failed"
@@ -1810,7 +1814,7 @@ failureCommandFile=$( mktemp -u /var/tmp/dialogCommandFileFailure.XXX )
 
 welcomeTitle="Happy $( date +'%A' ), ${loggedInUserFirstname}!  \nWelcome to your new ${modelName}"
 
-welcomeMessage="Please enter the **required** information for your ${modelName}, select your preferred **Configuration** then click **Continue** to start applying settings to your new Mac. \n\nOnce completed, the **Wait** button will be enabled and you‘ll be able to review the results before restarting your ${modelName}."
+welcomeMessage="Please enter the **required** information for your ${modelName}, select your preferred **Configuration** then click **Continue** to start applying settings to your new Mac.  \n\nOnce completed, the **Wait** button will be enabled and you‘ll be able to review the results before restarting your ${modelName}."
 
 if [[ -n "${supportTeamName}" ]]; then
 
@@ -3213,8 +3217,8 @@ elif [[ "${welcomeDialog}" == "userInput" ]]; then
                 welcomeDialog "Waiting to display 'Setup Your Mac' dialog; pausing"
                 sleep 0.5
             done
-            welcomeDialog "'Setup Your Mac' dialog displayed; ensure it's the front-most app"
-            runAsUser osascript -e 'tell application "Dialog" to activate'
+            updateSetupYourMacDialog "'Setup Your Mac' dialog displayed; ensure it's the front-most app"
+            dialogUpdateSetupYourMac "activate:"
             if [[ -n "${overlayoverride}" ]]; then
                 dialogUpdateSetupYourMac "overlayicon: ${overlayoverride}"
             fi
@@ -3271,8 +3275,8 @@ else
         welcomeDialog "Waiting to display 'Setup Your Mac' dialog; pausing"
         sleep 0.5
     done
-    welcomeDialog "'Setup Your Mac' dialog displayed; ensure it's the front-most app"
-    runAsUser osascript -e 'tell application "Dialog" to activate'
+    updateSetupYourMacDialog "'Setup Your Mac' dialog displayed; ensure it's the front-most app"
+    dialogUpdateSetupYourMac "activate:"
     if [[ -n "${overlayoverride}" ]]; then
         dialogUpdateSetupYourMac "overlayicon: ${overlayoverride}"
     fi
