@@ -1275,45 +1275,100 @@ EOF
         activityImage="https://creazilla-store.fra1.digitaloceanspaces.com/cliparts/78010/old-mac-computer-clipart-md.png"
 
         webHookdata=$(cat <<EOF
-{
-    "@type": "MessageCard",
-    "@context": "http://schema.org/extensions",
-    "themeColor": "E4002B",
-    "summary": "New Mac Enrollment: '${webhookStatus}'",
-    "sections": [{
-        "activityTitle": "New Mac Enrollment: ${webhookStatus}",
-        "activitySubtitle": "${serialNumber}",
-        "activityImage": "${activityImage}",
-        "facts": [{
-            "name": "Computer Name",
-            "value": "$( scutil --get ComputerName )"
-        }, {
-            "name": "Timestamp",
-            "value": "${timestamp}"
-        }, {
-            "name": "Configuration",
-            "value": "${symConfiguration}"
-        }, {
-            "name": "User",
-            "value": "${loggedInUser}"
-        }, {
-            "name": "Operating System Version",
-            "value": "${osVersion} (${osBuild})"
-        }, {
-            "name": "Additional Comments",
-            "value": "${jamfProPolicyNameFailures}"
-}],
-        "markdown": true,
-        "potentialAction": [{
-        "@type": "OpenUri",
-        "name": "View in Jamf Pro",
-        "targets": [{
-        "os": "default",
-            "uri": "${jamfProComputerURL}"
-            }]
-        }]
-    }]
-}
+        {
+            "type": "message",
+            "attachments": [
+                {
+                    "contentType": "application/vnd.microsoft.card.adaptive",
+                    "contentUrl": null,
+                    "content": {
+                        "type": "AdaptiveCard",
+                        "body": [
+                            {
+                                "type": "TextBlock",
+                                "size": "Large",
+                                "weight": "Bolder",
+                                "text": "New Mac Enrollment '${webhookStatus}'"
+                            },
+                            {
+                                "type": "ColumnSet",
+                                "columns": [
+                                    {
+                                        "type": "Column",
+                                        "items": [
+                                            {
+                                                "type": "Image",
+                                                "url": "https://creazilla-store.fra1.digitaloceanspaces.com/cliparts/78010/old-mac-computer-clipart-md.png",
+                                                "altText": "Mac Image",
+                                                "size": "Small"
+                                            }
+                                        ],
+                                        "width": "auto"
+                                    },
+                                    {
+                                        "type": "Column",
+                                        "items": [
+                                            {
+                                                "type": "TextBlock",
+                                                "weight": "Bolder",
+                                                "text": "New Mac Enrollment: '${webhookStatus}'",
+                                                "wrap": true
+                                            },
+                                            {
+                                                "type": "TextBlock",
+                                                "spacing": "None",
+                                                "text": "${serialNumber}",
+                                                "isSubtle": true,
+                                                "wrap": true
+                                            }
+                                        ],
+                                        "width": "stretch"
+                                    }
+                                ]
+                            },
+                            {
+                                "type": "FactSet",
+                                "facts": [
+                                    {
+                                        "title": "ComputerName",
+                                        "value": "$( scutil --get ComputerName )"
+                                    },
+                                    {
+                                        "title": "Timestamp",
+                                        "value": "${timestamp}"
+                                    },
+                                    {
+                                        "title": "Configuration",
+                                        "value": "${symConfiguration}"
+                                    },
+                                    {
+                                        "title": "User",
+                                        "value": "${loggedInUser}"
+                                    },
+                                    {
+                                        "title": "Operating System",
+                                        "value": "${osVersion} (${osBuild})"
+                                    },
+                                    {
+                                        "title": "Additional Comments",
+                                        "value": "${jamfProPolicyNameFailures}"
+                                    }
+                                ]
+                            }
+                        ],
+                        "actions": [
+                            {
+                                "type": "Action.OpenUrl",
+                                "title": "View in Jamf Pro",
+                                "url": "${jamfProComputerURL}"
+                            }
+                        ],
+                        "$schema": "http://adaptivecards.io/schemas/adaptive-card.json",
+                        "version": "1.2"
+                    }
+                }
+            ]
+        }
 EOF
 )
 
