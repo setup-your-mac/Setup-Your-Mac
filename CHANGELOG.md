@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 1.15.1, 06-Feb-2025
+### 06-Feb-2025
+- Fixed minor issue with `calculateFreeDiskSpace` function result not being parsed into scriptLog
+
 ## 1.15.0
 ### 11-Jun-2024
 - Added logging functions [Pull Request No. 137](https://github.com/setup-your-mac/Setup-Your-Mac/pull/137); thanks, @robjschroeder!
