@@ -1,11 +1,16 @@
 # CHANGELOG
 
 ## 1.16.0
-### 13-Sep-2024
+### 06-Feb-2025
 - Added proof-of-concept validations for swiftDialog `2.5.1`'s "blurscreen" control
 - Removed vendor-specific Local Validations (in favor of Remote Validations)
 - Updated Configuration `policyJSON` to better match internal usage
 - Added "activate" command to Validations
+- Fixed minor issue with `calculateFreeDiskSpace` function result not being parsed into scriptLog (thanks, @robjschroeder!)
+
+## 1.15.1
+### 06-Feb-2025
+- Fixed minor issue with `calculateFreeDiskSpace` function result not being parsed into scriptLog (thanks, @robjschroeder!)
 
 ## 1.15.0
 ### 11-Jun-2024
