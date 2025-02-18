@@ -1,5 +1,5 @@
 #!/bin/bash
-# shellcheck disable=SC2001,SC1111,SC1112,SC2143,SC2145,SC2086,SC2089,SC2090,SC2269
+# shellcheck disable=SC2001,SC1111,SC1112,SC2143,SC2145,SC2086,SC2089,SC2090,SC2269,SC2154
 
 ####################################################################################################
 #
@@ -10,11 +10,12 @@
 #
 # HISTORY
 #
-#   Version 1.16.0, 06-Feb-2025
+#   Version 1.16.0, 18-Feb-2025
 #   - Added proof-of-concept validations for swiftDialog `2.5.1`'s "blurscreen" control
 #   - Removed vendor-specific Local Validations (in favor of Remote Validations)
 #   - Updated Configuration `policyJSON` to better match internal usage
 #   - Added "activate" command to Validations
+#   - Updated the MS Teams message template to the new format #156 (thanks, @nlopezUA!)
 #
 ####################################################################################################
 
@@ -30,7 +31,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.16.0-b4"
+scriptVersion="1.16.0-b5"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -1206,7 +1207,8 @@ EOF
         info "Generating Microsoft Teams Message …"
 
         # URL to an image to add to your notification
-        activityImage="https://creazilla-store.fra1.digitaloceanspaces.com/cliparts/78010/old-mac-computer-clipart-md.png"
+        # activityImage="https://creazilla-store.fra1.digitaloceanspaces.com/cliparts/78010/old-mac-computer-clipart-md.png"
+
 
         webHookdata=$(cat <<EOF
         {

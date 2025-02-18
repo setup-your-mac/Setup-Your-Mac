@@ -16,6 +16,7 @@
 ### Humbled & Amazed
 
 The response to Setup Your Mac has been both humbling and amazing; my personal thanks to MacAdmins worldwide and the ever-growing number of contributors:
+- nlopezUA for updating the Microsoft Teams message template to the new format [Pull Request No. 156](https://github.com/setup-your-mac/Setup-Your-Mac/pull/156)
 - lukecharters for eleventh-hour testing feedback
 - AndrewMBarnett for [Pull Request No. 145](https://github.com/setup-your-mac/Setup-Your-Mac/pull/145)
 - arnoldtaw for [Issue No. 132](https://github.com/setup-your-mac/Setup-Your-Mac/issues/132)
