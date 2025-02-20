@@ -10,12 +10,12 @@
 #
 # HISTORY
 #
-#   Version 1.16.0, 18-Feb-2025
+#   Version 1.16.0, 20-Feb-2025
 #   - Added proof-of-concept validations for swiftDialog `2.5.1`'s "blurscreen" control
 #   - Removed vendor-specific Local Validations (in favor of Remote Validations)
 #   - Updated Configuration `policyJSON` to better match internal usage
 #   - Added "activate" command to Validations
-#   - Updated the MS Teams message template to the new format #156 (thanks, @nlopezUA!)
+#   - Updated the Microsoft Teams message template to the new format #156 (thanks, @nlopezUA!)
 #
 ####################################################################################################
 
@@ -31,7 +31,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.16.0-b5"
+scriptVersion="1.16.0-b6"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -230,6 +230,8 @@ function completionActionOut() {
 function quitOut() {
     updateScriptLog "[QUIT SCRIPT]               ${1}"
 }
+
+
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Output Line Number in `verbose` Debug Mode (thanks, @bartreardon!)
@@ -1207,8 +1209,7 @@ EOF
         info "Generating Microsoft Teams Message …"
 
         # URL to an image to add to your notification
-        # activityImage="https://creazilla-store.fra1.digitaloceanspaces.com/cliparts/78010/old-mac-computer-clipart-md.png"
-
+        # activityImage="https://ics.services.jamfcloud.com/icon/hash_d75d2250498be4cdfc75956d88dc7204dabf886a51396d0e99dbd75759e151ed"
 
         webHookdata=$(cat <<EOF
         {
@@ -1224,7 +1225,7 @@ EOF
                                 "type": "TextBlock",
                                 "size": "Large",
                                 "weight": "Bolder",
-                                "text": "New Mac Enrollment '${webhookStatus}'"
+                                "text": "New Mac Enrollment: ${webhookStatus}"
                             },
                             {
                                 "type": "ColumnSet",
@@ -1234,8 +1235,8 @@ EOF
                                         "items": [
                                             {
                                                 "type": "Image",
-                                                "url": "https://creazilla-store.fra1.digitaloceanspaces.com/cliparts/78010/old-mac-computer-clipart-md.png",
-                                                "altText": "Mac Image",
+                                                "url": "https://ics.services.jamfcloud.com/icon/hash_d75d2250498be4cdfc75956d88dc7204dabf886a51396d0e99dbd75759e151ed",
+                                                "altText": "SYM",
                                                 "size": "Small"
                                             }
                                         ],
@@ -1247,7 +1248,7 @@ EOF
                                             {
                                                 "type": "TextBlock",
                                                 "weight": "Bolder",
-                                                "text": "New Mac Enrollment: '${webhookStatus}'",
+                                                "text": "$( scutil --get ComputerName )",
                                                 "wrap": true
                                             },
                                             {
@@ -1265,10 +1266,6 @@ EOF
                             {
                                 "type": "FactSet",
                                 "facts": [
-                                    {
-                                        "title": "ComputerName",
-                                        "value": "$( scutil --get ComputerName )"
-                                    },
                                     {
                                         "title": "Timestamp",
                                         "value": "${timestamp}"
@@ -2373,6 +2370,18 @@ function policyJSONConfiguration() {
                         ]
                     },
                     {
+                        "listitem": "Microsoft Company Portal",
+                        "subtitle": "Enables Platform Single Sign-On (SSO)",
+                        "icon": "https://ics.services.jamfcloud.com/icon/hash_be50910c664ac3632bb953bc0bdcda765dea449a5cca108d87530200ecc5aff5",
+                        "progresstext": "Microsoft Company Portal helps you securely access internal apps, data and resources.",
+                        "trigger_list": [
+                            {
+                                "trigger": "microsoftcompanyportal",
+                                "validation": "/Applications/Company Portal.app"
+                            }
+                        ]
+                    },
+                    {
                         "listitem": "Final Configuration",
                         "subtitle": "Configures remaining Church settings",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_4723e3e341a7e11e6881e418cf91b157fcc081bdb8948697750e5da3562df728",
@@ -2524,6 +2533,18 @@ function policyJSONConfiguration() {
                             {
                                 "trigger": "microsoftteamsnew",
                                 "validation": "/Applications/Microsoft Teams.app"
+                            }
+                        ]
+                    },
+                    {
+                        "listitem": "Microsoft Company Portal",
+                        "subtitle": "Enables Platform Single Sign-On (SSO)",
+                        "icon": "https://ics.services.jamfcloud.com/icon/hash_be50910c664ac3632bb953bc0bdcda765dea449a5cca108d87530200ecc5aff5",
+                        "progresstext": "Microsoft Company Portal helps you securely access internal apps, data and resources.",
+                        "trigger_list": [
+                            {
+                                "trigger": "microsoftcompanyportal",
+                                "validation": "/Applications/Company Portal.app"
                             }
                         ]
                     },
@@ -2683,6 +2704,18 @@ function policyJSONConfiguration() {
                         ]
                     },
                     {
+                        "listitem": "Microsoft Company Portal",
+                        "subtitle": "Enables Platform Single Sign-On (SSO)",
+                        "icon": "https://ics.services.jamfcloud.com/icon/hash_be50910c664ac3632bb953bc0bdcda765dea449a5cca108d87530200ecc5aff5",
+                        "progresstext": "Microsoft Company Portal helps you securely access internal apps, data and resources.",
+                        "trigger_list": [
+                            {
+                                "trigger": "microsoftcompanyportal",
+                                "validation": "/Applications/Company Portal.app"
+                            }
+                        ]
+                    },
+                    {
                         "listitem": "Adobe Acrobat Reader",
                         "subtitle": "Full-featured PDF reader",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_988b669ca27eab93a9bcd53bb7e2873fb98be4eaa95ae8974c14d611bea1d95f",
@@ -2830,6 +2863,18 @@ function policyJSONConfiguration() {
                             {
                                 "trigger": "globalProtect",
                                 "validation": "/Applications/GlobalProtect.app"
+                            }
+                        ]
+                    },
+                    {
+                        "listitem": "Microsoft Company Portal",
+                        "subtitle": "Enables Platform Single Sign-On (SSO)",
+                        "icon": "https://ics.services.jamfcloud.com/icon/hash_be50910c664ac3632bb953bc0bdcda765dea449a5cca108d87530200ecc5aff5",
+                        "progresstext": "Microsoft Company Portal helps you securely access internal apps, data and resources.",
+                        "trigger_list": [
+                            {
+                                "trigger": "microsoftcompanyportal",
+                                "validation": "/Applications/Company Portal.app"
                             }
                         ]
                     },
