@@ -17,6 +17,7 @@
 #   - Added "activate" command to Validations
 #   - Updated the Microsoft Teams message template to the new format #156 (thanks, @nlopezUA!)
 #   - Simplify Client-side Logging (thanks, @DevliegereM!)
+#   - Added proof-of-concept validations for swiftDialog `2.5.6`'s "hide or show" dialog window
 #
 ####################################################################################################
 
@@ -32,7 +33,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.16.0-b8"
+scriptVersion="1.16.0-b9"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -437,6 +438,10 @@ function run_jamf_trigger() {
         logMessage "SETUP YOUR MAC DIALOG" "DEBUG MODE: TRIGGER: $jamfBinary policy -event $trigger ${suppressRecon}"
         sleep "${debugModeSleepAmount}"
 
+    elif [[ "${trigger}" == "none" ]] ; then
+
+        logMessage "SETUP YOUR MAC DIALOG" "Trigger of '${trigger}' specified; proceeding to validation …"
+
     else
 
         logMessage "SETUP YOUR MAC DIALOG" "RUNNING: $jamfBinary policy -event $trigger"
@@ -525,6 +530,28 @@ function confirmPolicyExecution() {
                 sleep "${debugModeSleepAmount}"
             else
                 dialogUpdateSetupYourMac "blurscreen: disable"
+            fi
+            ;;
+
+        "Hide Dialog" | "hide dialog" )
+
+            outputLineNumberInVerboseDebugMode
+            logMessage "SETUP YOUR MAC DIALOG" "Confirm Policy Execution: ${validation}"
+            if [[ "${debugMode}" == "true" ]] || [[ "${debugMode}" == "verbose" ]] ; then
+                sleep "${debugModeSleepAmount}"
+            else
+                dialogUpdateSetupYourMac "hide: "
+            fi
+            ;;
+
+        "Show Dialog" | "show dialog" )
+
+            outputLineNumberInVerboseDebugMode
+            logMessage "SETUP YOUR MAC DIALOG" "Confirm Policy Execution: ${validation}"
+            if [[ "${debugMode}" == "true" ]] || [[ "${debugMode}" == "verbose" ]] ; then
+                sleep "${debugModeSleepAmount}"
+            else
+                dialogUpdateSetupYourMac "show: "
             fi
             ;;
 
@@ -2271,6 +2298,10 @@ function policyJSONConfiguration() {
                         "progresstext": "Use Palo Alto GlobalProtect to establish a Virtual Private Network (VPN) connection to Church headquarters.",
                         "trigger_list": [
                             {
+                                "trigger": "none",
+                                "validation": "Blurscreen Off"
+                            },
+                            {
                                 "trigger": "globalProtect",
                                 "validation": "/Applications/GlobalProtect.app"
                             }
@@ -2308,7 +2339,7 @@ function policyJSONConfiguration() {
                         "trigger_list": [
                             {
                                 "trigger": "finalConfiguration",
-                                "validation": "None"
+                                "validation": "Hide Dialog"
                             },
                             {
                                 "trigger": "reconAtReboot",
@@ -2322,6 +2353,14 @@ function policyJSONConfiguration() {
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_ff2147a6c09f5ef73d1c4406d00346811a9c64c0b6b7f36eb52fcb44943d26f9",
                         "progresstext": "A listing of your Mac’s apps and settings — its inventory — is sent automatically to the Jamf Pro server daily.",
                         "trigger_list": [
+                            {
+                                "trigger": "none",
+                                "validation": "Blurscreen On"
+                            },
+                            {
+                                "trigger": "none",
+                                "validation": "Show Dialog"
+                            },
                             {
                                 "trigger": "recon",
                                 "validation": "recon"
@@ -2422,6 +2461,10 @@ function policyJSONConfiguration() {
                         "progresstext": "Use Palo Alto GlobalProtect to establish a Virtual Private Network (VPN) connection to Church headquarters.",
                         "trigger_list": [
                             {
+                                "trigger": "none",
+                                "validation": "Blurscreen Off"
+                            },
+                            {
                                 "trigger": "globalProtect",
                                 "validation": "/Applications/GlobalProtect.app"
                             }
@@ -2475,7 +2518,7 @@ function policyJSONConfiguration() {
                         "trigger_list": [
                             {
                                 "trigger": "finalConfiguration",
-                                "validation": "None"
+                                "validation": "Hide Dialog"
                             },
                             {
                                 "trigger": "reconAtReboot",
@@ -2489,6 +2532,14 @@ function policyJSONConfiguration() {
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_ff2147a6c09f5ef73d1c4406d00346811a9c64c0b6b7f36eb52fcb44943d26f9",
                         "progresstext": "A listing of your Mac’s apps and settings — its inventory — is sent automatically to the Jamf Pro server daily.",
                         "trigger_list": [
+                            {
+                                "trigger": "none",
+                                "validation": "Blurscreen On"
+                            },
+                            {
+                                "trigger": "none",
+                                "validation": "Show Dialog"
+                            },
                             {
                                 "trigger": "recon",
                                 "validation": "recon"
@@ -2589,6 +2640,10 @@ function policyJSONConfiguration() {
                         "progresstext": "Use Palo Alto GlobalProtect to establish a Virtual Private Network (VPN) connection to Church headquarters.",
                         "trigger_list": [
                             {
+                                "trigger": "none",
+                                "validation": "Blurscreen Off"
+                            },
+                            {
                                 "trigger": "globalProtect",
                                 "validation": "/Applications/GlobalProtect.app"
                             }
@@ -2666,7 +2721,7 @@ function policyJSONConfiguration() {
                         "trigger_list": [
                             {
                                 "trigger": "finalConfiguration",
-                                "validation": "None"
+                                "validation": "Hide Dialog"
                             },
                             {
                                 "trigger": "reconAtReboot",
@@ -2680,6 +2735,14 @@ function policyJSONConfiguration() {
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_ff2147a6c09f5ef73d1c4406d00346811a9c64c0b6b7f36eb52fcb44943d26f9",
                         "progresstext": "A listing of your Mac’s apps and settings — its inventory — is sent automatically to the Jamf Pro server daily.",
                         "trigger_list": [
+                            {
+                                "trigger": "none",
+                                "validation": "Blurscreen On"
+                            },
+                            {
+                                "trigger": "none",
+                                "validation": "Show Dialog"
+                            },
                             {
                                 "trigger": "recon",
                                 "validation": "recon"
@@ -2780,6 +2843,10 @@ function policyJSONConfiguration() {
                         "progresstext": "Use Palo Alto GlobalProtect to establish a Virtual Private Network (VPN) connection to Church headquarters.",
                         "trigger_list": [
                             {
+                                "trigger": "none",
+                                "validation": "Blurscreen Off"
+                            },
+                            {
                                 "trigger": "globalProtect",
                                 "validation": "/Applications/GlobalProtect.app"
                             }
@@ -2805,7 +2872,7 @@ function policyJSONConfiguration() {
                         "trigger_list": [
                             {
                                 "trigger": "finalConfiguration",
-                                "validation": "Blurscreen Off"
+                                "validation": "Hide Dialog"
                             },
                             {
                                 "trigger": "reconAtReboot",
@@ -2819,6 +2886,14 @@ function policyJSONConfiguration() {
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_ff2147a6c09f5ef73d1c4406d00346811a9c64c0b6b7f36eb52fcb44943d26f9",
                         "progresstext": "A listing of your Mac’s apps and settings — its inventory — is sent automatically to the Jamf Pro server daily.",
                         "trigger_list": [
+                            {
+                                "trigger": "none",
+                                "validation": "Blurscreen On"
+                            },
+                            {
+                                "trigger": "none",
+                                "validation": "Show Dialog"
+                            },
                             {
                                 "trigger": "recon",
                                 "validation": "recon"
