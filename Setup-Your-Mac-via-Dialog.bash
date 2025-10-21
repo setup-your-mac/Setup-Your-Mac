@@ -10,7 +10,7 @@
 #
 # HISTORY
 #
-#   Version 1.16.0, 20-May-2025
+#   Version 1.16.0, 21-Oct-2025
 #   - Added proof-of-concept validations for swiftDialog `2.5.1`'s "blurscreen" control
 #   - Removed vendor-specific Local Validations (in favor of Remote Validations)
 #   - Updated Configuration `policyJSON` to better match internal usage
@@ -19,6 +19,7 @@
 #   - Simplify Client-side Logging (thanks, @DevliegereM!)
 #   - Added proof-of-concept validations for swiftDialog `2.5.6`'s "hide or show" dialog window
 #   - Updated Dynamic Download Estimates for macOS 26 (and beyond)
+#   - Updated for swiftDialog 3.0.0
 #
 ####################################################################################################
 
@@ -34,16 +35,16 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.16.0-b10"
+scriptVersion="1.16.0-b12"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
-welcomeDialog="${6:-"userInput"}"                                               # Parameter 6: Welcome dialog [ userInput (default) | video | messageOnly | false ]
-completionActionOption="${7:-"Restart Attended"}"                               # Parameter 7: Completion Action [ wait | sleep (with seconds) | Shut Down | Shut Down Attended | Shut Down Confirm | Restart | Restart Attended (default) | Restart Confirm | Log Out | Log Out Attended | Log Out Confirm ]requiredMinimumBuild="${8:-"disabled"}"                                         # Parameter 8: Required Minimum Build [ disabled (default) | 23F ] (i.e., Your organization's required minimum build of macOS to allow users to proceed; use "23F" for macOS 14.5)
+welcomeDialog="${6:-"false"}"                                               # Parameter 6: Welcome dialog [ userInput (default) | video | messageOnly | false ]
+completionActionOption="${7:-"wait"}"                               # Parameter 7: Completion Action [ wait | sleep (with seconds) | Shut Down | Shut Down Attended | Shut Down Confirm | Restart | Restart Attended (default) | Restart Confirm | Log Out | Log Out Attended | Log Out Confirm ]requiredMinimumBuild="${8:-"disabled"}"                                         # Parameter 8: Required Minimum Build [ disabled (default) | 23F ] (i.e., Your organization's required minimum build of macOS to allow users to proceed; use "23F" for macOS 14.5)
 outdatedOsAction="${9:-"/System/Library/CoreServices/Software Update.app"}"     # Parameter 9: Outdated OS Action [ /System/Library/CoreServices/Software Update.app (default) | jamfselfservice://content?entity=policy&id=117&action=view ] (i.e., Jamf Pro Self Service policy ID for operating system ugprades)
 webhookURL="${10:-""}"                                                          # Parameter 10: Microsoft Teams or Slack Webhook URL [ Leave blank to disable (default) | https://microsoftTeams.webhook.com/URL | https://hooks.slack.com/services/URL ] Can be used to send a success or failure message to Microsoft Teams or Slack via Webhook. (Function will automatically detect if Webhook URL is for Slack or Teams; can be modified to include other communication tools that support functionality.)
 presetConfiguration="${11:-""}"                                                 # Parameter 11: Specify a Configuration (i.e., `policyJSON`; NOTE: If set, `promptForConfiguration` will be automatically suppressed and the preselected configuration will be used instead)
-swiftDialogMinimumRequiredVersion="2.5.6.4805"                                  # This will be set and updated as dependancies on newer features change.
+swiftDialogMinimumRequiredVersion="3.0.0.4910"                                  # This will be set and updated as dependancies on newer features change.
 
 
 
@@ -236,6 +237,7 @@ function calculateFreeDiskSpace() {
 
 function dialogUpdateWelcome(){
     echo "$1" >> "$welcomeCommandFile"
+    sleep 0.3
 }
 
 
@@ -247,6 +249,7 @@ function dialogUpdateWelcome(){
 function dialogUpdateSetupYourMac() {
     logMessage "SETUP YOUR MAC DIALOG" "$1"
     echo "$1" >> "$setupYourMacCommandFile"
+    sleep 0.3
 }
 
 
@@ -258,6 +261,7 @@ function dialogUpdateSetupYourMac() {
 function dialogUpdateFailure(){
     logMessage "FAILURE DIALOG" "$1"
     echo "$1" >> "$failureCommandFile"
+    sleep 0.3
 }
 
 
@@ -2311,7 +2315,7 @@ function policyJSONConfiguration() {
                     {
                         "listitem": "Microsoft Teams",
                         "subtitle": "The hub for teamwork in Microsoft 365",
-                        "icon": "https://ics.services.jamfcloud.com/icon/hash_dcb65709dba6cffa90a5eeaa54cb548d5ecc3b051f39feadd39e02744f37c19e",
+                        "icon": "https://usw2.ics.services.jamfcloud.com/icon/hash_0fe09467b4c20a184480f663c02a65c7466287ebb30644264eae65238171d0e8",
                         "progresstext": "Microsoft Teams is a hub for teamwork in Microsoft 365. Keep all your team’s chats, meetings and files together in one place.",
                         "trigger_list": [
                             {
@@ -2490,7 +2494,7 @@ function policyJSONConfiguration() {
                     {
                         "listitem": "Microsoft Teams",
                         "subtitle": "The hub for teamwork in Microsoft 365",
-                        "icon": "https://ics.services.jamfcloud.com/icon/hash_dcb65709dba6cffa90a5eeaa54cb548d5ecc3b051f39feadd39e02744f37c19e",
+                        "icon": "https://usw2.ics.services.jamfcloud.com/icon/hash_0fe09467b4c20a184480f663c02a65c7466287ebb30644264eae65238171d0e8",
                         "progresstext": "Microsoft Teams is a hub for teamwork in Office 365. Keep all your team’s chats, meetings and files together in one place.",
                         "trigger_list": [
                             {
@@ -2669,7 +2673,7 @@ function policyJSONConfiguration() {
                     {
                         "listitem": "Microsoft Teams",
                         "subtitle": "The hub for teamwork in Microsoft 365",
-                        "icon": "https://ics.services.jamfcloud.com/icon/hash_dcb65709dba6cffa90a5eeaa54cb548d5ecc3b051f39feadd39e02744f37c19e",
+                        "icon": "https://usw2.ics.services.jamfcloud.com/icon/hash_0fe09467b4c20a184480f663c02a65c7466287ebb30644264eae65238171d0e8",
                         "progresstext": "Microsoft Teams is a hub for teamwork in Office 365. Keep all your team’s chats, meetings and files together in one place.",
                         "trigger_list": [
                             {
@@ -3055,7 +3059,7 @@ if [[ "${welcomeDialog}" == "video" ]]; then
     logMessage "WELCOME DIALOG" "Using ${symConfiguration} Configuration …"
     policyJSONConfiguration
 
-    eval "${dialogSetupYourMacCMD[*]}" & sleep 0.3
+    eval "${dialogSetupYourMacCMD[*]}" & sleep 0.5
     dialogUpdateSetupYourMac "activate:"
     if [[ -n "${overlayoverride}" ]]; then
         dialogUpdateSetupYourMac "overlayicon: ${overlayoverride}"
