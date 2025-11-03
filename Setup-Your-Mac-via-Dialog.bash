@@ -10,7 +10,7 @@
 #
 # HISTORY
 #
-#   Version 1.16.0, 21-Oct-2025
+#   Version 1.16.0, 03-Nov-2025
 #   - Added proof-of-concept validations for swiftDialog `2.5.1`'s "blurscreen" control
 #   - Removed vendor-specific Local Validations (in favor of Remote Validations)
 #   - Updated Configuration `policyJSON` to better match internal usage
@@ -20,6 +20,7 @@
 #   - Added proof-of-concept validations for swiftDialog `2.5.6`'s "hide or show" dialog window
 #   - Updated Dynamic Download Estimates for macOS 26 (and beyond)
 #   - Updated for swiftDialog 3.0.0
+#   - Updated `checkNetworkQualityCatchAllConfiguration` for macOS 26 (thanks for the heads-up, @Harald Brouwers!)
 #
 ####################################################################################################
 
@@ -35,7 +36,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.16.0-b12"
+scriptVersion="1.16.0-b13"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -1061,7 +1062,7 @@ function checkNetworkQualityCatchAllConfiguration() {
             dlEndDate="N/A; macOS ${osVersion}"
             ;;
 
-        12* | 13* | 14* | 15* )
+        * )
             dlThroughput=$( get_json_value "$networkQualityTest" "dl_throughput")
             dlResponsiveness=$( get_json_value "$networkQualityTest" "dl_responsiveness" )
             dlStartDate=$( get_json_value "$networkQualityTest" "start_date" )
