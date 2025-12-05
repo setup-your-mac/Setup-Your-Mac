@@ -15,7 +15,7 @@
 #   - Removed vendor-specific Local Validations (in favor of Remote Validations)
 #   - Updated Configuration `policyJSON` to better match internal usage
 #   - Added "activate" command to Validations
-#   - Updated the Microsoft Teams message template to the new format #156 (thanks, @nlopezUA!)
+#   - Updated the Microsoft Teams message template to the new format (Pull Request #156; thanks, @nlopezUA!)
 #   - Simplify Client-side Logging (thanks, @DevliegereM!)
 #   - Added proof-of-concept validations for swiftDialog `2.5.6`'s "hide or show" dialog window
 #   - Updated Dynamic Download Estimates for macOS 26 (and beyond)
@@ -37,7 +37,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.16.0-b15"
+scriptVersion="1.16.0-b16"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]

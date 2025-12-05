@@ -6,7 +6,7 @@
 - Removed vendor-specific Local Validations (in favor of Remote Validations)
 - Updated Configuration `policyJSON` to better match internal usage
 - Added "activate" command to Validations
-- Updated the Microsoft Teams message template to the new format #156 (thanks, @nlopezUA!)
+- Updated the Microsoft Teams message template to the new format  (Pull Request #156; thanks, @nlopezUA!)
 - Simplify Client-side Logging (thanks, @DevliegereM!)
 - Added proof-of-concept validations for swiftDialog `2.5.6`'s "hide or show" dialog window
 - Updated Dynamic Download Estimates for macOS 26 (and beyond)
