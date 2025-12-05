@@ -222,11 +222,11 @@ function runAsUser() {
 function greeting() {
     hour=$(date +%H)
     if [[ $hour -le 11 ]]; then
-        echo "Good morning"
+        echo "Good morning,"
     elif [[ $hour -le 18 ]]; then
-        echo "Good afternoon"
+        echo "Good afternoon,"
     else
-        echo "Good evening"
+        echo "Good evening,"
     fi
 }
 
@@ -1838,7 +1838,7 @@ failureCommandFile=$( mktemp -u /var/tmp/dialogCommandFileFailure.XXX )
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 timeOfDay=$(greeting)
-welcomeTitle="$timeOfDay ${loggedInUserFirstname}!  \nWelcome to your new ${modelName}"
+welcomeTitle="${timeOfDay}, ${loggedInUserFirstname}!  \nWelcome to your new ${modelName}"
 
 welcomeMessage="Please enter the **required** information for your ${modelName}, select your preferred **Configuration** then click **Continue** to start applying settings to your new Mac.  \n\nOnce completed, the **Wait** button will be enabled and you‘ll be able to review the results before restarting your ${modelName}."
 
@@ -2321,6 +2321,18 @@ function policyJSONConfiguration() {
                         ]
                     },
                     {
+                        "listitem": "Okta Verify",
+                        "subtitle": "Multifactor Authentication Application",
+                        "icon": "https://ics.services.jamfcloud.com/icon/hash_136962d8faa0e3089b037401052d8babf572fb810c129d84386fa37d846d2d6d",
+                        "progresstext": "Okta Verify is a multifactor authentication (MFA) application designed to securely verify user identities.",
+                        "trigger_list": [
+                            {
+                                "trigger": "oktaVerify",
+                                "validation": "/Applications/Okta Verify.app"
+                            }
+                        ]
+                    },
+                    {
                         "listitem": "Palo Alto GlobalProtect",
                         "subtitle": "Virtual Private Network (VPN) connection to Church headquarters",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_ca1ee7bc394882e26b8c4b380d4eac39ce5fc7d25d7d90e35984d14756fe57fc",
@@ -2345,18 +2357,6 @@ function policyJSONConfiguration() {
                             {
                                 "trigger": "microsoftteamsnew",
                                 "validation": "/Applications/Microsoft Teams.app"
-                            }
-                        ]
-                    },
-                    {
-                        "listitem": "Microsoft Company Portal",
-                        "subtitle": "Enables Platform Single Sign-On (SSO)",
-                        "icon": "https://ics.services.jamfcloud.com/icon/hash_be50910c664ac3632bb953bc0bdcda765dea449a5cca108d87530200ecc5aff5",
-                        "progresstext": "Microsoft Company Portal helps you securely access internal apps, data and resources.",
-                        "trigger_list": [
-                            {
-                                "trigger": "microsoftcompanyportal",
-                                "validation": "/Applications/Company Portal.app"
                             }
                         ]
                     },
@@ -2484,6 +2484,18 @@ function policyJSONConfiguration() {
                         ]
                     },
                     {
+                        "listitem": "Okta Verify",
+                        "subtitle": "Multifactor Authentication Application",
+                        "icon": "https://ics.services.jamfcloud.com/icon/hash_136962d8faa0e3089b037401052d8babf572fb810c129d84386fa37d846d2d6d",
+                        "progresstext": "Okta Verify is a multifactor authentication (MFA) application designed to securely verify user identities.",
+                        "trigger_list": [
+                            {
+                                "trigger": "oktaVerify",
+                                "validation": "/Applications/Okta Verify.app"
+                            }
+                        ]
+                    },
+                    {
                         "listitem": "Palo Alto GlobalProtect",
                         "subtitle": "Virtual Private Network (VPN) connection to Church headquarters",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_ca1ee7bc394882e26b8c4b380d4eac39ce5fc7d25d7d90e35984d14756fe57fc",
@@ -2524,18 +2536,6 @@ function policyJSONConfiguration() {
                             {
                                 "trigger": "microsoftteamsnew",
                                 "validation": "/Applications/Microsoft Teams.app"
-                            }
-                        ]
-                    },
-                    {
-                        "listitem": "Microsoft Company Portal",
-                        "subtitle": "Enables Platform Single Sign-On (SSO)",
-                        "icon": "https://ics.services.jamfcloud.com/icon/hash_be50910c664ac3632bb953bc0bdcda765dea449a5cca108d87530200ecc5aff5",
-                        "progresstext": "Microsoft Company Portal helps you securely access internal apps, data and resources.",
-                        "trigger_list": [
-                            {
-                                "trigger": "microsoftcompanyportal",
-                                "validation": "/Applications/Company Portal.app"
                             }
                         ]
                     },
@@ -2663,6 +2663,18 @@ function policyJSONConfiguration() {
                         ]
                     },
                     {
+                        "listitem": "Okta Verify",
+                        "subtitle": "Multifactor Authentication Application",
+                        "icon": "https://ics.services.jamfcloud.com/icon/hash_136962d8faa0e3089b037401052d8babf572fb810c129d84386fa37d846d2d6d",
+                        "progresstext": "Okta Verify is a multifactor authentication (MFA) application designed to securely verify user identities.",
+                        "trigger_list": [
+                            {
+                                "trigger": "oktaVerify",
+                                "validation": "/Applications/Okta Verify.app"
+                            }
+                        ]
+                    },
+                    {
                         "listitem": "Palo Alto GlobalProtect",
                         "subtitle": "Virtual Private Network (VPN) connection to Church headquarters",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_ca1ee7bc394882e26b8c4b380d4eac39ce5fc7d25d7d90e35984d14756fe57fc",
@@ -2703,18 +2715,6 @@ function policyJSONConfiguration() {
                             {
                                 "trigger": "microsoftteamsnew",
                                 "validation": "/Applications/Microsoft Teams.app"
-                            }
-                        ]
-                    },
-                    {
-                        "listitem": "Microsoft Company Portal",
-                        "subtitle": "Enables Platform Single Sign-On (SSO)",
-                        "icon": "https://ics.services.jamfcloud.com/icon/hash_be50910c664ac3632bb953bc0bdcda765dea449a5cca108d87530200ecc5aff5",
-                        "progresstext": "Microsoft Company Portal helps you securely access internal apps, data and resources.",
-                        "trigger_list": [
-                            {
-                                "trigger": "microsoftcompanyportal",
-                                "validation": "/Applications/Company Portal.app"
                             }
                         ]
                     },
@@ -2866,6 +2866,18 @@ function policyJSONConfiguration() {
                         ]
                     },
                     {
+                        "listitem": "Okta Verify",
+                        "subtitle": "Multifactor Authentication Application",
+                        "icon": "https://ics.services.jamfcloud.com/icon/hash_136962d8faa0e3089b037401052d8babf572fb810c129d84386fa37d846d2d6d",
+                        "progresstext": "Okta Verify is a multifactor authentication (MFA) application designed to securely verify user identities.",
+                        "trigger_list": [
+                            {
+                                "trigger": "oktaVerify",
+                                "validation": "/Applications/Okta Verify.app"
+                            }
+                        ]
+                    },
+                    {
                         "listitem": "Palo Alto GlobalProtect",
                         "subtitle": "Virtual Private Network (VPN) connection to Church headquarters",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_ca1ee7bc394882e26b8c4b380d4eac39ce5fc7d25d7d90e35984d14756fe57fc",
@@ -2881,19 +2893,7 @@ function policyJSONConfiguration() {
                             }
                         ]
                     },
-                    {
-                        "listitem": "Microsoft Company Portal",
-                        "subtitle": "Enables Platform Single Sign-On (SSO)",
-                        "icon": "https://ics.services.jamfcloud.com/icon/hash_be50910c664ac3632bb953bc0bdcda765dea449a5cca108d87530200ecc5aff5",
-                        "progresstext": "Microsoft Company Portal helps you securely access internal apps, data and resources.",
-                        "trigger_list": [
-                            {
-                                "trigger": "microsoftcompanyportal",
-                                "validation": "/Applications/Company Portal.app"
-                            }
-                        ]
-                    },
-                    {
+                                        {
                         "listitem": "Final Configuration",
                         "subtitle": "Configures remaining Church settings",
                         "icon": "https://ics.services.jamfcloud.com/icon/hash_4723e3e341a7e11e6881e418cf91b157fcc081bdb8948697750e5da3562df728",
