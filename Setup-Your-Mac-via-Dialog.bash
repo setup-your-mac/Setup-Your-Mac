@@ -59,6 +59,7 @@ humanReadableScriptName="Setup Your Mac"    # Script Human-readable Name
 organizationScriptName="sym"                # Organization's Script Name
 debugModeSleepAmount="3"                    # Delay for various actions when running in Debug Mode
 failureDialog="true"                        # Display the so-called "Failure" dialog (after the main SYM dialog) [ true | false ]
+requiredMinimumBatteryPercentage="25"       # Minimum battery percentage allowed to run without AC power. Set to "0" to always require AC power (original behaviour).
 
 
 
@@ -1586,25 +1587,89 @@ caffeinate -dimsu -w $symPID &
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 function acPowerCheck() {
-    waitTime=300
-    humanReadableTime=$(printf '%dh:%dm:%ds\n' $((waitTime/3600)) $((waitTime%3600/60)) $((waitTime%60)))
 
-    if pmset -g ps | grep -q "AC Power"; then
-        logMessage "PRE-FLIGHT" "AC power detected; proceeding..."
+    preFlight "Ensure computer is connected to AC power"
+
+    # Amount of time (in seconds) to allow a user to connect to AC power before exiting
+    # If 0, then the user will not have the opportunity to connect to AC power
+    acPowerWaitTimer="300"
+    humanReadablePowerWaitTimer="$((acPowerWaitTimer / 60)) minutes"
+    endTime=$(date -v+${acPowerWaitTimer}S +"%H:%M")
+
+    # Read current battery percentage as an integer (eg 79)
+    currentBatteryPercentage=$(pmset -g batt | grep -Eo "[0-9]+%" | head -1 | tr -d '%')
+
+    if [[ -n "${currentBatteryPercentage}" ]]; then
+        preFlight "Current battery level: ${currentBatteryPercentage}%"
     else
-        logMessage "PRE-FLIGHT" "No AC power detected; waiting for $humanReadableTime..."
-        osascript -e "display dialog \"Please connect AC power within $humanReadableTime.\" with title \"Setup Your Mac\" buttons {\"OK\"} with icon caution" &
-        while [[ $waitTime -gt 0 ]]; do
-            if pmset -g ps | grep -q "AC Power"; then
-                logMessage "PRE-FLIGHT" "AC power connected; proceeding..."
+        preFlight "Unable to determine current battery level; treating as 0%."
+        currentBatteryPercentage="0"
+    fi
+
+    preFlight "Required minimum battery percentage (to run without AC): ${requiredMinimumBatteryPercentage}%"
+
+    function waitForPower() {
+
+        preFlight "Waiting for AC power …"
+
+        while [[ "$acPowerWaitTimer" -gt "0" ]]; do
+            if pmset -g ps | grep "AC Power" > /dev/null ; then
+                preFlight "AC power detected; proceeding …"
+                killProcess "osascript"
                 return
             fi
             sleep 1
             ((waitTime--))
         done
-        logMessage "ERROR" "AC power not connected; exiting."
+        killProcess "osascript"
+        preFlight "No AC power detected, exiting"
+        osascript -e 'display dialog "Setup Your Mac needs the battery to be at least '"${requiredMinimumBatteryPercentage}"'% to run without AC power.\r\rSetup Your Mac waited '"${humanReadablePowerWaitTimer}"' for AC power to be connected, but none was detected.\r\rPlease connect AC power and try again.\r\r" with title "Setup Your Mac: No AC power detected" buttons {"OK"} with icon caution'
         exit 1
+
+    }
+
+
+
+    # Check if computer is on AC power.
+    # If not, allow running on battery if it meets the configured minimum percentage.
+    # Otherwise, fall back to original behaviour and require AC.
+
+    if pmset -g ps | grep "AC Power" > /dev/null ; then
+
+        preFlight "AC power detected; proceeding …"
+        return
+
+    else
+
+        # Allow running on battery if:
+        # - requiredMinimumBatteryPercentage > 0
+        # - currentBatteryPercentage >= requiredMinimumBatteryPercentage
+        if [[ -n "${requiredMinimumBatteryPercentage}" ]] \
+           && [[ "${requiredMinimumBatteryPercentage}" -gt 0 ]] \
+           && [[ -n "${currentBatteryPercentage}" ]] \
+           && [[ "${currentBatteryPercentage}" -ge "${requiredMinimumBatteryPercentage}" ]]; then
+
+            preFlight "Running on battery power (${currentBatteryPercentage}%) which meets required minimum (${requiredMinimumBatteryPercentage}%); proceeding without AC …"
+            return
+        fi
+
+        # Otherwise, enforce AC requirement (existing behaviour)
+        preFlight "Battery level ${currentBatteryPercentage}% is below required minimum (${requiredMinimumBatteryPercentage}%) or could not be determined; enforcing AC power requirement."
+
+        if [[ "$acPowerWaitTimer" -gt 0 ]]; then
+            osascript -e 'display dialog "Setup Your Mac needs the battery to be at least '"${requiredMinimumBatteryPercentage}"'% to run without AC power.\r\rPlease plug in your power adapter to continue.\r\rWaiting '"${humanReadablePowerWaitTimer}"' (until '"${endTime}"') for AC power before Setup Your Mac quits.\r\r" with title "Setup Your Mac: No AC power detected" buttons {"OK"} with icon caution' &
+            waitForPower
+
+        else
+
+            preFlight "No AC power detected, exiting"
+            osascript -e 'display dialog "Setup Your Mac needs the battery to be at least '"${requiredMinimumBatteryPercentage}"'% to run without AC power.\r\rPlease connect AC power and try again.\r\r" with title "Setup Your Mac: No AC power detected" buttons {"OK"} with icon caution'
+            exit 1
+
+        fi
+
     fi
+
 }
 
 acPowerCheck # Comment-out to disable
