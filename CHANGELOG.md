@@ -1,7 +1,7 @@
 # CHANGELOG
 
-## 1.16.0
-### 05-Dec-2025
+## 1.16.0rc1
+### 28-Dec-2025
 - Added proof-of-concept validations for swiftDialog `2.5.1`'s "blurscreen" control
 - Removed vendor-specific Local Validations (in favor of Remote Validations)
 - Updated Configuration `policyJSON` to better match internal usage
@@ -13,6 +13,7 @@
 - Updated for swiftDialog `3.0.0`
 - Updated `checkNetworkQualityCatchAllConfiguration` for macOS 26 (thanks for the heads-up, @Harald Brouwers!)
 - Added new salutation banner greeting, based on time o’ day (Pull Request #171; thanks, @ScottEKendall!)
+- Add configurable battery threshold to AC power pre-flight check (Pull Request #175; thanks, @owainri!)
 
 ## 1.15.1
 ### 06-Feb-2025

@@ -10,7 +10,7 @@
 #
 # HISTORY
 #
-#   Version 1.16.0, 05-Dec-2025
+#   Version 1.16.0rc1, 28-Dec-2025
 #   - Added proof-of-concept validations for swiftDialog `2.5.1`'s "blurscreen" control
 #   - Removed vendor-specific Local Validations (in favor of Remote Validations)
 #   - Updated Configuration `policyJSON` to better match internal usage
@@ -22,6 +22,7 @@
 #   - Updated for swiftDialog `3.0.0`
 #   - Updated `checkNetworkQualityCatchAllConfiguration` for macOS 26 (thanks for the heads-up, @Harald Brouwers!)
 #   - Added new salutation banner greeting, based on time o’ day (Pull Request #171; thanks, @ScottEKendall!)
+#   - Add configurable battery threshold to AC power pre-flight check (Pull Request #175; thanks, @owainri!)
 #
 ####################################################################################################
 
@@ -37,7 +38,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.16.0-b16"
+scriptVersion="1.16.0rc1"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -47,7 +48,7 @@ requiredMinimumBuild="${8:-"disabled"}"                                         
 outdatedOsAction="${9:-"/System/Library/CoreServices/Software Update.app"}"     # Parameter 9: Outdated OS Action [ /System/Library/CoreServices/Software Update.app (default) | jamfselfservice://content?entity=policy&id=117&action=view ] (i.e., Jamf Pro Self Service policy ID for operating system ugprades)
 webhookURL="${10:-""}"                                                          # Parameter 10: Microsoft Teams or Slack Webhook URL [ Leave blank to disable (default) | https://microsoftTeams.webhook.com/URL | https://hooks.slack.com/services/URL ] Can be used to send a success or failure message to Microsoft Teams or Slack via Webhook. (Function will automatically detect if Webhook URL is for Slack or Teams; can be modified to include other communication tools that support functionality.)
 presetConfiguration="${11:-""}"                                                 # Parameter 11: Specify a Configuration (i.e., `policyJSON`; NOTE: If set, `promptForConfiguration` will be automatically suppressed and the preselected configuration will be used instead)
-swiftDialogMinimumRequiredVersion="3.0.0.4922"                                  # This will be set and updated as dependancies on newer features change.
+swiftDialogMinimumRequiredVersion="2.5.6.4805"                                  # This will be set and updated as dependancies on newer features change.
 
 
 
@@ -221,10 +222,13 @@ function runAsUser() {
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 function greeting() {
+    local hour
     hour=$(date +%H)
-    if [[ $hour -le 11 ]]; then
+    hour=$((10#$hour))   # force decimal (base-10), avoids 08/09 octal issue
+
+    if (( hour <= 11 )); then
         echo "Good morning,"
-    elif [[ $hour -le 18 ]]; then
+    elif (( hour <= 18 )); then
         echo "Good afternoon,"
     else
         echo "Good evening,"
@@ -1580,15 +1584,12 @@ caffeinate -dimsu -w $symPID &
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Pre-flight Check: Ensure computer is connected to AC power (thanks, Josh!)
-# https://github.com/kc9wwh/macOSUpgrade/blob/master/macOSUpgrade.sh
-# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Changed to be simplified and reduce redudant code
+# Pre-flight Check: Ensure computer is connected to AC power (thanks, @kc9wwh and @owainri!)
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 function acPowerCheck() {
 
-    preFlight "Ensure computer is connected to AC power"
+    logMessage "PRE-FLIGHT" "Ensure computer is connected to AC power"
 
     # Amount of time (in seconds) to allow a user to connect to AC power before exiting
     # If 0, then the user will not have the opportunity to connect to AC power
@@ -1600,21 +1601,21 @@ function acPowerCheck() {
     currentBatteryPercentage=$(pmset -g batt | grep -Eo "[0-9]+%" | head -1 | tr -d '%')
 
     if [[ -n "${currentBatteryPercentage}" ]]; then
-        preFlight "Current battery level: ${currentBatteryPercentage}%"
+        logMessage "PRE-FLIGHT" "Current battery level: ${currentBatteryPercentage}%"
     else
-        preFlight "Unable to determine current battery level; treating as 0%."
+        logMessage "PRE-FLIGHT" "Unable to determine current battery level; treating as 0%."
         currentBatteryPercentage="0"
     fi
 
-    preFlight "Required minimum battery percentage (to run without AC): ${requiredMinimumBatteryPercentage}%"
+    logMessage "PRE-FLIGHT" "Required minimum battery percentage (to run without AC): ${requiredMinimumBatteryPercentage}%"
 
     function waitForPower() {
 
-        preFlight "Waiting for AC power …"
+        logMessage "PRE-FLIGHT" "Waiting for AC power …"
 
         while [[ "$acPowerWaitTimer" -gt "0" ]]; do
             if pmset -g ps | grep "AC Power" > /dev/null ; then
-                preFlight "AC power detected; proceeding …"
+                logMessage "PRE-FLIGHT" "AC power detected; proceeding …"
                 killProcess "osascript"
                 return
             fi
@@ -1622,7 +1623,7 @@ function acPowerCheck() {
             ((waitTime--))
         done
         killProcess "osascript"
-        preFlight "No AC power detected, exiting"
+        logMessage "PRE-FLIGHT" "No AC power detected, exiting"
         osascript -e 'display dialog "Setup Your Mac needs the battery to be at least '"${requiredMinimumBatteryPercentage}"'% to run without AC power.\r\rSetup Your Mac waited '"${humanReadablePowerWaitTimer}"' for AC power to be connected, but none was detected.\r\rPlease connect AC power and try again.\r\r" with title "Setup Your Mac: No AC power detected" buttons {"OK"} with icon caution'
         exit 1
 
@@ -1636,7 +1637,7 @@ function acPowerCheck() {
 
     if pmset -g ps | grep "AC Power" > /dev/null ; then
 
-        preFlight "AC power detected; proceeding …"
+        logMessage "PRE-FLIGHT" "AC power detected; proceeding …"
         return
 
     else
@@ -1649,12 +1650,12 @@ function acPowerCheck() {
            && [[ -n "${currentBatteryPercentage}" ]] \
            && [[ "${currentBatteryPercentage}" -ge "${requiredMinimumBatteryPercentage}" ]]; then
 
-            preFlight "Running on battery power (${currentBatteryPercentage}%) which meets required minimum (${requiredMinimumBatteryPercentage}%); proceeding without AC …"
+            logMessage "PRE-FLIGHT" "Running on battery power (${currentBatteryPercentage}%) which meets required minimum (${requiredMinimumBatteryPercentage}%); proceeding without AC …"
             return
         fi
 
         # Otherwise, enforce AC requirement (existing behaviour)
-        preFlight "Battery level ${currentBatteryPercentage}% is below required minimum (${requiredMinimumBatteryPercentage}%) or could not be determined; enforcing AC power requirement."
+        logMessage "PRE-FLIGHT" "Battery level ${currentBatteryPercentage}% is below required minimum (${requiredMinimumBatteryPercentage}%) or could not be determined; enforcing AC power requirement."
 
         if [[ "$acPowerWaitTimer" -gt 0 ]]; then
             osascript -e 'display dialog "Setup Your Mac needs the battery to be at least '"${requiredMinimumBatteryPercentage}"'% to run without AC power.\r\rPlease plug in your power adapter to continue.\r\rWaiting '"${humanReadablePowerWaitTimer}"' (until '"${endTime}"') for AC power before Setup Your Mac quits.\r\r" with title "Setup Your Mac: No AC power detected" buttons {"OK"} with icon caution' &
@@ -1662,7 +1663,7 @@ function acPowerCheck() {
 
         else
 
-            preFlight "No AC power detected, exiting"
+            logMessage "PRE-FLIGHT" "No AC power detected, exiting"
             osascript -e 'display dialog "Setup Your Mac needs the battery to be at least '"${requiredMinimumBatteryPercentage}"'% to run without AC power.\r\rPlease connect AC power and try again.\r\r" with title "Setup Your Mac: No AC power detected" buttons {"OK"} with icon caution'
             exit 1
 
@@ -1740,7 +1741,19 @@ toggleJamfLaunchDaemon
 function dialogInstall() {
 
     # Get the URL of the latest PKG From the Dialog GitHub repo
-    dialogURL=$(curl -L --silent --fail "https://api.github.com/repos/swiftDialog/swiftDialog/releases/latest" | awk -F '"' "/browser_download_url/ && /pkg\"/ { print \$4; exit }")
+    dialogURL=$(curl -L --silent --fail --connect-timeout 10 --max-time 30 \
+        "https://api.github.com/repos/swiftDialog/swiftDialog/releases/latest" \
+        | awk -F '"' "/browser_download_url/ && /pkg\"/ { print \$4; exit }")
+    
+    # Validate URL was retrieved
+    if [[ -z "${dialogURL}" ]]; then
+        logMessage "PRE-FLIGHT" "Failed to retrieve swiftDialog download URL from GitHub API"
+    fi
+    
+    # Validate URL format
+    if [[ ! "${dialogURL}" =~ ^https://github\.com/ ]]; then
+        logMessage "PRE-FLIGHT" "Invalid swiftDialog URL format: ${dialogURL}"
+    fi
 
     # Expected Team ID of the downloaded PKG
     expectedDialogTeamID="PWA5E9TQ59"
@@ -1751,8 +1764,12 @@ function dialogInstall() {
     workDirectory=$( /usr/bin/basename "$0" )
     tempDirectory=$( /usr/bin/mktemp -d "/private/tmp/$workDirectory.XXXXXX" )
 
-    # Download the installer package
-    /usr/bin/curl --location --silent "$dialogURL" -o "$tempDirectory/Dialog.pkg"
+    # Download the installer package with timeouts
+    if ! curl --location --silent --fail --connect-timeout 10 --max-time 60 \
+             "$dialogURL" -o "$tempDirectory/Dialog.pkg"; then
+        rm -Rf "$tempDirectory"
+        logMessage "PRE-FLIGHT" "Failed to download swiftDialog package"
+    fi
 
     # Verify the download
     teamID=$(/usr/sbin/spctl -a -vv -t install "$tempDirectory/Dialog.pkg" 2>&1 | awk '/origin=/ {print $NF }' | tr -d '()')
@@ -1788,10 +1805,13 @@ function dialogCheck() {
     if [[ "${debugMode}" == "verbose" ]]; then logMessage "PRE-FLIGHT" "# # # SETUP YOUR MAC VERBOSE DEBUG MODE: Line No. ${LINENO} # # #" ; fi
 
     # Check for Dialog and install if not found
-    if [ ! -e "/Library/Application Support/Dialog/Dialog.app" ]; then
+    if [[ ! -x "/Library/Application Support/Dialog/Dialog.app" ]]; then
 
         logMessage "PRE-FLIGHT" "swiftDialog not found. Installing..."
         dialogInstall
+        if [[ ! -x "/usr/local/bin/dialog" ]]; then
+            logMessage "PRE-FLIGHT" "swiftDialog still not found; are downloads from GitHub blocked on this Mac?"
+        fi
 
     else
 
@@ -2145,7 +2165,7 @@ welcomeJSON='
     "selectitems" : [
         '${selectItemsJSON}'
     ],
-    "height" : "800"
+    "height" : "1001"
 }
 '
 
