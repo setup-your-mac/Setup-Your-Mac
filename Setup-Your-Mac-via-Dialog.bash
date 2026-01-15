@@ -971,6 +971,7 @@ function welcomeDialogInfoboxAnimation() {
 }
 
 
+
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Setup Your Mac dialog 'infobox' animation (thanks, @bartreadon!)
 # To convert emojis, see: https://r12a.github.io/app-conversion/
