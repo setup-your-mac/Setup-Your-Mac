@@ -10,7 +10,7 @@
 #
 # HISTORY
 #
-#   Version 1.16.0rc1, 28-Dec-2025
+#   Version 1.16.0rc2, 11-Feb-2026
 #   - Added proof-of-concept validations for swiftDialog `2.5.1`'s "blurscreen" control
 #   - Removed vendor-specific Local Validations (in favor of Remote Validations)
 #   - Updated Configuration `policyJSON` to better match internal usage
@@ -38,7 +38,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.16.0rc1"
+scriptVersion="1.16.0rc2"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -1348,7 +1348,7 @@ function quitScript() {
     killProcess "caffeinate"
 
     # Toggle `jamf` binary check-in 
-    if [[ "${completionActionOption}" == "Log Out"* ]] || [[ "${completionActionOption}" == "Sleep"* ]] || [[ "${completionActionOption}" == "Quit" ]] || [[ "${completionActionOption}" == "wait" ]] ; then
+    if [[ "${completionActionOption}" == "Log Out"* ]] || [[ "${completionActionOption}" == "Sleep"* ]] || [[ "${completionActionOption}" == "Quit" ]] || [[ "${completionActionOption}" == "Wait" ]] || [[ "${completionActionOption}" == "wait" ]] ; then
         toggleJamfLaunchDaemon
     fi
     
@@ -1621,7 +1621,7 @@ function acPowerCheck() {
                 return
             fi
             sleep 1
-            ((waitTime--))
+            ((acPowerWaitTimer--))
         done
         killProcess "osascript"
         logMessage "PRE-FLIGHT" "No AC power detected, exiting"
