@@ -3,7 +3,7 @@
 
 <br>
 
-# Setup Your Mac <br> Contributors
+# Setup Your Mac (1.16.0)<br> Contributors
 
 > ## `sym-devs`
 > A special thanks to the following individuals who have been _**absolutely, positively indispensable**_ during the ongoing development of Setup Your Mac.
