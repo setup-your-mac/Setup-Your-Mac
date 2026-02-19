@@ -10,7 +10,7 @@
 #
 # HISTORY
 #
-#   Version 1.16.0rc2, 11-Feb-2026
+#   Version 1.16.0, 19-Feb-2026
 #   - Added proof-of-concept validations for swiftDialog `2.5.1`'s "blurscreen" control
 #   - Removed vendor-specific Local Validations (in favor of Remote Validations)
 #   - Updated Configuration `policyJSON` to better match internal usage
