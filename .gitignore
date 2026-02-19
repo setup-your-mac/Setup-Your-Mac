@@ -1,0 +1,24 @@
+# Setup Your Mac
+## Version 1.16.0
+
+### macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.Spotlight-V100
+.Trashes
+.fseventsd
+.TemporaryItems
+.DocumentRevisions-V100
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.apdisk
+
+### Zsh
+.zsh_history
+.zsh_sessions/
+.zcompdump*
+.zcompcache/
+*.zwc

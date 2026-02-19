@@ -12,6 +12,7 @@ The implementation of recent [feature request](https://github.com/dan-snelson/di
 
 ### Scripts
 - [Check Printer Install](Check%20Printer%20Install.sh)
+- [BeyondTrust Privileged Access Management](BeyondTrust%20Privileged%20Access%20Management.bash)
 - [Cisco Umbrella](Cisco%20Umbrella.bash)
 - [CrowdStrike Falcon Status](CrowdStrike%20Falcon%20Status.bash)
 - [Microsoft Office 365](Microsoft%20Office%20365.bash)
