@@ -1,11 +1,11 @@
 <!-- markdownlint-disable-next-line first-line-heading no-inline-html -->
-[<img align="right" alt="Setup Your Mac (1.16.0)" src="images/SYM_icon_255.png" width="128" />](https://github.com/setup-your-mac/Setup-Your-Mac/wiki)
+[<img align="right" alt="Setup Your Mac (1.16.1b1)" src="images/SYM_icon_255.png" width="128" />](https://github.com/setup-your-mac/Setup-Your-Mac/wiki)
 
-# Setup Your Mac (1.16.0) <br> with SYM-Helper (1.3.1) <br> via swiftDialog (3.0.0)
+# Setup Your Mac (1.16.1b1) <br> with SYM-Helper (1.3.1) <br> via swiftDialog (3.0.0)
 
 ![GitHub release (latest by date)](https://img.shields.io/github/v/release/dan-snelson/Setup-Your-Mac?display_name=tag) ![GitHub issues](https://img.shields.io/github/issues-raw/dan-snelson/Setup-Your-Mac) ![GitHub closed issues](https://img.shields.io/github/issues-closed-raw/dan-snelson/Setup-Your-Mac) ![GitHub pull requests](https://img.shields.io/github/issues-pr-raw/dan-snelson/Setup-Your-Mac) ![GitHub closed pull requests](https://img.shields.io/github/issues-pr-closed-raw/dan-snelson/Setup-Your-Mac)
 
-> Optimized to leverage SYM-Helper (1.3.1), Setup Your Mac (1.16.0) offers full support of swiftDialog (3.0.0).
+> Optimized to leverage SYM-Helper (1.3.1), Setup Your Mac (1.16.1b1) offers full support of swiftDialog (3.0.0).
 [<img alt="Setup Your Mac (1.16.0)" src="images/SYM-Helper_1.3.1_SYM-1.16.0_Hero.png" />](https://github.com/setup-your-mac/Setup-Your-Mac/wiki)
 
 Apple's Automated Device Enrollment helps streamline Mobile Device Management (MDM) enrollment and device Supervision during activation, enabling IT to manage enterprise devices with "zero touch."

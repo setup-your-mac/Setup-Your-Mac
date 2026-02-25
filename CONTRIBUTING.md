@@ -3,7 +3,7 @@
 
 <br>
 
-# Contributing to <br> Setup Your Mac (1.16.0)
+# Contributing to <br> Setup Your Mac (1.16.1b1)
 
 ## Welcome and Thank You!
 Welcome and thank you for considering contributing _your_ unique talents to [Setup Your Mac](https://snelson.us/sym); this project wouldn't be what it is today without the assistance of MacAdmins worldwide just like you.

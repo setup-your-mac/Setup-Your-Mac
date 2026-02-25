@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 1.16.1b1
+### 25-Feb-2026
+- Fixed false `Error` list-item status for `Hide Dialog` and `Show Dialog` validations by treating only those explicit validation values as successful. ([Issue 178](https://github.com/setup-your-mac/Setup-Your-Mac/issues/178) and [Pull Request 179](https://github.com/setup-your-mac/Setup-Your-Mac/pull/179); thanks for the two-fer, @HowardGMac!)
+- Updated inline `policyJSON` validation documentation to include `Blurscreen` and `Hide Dialog` / `Show Dialog` control validations.
+- Added follow-up tracking for step validation hardening to evaluate each `trigger_list` entry (instead of only the final trigger/validation pair).
+
 ## 1.16.0
 ### 19-Feb-2026
 - Added proof-of-concept validations for swiftDialog `2.5.1`'s "blurscreen" control

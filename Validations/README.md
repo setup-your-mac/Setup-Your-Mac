@@ -6,7 +6,7 @@
 
 ## Background
 
-The implementation of recent [feature request](https://github.com/dan-snelson/dialog-scripts/issues/21) to **Setup Your Mac** (1.6.0) introduces additional policy validation options to help ensure critical enterprise applications are both _installed_ and their related services are **running**.
+The implementation of [feature request](https://github.com/dan-snelson/dialog-scripts/issues/21) to **Setup Your Mac** introduces additional policy validation options to help ensure critical enterprise applications are both _installed_ and their related services are **running**.
 
 [Continue reading …](https://snelson.us/2023/01/setup-your-mac-validation/)
 
