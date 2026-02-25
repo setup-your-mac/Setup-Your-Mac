@@ -10,19 +10,10 @@
 #
 # HISTORY
 #
-#   Version 1.16.0, 19-Feb-2026
-#   - Added proof-of-concept validations for swiftDialog `2.5.1`'s "blurscreen" control
-#   - Removed vendor-specific Local Validations (in favor of Remote Validations)
-#   - Updated Configuration `policyJSON` to better match internal usage
-#   - Added "activate" command to Validations
-#   - Updated the Microsoft Teams message template to the new format (Pull Request #156; thanks, @nlopezUA!)
-#   - Simplify Client-side Logging (thanks, @DevliegereM!)
-#   - Added proof-of-concept validations for swiftDialog `2.5.6`'s "hide or show" dialog window
-#   - Updated Dynamic Download Estimates for macOS 26 (and beyond)
-#   - Updated for swiftDialog `3.0.0`
-#   - Updated `checkNetworkQualityCatchAllConfiguration` for macOS 26 (thanks for the heads-up, @Harald Brouwers!)
-#   - Added new salutation banner greeting, based on time o’ day (Pull Request #171; thanks, @ScottEKendall!)
-#   - Add configurable battery threshold to AC power pre-flight check (Pull Request #175; thanks, @owainri!)
+#   Version 1.16.1b1, 25-Feb-2026
+#   - Fixed false `Error` list-item status for `Hide Dialog` and `Show Dialog` validations by treating only those explicit validation values as successful. ([Issue 178](https://github.com/setup-your-mac/Setup-Your-Mac/issues/178) and [Pull Request 179](https://github.com/setup-your-mac/Setup-Your-Mac/pull/179); thanks for the two-fer, @HowardGMac!)
+#   - Updated inline `policyJSON` validation documentation to include `Blurscreen` and `Hide Dialog` / `Show Dialog` control validations.
+#   - Added follow-up tracking for step validation hardening to evaluate each `trigger_list` entry (instead of only the final trigger/validation pair).
 #
 ####################################################################################################
 
@@ -38,7 +29,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.16.0"
+scriptVersion="1.16.1b1"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -756,7 +747,7 @@ function validatePolicyResult() {
         # (Always evaluates as: 'success' and 'Installed')
         ###
 
-        "None" | "none" | *"Blurscreen"* | *"blurscreen"* | *"Dialog"* | *"dialog"* )
+        "None" | "none" | *"Blurscreen"* | *"blurscreen"* | "Hide Dialog" | "hide dialog" | "Show Dialog" | "show dialog" )
         
             outputLineNumberInVerboseDebugMode
             logMessage "SETUP YOUR MAC DIALOG" "Confirm Policy Execution: ${validation}"
@@ -2286,13 +2277,15 @@ dialogSetupYourMacCMD="$dialogBinary \
 #   - See: https://vimeo.com/772998915
 # - progresstext: The text to be displayed below the progress bar
 # - trigger: The Jamf Pro Policy Custom Event Name
-# - validation: [ {absolute path} | Local | Remote | None | Recon ]
+# - validation: [ {absolute path} | Local | Remote | None | Recon | Blurscreen On/Off | Hide Dialog/Show Dialog ]
 #   See: https://snelson.us/2023/01/setup-your-mac-validation/
 #       - {absolute path} (simulates pre-v1.6.0 behavior, for example: "/Applications/Microsoft Teams classic.app/Contents/Info.plist")
 #       - Local (for validation within this script, for example: "filevault")
 #       - Remote (for validation via a single-script Jamf Pro policy, for example: "symvGlobalProtect")
 #       - None (for triggers which don't require validation; always evaluates as successful)
 #       - Recon (to update the computer's inventory with your Jamf Pro server)
+#       - Blurscreen On / Blurscreen Off (for swiftDialog display controls; evaluates as successful)
+#       - Hide Dialog / Show Dialog (for swiftDialog visibility controls; evaluates as successful)
 #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #
@@ -3720,6 +3713,7 @@ for (( i=0; i<dialog_step_length; i++ )); do
 
     fi
 
+    # TODO (Hardening): Evaluate validation per `trigger_list` entry instead of only the final trigger/validation pair.
     validatePolicyResult "${trigger}" "${validation}"
 
     # Increment the progress bar

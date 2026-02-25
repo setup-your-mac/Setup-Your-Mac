@@ -1,4 +1,4 @@
-# AGENTS.md (Setup Your Mac, version 1.16.0)
+# AGENTS.md (Setup Your Mac, version 1.16.1b1)
 
 These instructions are for AI coding agents working in this repository.
 

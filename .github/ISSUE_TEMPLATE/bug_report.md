@@ -33,7 +33,7 @@ If applicable, add screenshots to help explain your problem.
 
 **Environment (please complete the following information):**
  - OS version (i.e., 26.3)
- - Script version (i.e., 1.16.0) - please upgrade to the latest version before submitting a bug report.
+ - Script version (i.e., 1.16.1b1) - please upgrade to the latest version before submitting a bug report.
  - swiftDialog version (i.e., 3.0.0) - please upgrade to the latest version before submitting a bug report.
 
 **Additional context**

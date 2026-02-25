@@ -3,7 +3,7 @@
 
 <br>
 
-# Setup Your Mac (1.16.0)<br> Contributors
+# Setup Your Mac (1.16.1b1)<br> Contributors
 
 > ## `sym-devs`
 > A special thanks to the following individuals who have been _**absolutely, positively indispensable**_ during the ongoing development of Setup Your Mac.
@@ -16,6 +16,7 @@
 ### Humbled & Amazed
 
 The response to Setup Your Mac has been both humbling and amazing; my personal thanks to MacAdmins worldwide and the ever-growing number of contributors:
+- HowardGMac for [Issue No. 178](https://github.com/setup-your-mac/Setup-Your-Mac/issues/178) and [Pull Request No. 179](https://github.com/setup-your-mac/Setup-Your-Mac/pull/179)
 - DevliegereM for simplifing the Client-side Logging [Pull Request No. 164](https://github.com/setup-your-mac/Setup-Your-Mac/pull/164)
 - nlopezUA for updating the Microsoft Teams message template to the new format [Pull Request No. 156](https://github.com/setup-your-mac/Setup-Your-Mac/pull/156)
 - lukecharters for eleventh-hour testing feedback
