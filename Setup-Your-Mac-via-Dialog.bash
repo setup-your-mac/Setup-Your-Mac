@@ -528,7 +528,7 @@ function confirmPolicyExecution() {
                 logMessage "SETUP YOUR MAC DIALOG" "Updating computer inventory with the following 'reconOptions': \"${reconOptions}\" …"
                 dialogUpdateSetupYourMac "listitem: index: $i, status: wait, statustext: Updating …, "
                 reconRaw=$( eval "${jamfBinary} recon ${reconOptions} -verbose | tee -a ${scriptLog}" )
-                computerID=$( echo "${reconRaw}" | grep '<computer_id>' | xmllint --xpath xmllint --xpath '/computer_id/text()' - )
+                computerID=$( echo "${reconRaw}" | grep '<computer_id>' | xmllint --xpath '/computer_id/text()' - )
             fi
             ;;
 
