@@ -16,6 +16,12 @@
 #
 # HISTORY
 #
+# Version 0.0.1a2, 26-Mar-2026, Dan K. Snelson (@dan-snelson)
+#   - Added per-item icons to selection dialog checkboxes
+#   - Changed item array delimiter from colon to space-padded pipe ( | )
+#   - Skip completion and restart dialogs when all selected items were already installed
+#   - Sort all checkboxes (Installomator and Jamf) together alphabetically by display name
+#
 # Version 0.0.1a1, 26-Mar-2026, Dan K. Snelson (@dan-snelson)
 #   - Initial alpha release
 #   - Unified Installomator label and Jamf Pro policy execution
@@ -36,7 +42,7 @@ export PATH=/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin/
 setopt NONOMATCH
 
 # Script Version
-scriptVersion="0.0.1a1"
+scriptVersion="0.0.1a2"
 
 # Script Human-readable Name
 humanReadableScriptName="Setup Your Mac Lite: Developer Edition"
@@ -100,20 +106,25 @@ restartPromptEnabled="true"
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Item Configuration Arrays
-# Format: "identifier:displayName:validationPath:iconURL"
+# Format: "identifier | displayName | validationPath | iconURL"
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 # Installomator Items
-# Format: "label:Display Name:Validation Path:Icon URL"
+# Format: "label | Display Name | Validation Path | Icon URL"
 installomatorItems=(
-    "docker:Docker:/Applications/Docker.app:https://usw2.ics.services.jamfcloud.com/icon/hash_a344dca5fdc0e86822e8f21ec91088e6591b1e292bdcebdee1281fbd794c2724"
+    "androidstudio | Android Studio | /Applications/Android Studio.app | https://use2.ics.services.jamfcloud.com/icon/hash_f7021d808263d18f52ba2535ec66d35f8bb24b08ab9bff6aee22ecb319159904"
+    "awsvpnclient | AWS VPN Client | /Applications/AWS VPN Client/AWS VPN Client.app | https://usw2.ics.services.jamfcloud.com/icon/hash_1d1bef5523d9f7eca5a45f2db9a63732e85edb5f914220807ca740ba7c4881b9"
+    "charles | Charles Proxy | /Applications/Charles.app | https://use2.ics.services.jamfcloud.com/icon/hash_59b395ca81889a6d83deda8e6babc5ae4bc5931d36a72b738fe30b84d027593d"
+    "docker | Docker | /Applications/Docker.app | https://usw2.ics.services.jamfcloud.com/icon/hash_a344dca5fdc0e86822e8f21ec91088e6591b1e292bdcebdee1281fbd794c2724"
+    "jetbrainsintellijidea | IntelliJ IDEA | /Applications/IntelliJ IDEA.app | https://usw2.ics.services.jamfcloud.com/icon/hash_f669d73acc06297e1fc2f65245cfbdace03263f81aebf95444a8360a101b239d"
+    "visualstudiocode | Visual Studio Code | /Applications/Visual Studio Code.app | https://use2.ics.services.jamfcloud.com/icon/hash_532094f99f6130f325a97ed6421d09d2a416e269f284304d39c21020565056ed"
 )
 
 # Jamf Pro Policy Items
-# Format: "trigger:Display Name:Validation Path:Icon URL"
+# Format: "trigger | Display Name | Validation Path | Icon URL"
 jamfPolicyItems=(
-    "appleXcode:Xcode:/Applications/Xcode.app:https://usw2.ics.services.jamfcloud.com/icon/hash_583afb5af440479d642b3c35ec4ec3ad06c74ec814dba9af84e4e69202edf62a"
-    "homebrew:Homebrew:/opt/homebrew/bin/brew:https://usw2.ics.services.jamfcloud.com/icon/hash_9edff3eb98482a1aaf17f8560488f7b500cc7dc64955b8a9027b3801cab0fd82"
+    "appleXcode | Xcode | /Applications/Xcode.app | https://usw2.ics.services.jamfcloud.com/icon/hash_583afb5af440479d642b3c35ec4ec3ad06c74ec814dba9af84e4e69202edf62a"
+    "homebrew | Homebrew | /opt/homebrew/bin/brew | https://usw2.ics.services.jamfcloud.com/icon/hash_9edff3eb98482a1aaf17f8560488f7b500cc7dc64955b8a9027b3801cab0fd82"
 )
 
 
@@ -224,44 +235,36 @@ function runAsUser() {
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Parse Installomator Item Configuration
-# Input: "label:displayName:validationPath:iconURL"
+# Input: "label | displayName | validationPath | iconURL"
 # Output: Sets global variables itemLabel, itemDisplayName, itemValidationPath, itemIconURL
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 function parseInstallomatorItem() {
     local itemConfig="$1"
-    local oldIFS="$IFS"
-    IFS=':'
-    local parts=("${(@s/:/)itemConfig}")
-    IFS="$oldIFS"
-    
+    local parts=("${(@s: | :)itemConfig}")
+
     itemLabel="${parts[1]}"
     itemDisplayName="${parts[2]}"
     itemValidationPath="${parts[3]}"
-    # Reconstruct icon URL from remaining parts (handles URLs with colons)
-    itemIconURL="${(j.:.)parts[4,-1]}"
+    itemIconURL="${parts[4]}"
 }
 
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Parse Jamf Policy Item Configuration
-# Input: "trigger:displayName:validationPath:iconURL"
+# Input: "trigger | displayName | validationPath | iconURL"
 # Output: Sets global variables itemTrigger, itemDisplayName, itemValidationPath, itemIconURL
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 function parseJamfPolicyItem() {
     local itemConfig="$1"
-    local oldIFS="$IFS"
-    IFS=':'
-    local parts=("${(@s/:/)itemConfig}")
-    IFS="$oldIFS"
-    
+    local parts=("${(@s: | :)itemConfig}")
+
     itemTrigger="${parts[1]}"
     itemDisplayName="${parts[2]}"
     itemValidationPath="${parts[3]}"
-    # Reconstruct icon URL from remaining parts (handles URLs with colons)
-    itemIconURL="${(j.:.)parts[4,-1]}"
+    itemIconURL="${parts[4]}"
 }
 
 
@@ -276,19 +279,13 @@ function getAllItemIDs() {
     
     # Add Installomator labels
     for item in "${installomatorItems[@]}"; do
-        local oldIFS="$IFS"
-        IFS=':'
-        local parts=("${(@s/:/)item}")
-        IFS="$oldIFS"
+        local parts=("${(@s: | :)item}")
         allIDs+=("${parts[1]}")
     done
     
     # Add Jamf policy triggers
     for item in "${jamfPolicyItems[@]}"; do
-        local oldIFS="$IFS"
-        IFS=':'
-        local parts=("${(@s/:/)item}")
-        IFS="$oldIFS"
+        local parts=("${(@s: | :)item}")
         allIDs+=("${parts[1]}")
     done
     
@@ -308,10 +305,7 @@ function getItemType() {
     
     # Check Installomator items
     for item in "${installomatorItems[@]}"; do
-        local oldIFS="$IFS"
-        IFS=':'
-        local parts=("${(@s/:/)item}")
-        IFS="$oldIFS"
+        local parts=("${(@s: | :)item}")
         if [[ "${parts[1]}" == "${itemID}" ]]; then
             echo "installomator"
             return 0
@@ -320,10 +314,7 @@ function getItemType() {
     
     # Check Jamf policy items
     for item in "${jamfPolicyItems[@]}"; do
-        local oldIFS="$IFS"
-        IFS=':'
-        local parts=("${(@s/:/)item}")
-        IFS="$oldIFS"
+        local parts=("${(@s: | :)item}")
         if [[ "${parts[1]}" == "${itemID}" ]]; then
             echo "jamf"
             return 0
@@ -347,10 +338,7 @@ function getItemConfig() {
     
     # Check Installomator items
     for item in "${installomatorItems[@]}"; do
-        local oldIFS="$IFS"
-        IFS=':'
-        local parts=("${(@s/:/)item}")
-        IFS="$oldIFS"
+        local parts=("${(@s: | :)item}")
         if [[ "${parts[1]}" == "${itemID}" ]]; then
             echo "${item}"
             return 0
@@ -359,10 +347,7 @@ function getItemConfig() {
     
     # Check Jamf policy items
     for item in "${jamfPolicyItems[@]}"; do
-        local oldIFS="$IFS"
-        IFS=':'
-        local parts=("${(@s/:/)item}")
-        IFS="$oldIFS"
+        local parts=("${(@s: | :)item}")
         if [[ "${parts[1]}" == "${itemID}" ]]; then
             echo "${item}"
             return 0
@@ -839,23 +824,28 @@ function showSelectionDialog() {
     # Build message
     baseMessage="Select one or more applications to install."
 
-    # Add Installomator items as checkboxes with header
-    if [[ ${#installomatorItems[@]} -gt 0 ]]; then
-        checkboxArgs+=(--selecttitle "Installomator Labels")
-        for item in "${installomatorItems[@]}"; do
-            parseInstallomatorItem "${item}"
-            checkboxArgs+=(--checkbox "${itemDisplayName},name=${itemLabel}")
-        done
-    fi
-
-    # Add Jamf policy items as checkboxes with header
-    if [[ ${#jamfPolicyItems[@]} -gt 0 ]]; then
-        checkboxArgs+=(--selecttitle "Jamf Pro Policies")
-        for item in "${jamfPolicyItems[@]}"; do
-            parseJamfPolicyItem "${item}"
-            checkboxArgs+=(--checkbox "${itemDisplayName},name=${itemTrigger}")
-        done
-    fi
+    # Build unified checkbox list (Installomator + Jamf, sorted together by display name)
+    local -a allSortKeys=()
+    for item in "${installomatorItems[@]}"; do
+        local parts=("${(@s: | :)item}")
+        allSortKeys+=("${parts[2]} | installomator | ${item}")
+    done
+    for item in "${jamfPolicyItems[@]}"; do
+        local parts=("${(@s: | :)item}")
+        allSortKeys+=("${parts[2]} | jamf | ${item}")
+    done
+    for entry in "${(oi)allSortKeys[@]}"; do
+        local entryParts=("${(@s: | :)entry}")
+        local itemType="${entryParts[2]}"
+        local itemConfig="${(j: | :)entryParts[3,-1]}"
+        if [[ "${itemType}" == "installomator" ]]; then
+            parseInstallomatorItem "${itemConfig}"
+            checkboxArgs+=(--checkbox "${itemDisplayName},name=${itemLabel},icon=${itemIconURL}")
+        elif [[ "${itemType}" == "jamf" ]]; then
+            parseJamfPolicyItem "${itemConfig}"
+            checkboxArgs+=(--checkbox "${itemDisplayName},name=${itemTrigger},icon=${itemIconURL}")
+        fi
+    done
 
     # Loop until at least one item is selected
     while true; do
@@ -870,7 +860,7 @@ function showSelectionDialog() {
             --messagefont "size=${fontSize}" \
             --message "${messageText}" \
             --icon "${mainDialogIcon}" \
-            --checkboxstyle "switch,small" \
+            --checkboxstyle "switch,large" \
             --json \
             --button1text "Install" \
             --button2text "Cancel" \
@@ -1230,6 +1220,13 @@ separateSelectedItemsByType
 
 # Phase 3 & 4: Execute selected items via Inspect Mode
 executeSYMLiteItems
+
+# Skip completion and restart dialogs if all selected items were already installed
+if [[ ${#completedItems[@]} -eq 0 && ${#failedItems[@]} -eq 0 ]]; then
+    notice "All ${#skippedItems[@]} selected items were already installed; skipping completion dialogs"
+    info "SYM-Lite execution complete - Total Elapsed Time: $(formattedElapsedTime)"
+    quitScript 0
+fi
 
 # Phase 5: Display completion and prompt for restart
 showCompletionDialog
