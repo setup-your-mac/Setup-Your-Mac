@@ -5,8 +5,8 @@ SYM-Lite is a lean, purpose-built script for executing Jamf Pro Policy Custom Tr
 
 **Version:** 0.0.1a1  
 **File:** `Resources/SYM-Lite.zsh`  
-**Size:** 40KB (1,184 lines)  
-**Status:** ✓ Syntax validated, ready for functional testing
+**Size:** 44KB (1,239 lines)  
+**Status:** ✓ Syntax validated, includes logMonitor support
 
 ---
 
@@ -15,11 +15,12 @@ SYM-Lite is a lean, purpose-built script for executing Jamf Pro Policy Custom Tr
 ✓ **Dual execution support** — Installomator labels AND Jamf Pro policies in single session  
 ✓ **Interactive selection UI** — User-friendly checkbox dialog  
 ✓ **Silent mode** — CSV-based automation support  
-✓ **Inspect Mode monitoring** — Real-time progress via file system monitoring  
-✓ **Path-based validation** — Pre/post-execution checks  
+✓ **Inspect Mode monitoring** — Real-time progress with rich status updates for Installomator labels  
+✓ **Log monitoring** — Parses Installomator.log for intermediate states (downloading, installing, verifying)  
+✓ **Path-based validation** — Pre/post-execution checks via file system monitoring  
 ✓ **Cache monitoring** — Detects in-progress downloads  
 ✓ **Completion dialogs** — Success/failure summary and restart prompt  
-✓ **Graceful interruption** — Clean shutdown on SIGINT/SIGTERM  
+✓ **Graceful interruption** — Clean shutdown on SIGINT/SIGTERM with 30-second timeout  
 
 ---
 
@@ -162,29 +163,87 @@ COMPLETION & RESTART
 
 ## How Inspect Mode Works
 
-swiftDialog's Inspect Mode **monitors the file system**, not log files. It uses Apple's FSEvents API to detect when files appear.
+swiftDialog's Inspect Mode uses **dual monitoring** for comprehensive progress tracking:
 
-**What Inspect Mode Does:**
-- Watches specified `paths` arrays for each item
-- Monitors `cachePaths` for download progress (`.pkg`, `.dmg`, `.download` files)
-- Updates item status when validation paths are detected
-- Scans every `scanInterval` seconds (default: 2)
+### For Installomator Labels (Rich Status)
 
-**What Inspect Mode Does NOT Do:**
-- Parse log files (no `Installomator.log` or `jamf.log` monitoring)
-- Track command output
-- Monitor process execution
+**Log Monitoring:**
+- Parses `/var/log/Installomator.log` in real-time
+- Uses undocumented `"preset": "installomator"` feature
+- Shows intermediate states:
+  - "Downloading..." (with progress if available)
+  - "Installing Microsoft Word..."
+  - "Verifying..."
+  - "Completed"
 
-**How Items Complete:**
-1. Script executes Installomator or Jamf policy
-2. Inspect Mode continuously checks if validation path exists
-3. When file appears, item status updates to complete
-4. Dialog auto-enables "Close" button when all items done
+**File System Monitoring:**
+- Watches validation path via FSEvents API
+- Item marks complete when app appears at specified path
+- Independent verification of installation success
 
-**Example:**
-- Installomator installs `/Applications/Microsoft Word.app`
-- Inspect Mode detects when that path exists
-- Item automatically marks complete in dialog
+### For Jamf Pro Policies (Binary Status)
+
+**File System Monitoring Only:**
+- No log parsing (no Jamf equivalent to Installomator preset)
+- Shows binary states:
+  - "Waiting" (policy executing)
+  - "Completed" (validation path detected)
+
+### Common Features
+
+**Both types benefit from:**
+- `cachePaths` monitoring — Detects `.pkg`, `.dmg`, `.download` files in progress
+- `scanInterval: 2` — Checks for path changes every 2 seconds
+- Auto-enable Close button when all items complete
+- 30-second timeout if dialog doesn't close naturally
+
+**Example Flow (Installomator):**
+1. Script executes: `Installomator.sh microsoftword`
+2. Log shows: "Downloading..." → User sees rich progress
+3. Log shows: "Installing Microsoft Word..." → Status updates
+4. Path appears: `/Applications/Microsoft Word.app` → Marks complete
+
+**Example Flow (Jamf Policy):**
+1. Script executes: `jamf policy -event installRosetta`
+2. Dialog shows: "Waiting" → No intermediate updates
+3. Path appears: `/usr/bin/arch` → Marks complete
+
+---
+
+## Restart Prompt Behavior
+
+After all items complete and the completion dialog closes, SYM-Lite prompts for a restart (if `restartPromptEnabled="true"`).
+
+**Restart Prompt Dialog:**
+- Title: "Restart Recommended"
+- Message: "A restart is recommended to complete the installation. Would you like to restart now?"
+- Button 1: "Restart Now"
+- Button 2: "Later"
+
+**User Clicks "Restart Now":**
+1. Script sends AppleScript restart event to loginwindow
+2. macOS shows its **standard restart confirmation dialog**
+3. User confirms the restart (or cancels at macOS level)
+4. This is a "polite" restart — gives user final control
+
+**User Clicks "Later":**
+1. Script logs "User chose to restart later"
+2. Script exits normally
+3. No restart occurs
+
+**Silent Mode:**
+- Restart prompt **never shows** in silent mode
+- Script exits after completion dialog
+- Suitable for unattended deployment
+
+**Disable Restart Prompt:**
+Set `restartPromptEnabled="false"` in the script to skip the prompt entirely in all modes.
+
+**Technical Implementation:**
+- Uses `executeRestartAction "Restart Confirm"` helper
+- Sends `«event aevtrrst»` to loginwindow as logged-in user
+- Runs via `runAsUser` to ensure proper user context
+- Falls back gracefully if AppleScript command fails
 
 ---
 
@@ -213,8 +272,9 @@ swiftDialog's Inspect Mode **monitors the file system**, not log files. It uses 
 
 | Variable | Default | Purpose |
 |----------|---------|---------|
-| `organizationPreset` | `"1"` | swiftDialog Inspect Mode preset (1-4) |
+| `organizationPreset` | `"2"` | swiftDialog Inspect Mode preset (1-4) |
 | `organizationInstallomatorFile` | `/Library/Management/...` | Path to Installomator.sh |
+| `installomatorLog` | `/var/log/Installomator.log` | Installomator log path for monitoring |
 | `jamfBinary` | `/usr/local/bin/jamf` | Path to jamf binary |
 | `organizationOverlayiconURL` | swiftDialog logo | Overlay icon URL |
 | `mainDialogIcon` | `SF=gearshape.2...` | Main dialog icon |
@@ -242,8 +302,10 @@ swiftDialog's Inspect Mode **monitors the file system**, not log files. It uses 
 - All output written to primary script log for troubleshooting
 
 **Inspect Mode Monitoring:**
-- Inspect Mode uses file system monitoring (FSEvents), not log parsing
-- Items complete when validation paths appear, independent of log output
+- **Installomator labels:** Log parsing (`/var/log/Installomator.log`) + file system monitoring
+- **Jamf policies:** File system monitoring only (FSEvents)
+- Items mark complete when validation paths appear
+- Rich status updates shown for Installomator labels during execution
 
 **Auto-rotation:** Log rotates when exceeds 10MB
 
@@ -275,6 +337,13 @@ swiftDialog's Inspect Mode **monitors the file system**, not log files. It uses 
 - Verify items are configured in arrays
 - Check array syntax (colon-separated fields)
 - Review pre-flight log for parsing errors
+
+### Script hangs after clicking Close
+- Script implements 30-second timeout for dialog close
+- After timeout, dialog is force-terminated and script continues
+- Check for debug output in terminal (may indicate dialog issue)
+- Verify `dialogPID` was captured correctly in logs
+- If consistently hanging, check for swiftDialog version issues
 
 ---
 

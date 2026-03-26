@@ -39,7 +39,7 @@ setopt NONOMATCH
 scriptVersion="0.0.1a1"
 
 # Script Human-readable Name
-humanReadableScriptName="SYM-Lite"
+humanReadableScriptName="Setup Your Mac Lite: Developer Edition"
 
 # Organization's Script Name
 organizationScriptName="SYML"
@@ -88,7 +88,7 @@ jamfBinary="/usr/local/bin/jamf"
 organizationOverlayiconURL="https://swiftdialog.app/_astro/dialog_logo.CZF0LABZ_ZjWz8w.webp"
 
 # Main Dialog Icon
-mainDialogIcon="SF=gearshape.2,weight=semibold,colour1=#51a3ef,colour2=#5154ef"
+mainDialogIcon="https://raw.githubusercontent.com/setup-your-mac/Setup-Your-Mac/refs/heads/main/images/SYM_icon.png"
 
 # Dialog presentation defaults
 fontSize="14"
@@ -112,7 +112,7 @@ installomatorItems=(
 # Jamf Pro Policy Items
 # Format: "trigger:Display Name:Validation Path:Icon URL"
 jamfPolicyItems=(
-    "appleXcode:Apple Xcode:/Applications/Xcode.app:https://usw2.ics.services.jamfcloud.com/icon/hash_583afb5af440479d642b3c35ec4ec3ad06c74ec814dba9af84e4e69202edf62a"
+    "appleXcode:Xcode:/Applications/Xcode.app:https://usw2.ics.services.jamfcloud.com/icon/hash_583afb5af440479d642b3c35ec4ec3ad06c74ec814dba9af84e4e69202edf62a"
     "homebrew:Homebrew:/opt/homebrew/bin/brew:https://usw2.ics.services.jamfcloud.com/icon/hash_9edff3eb98482a1aaf17f8560488f7b500cc7dc64955b8a9027b3801cab0fd82"
 )
 
@@ -677,8 +677,9 @@ function createSYMLiteInspectConfig() {
     done
     
     # Create the full JSON configuration
-    # Note: Inspect Mode monitors file system paths, not log files
-    # Items are checked by watching for files to appear at specified paths
+    # Note: Inspect Mode uses dual monitoring:
+    # - logMonitor: Parses Installomator.log for rich status updates (Installomator labels only)
+    # - paths: Watches file system via FSEvents for completion detection (both types)
     if ! /bin/cat > "${dialogInspectModeJSONFile}" <<EOF
 {
     "preset": "preset${organizationPreset}",
@@ -1053,9 +1054,21 @@ function executeSYMLiteItems() {
         fi
     done
     
-    # Wait for Dialog to close
+    # Wait for Dialog to close (with timeout)
     info "Waiting for Inspect Mode (PID: ${dialogPID}) to close …"
-    wait "${dialogPID}"
+    local waitCount=0
+    local maxWait=30
+    while kill -0 "${dialogPID}" 2>/dev/null && (( waitCount < maxWait )); do
+        sleep 1
+        ((waitCount++))
+    done
+    
+    if kill -0 "${dialogPID}" 2>/dev/null; then
+        warning "Dialog did not close after ${maxWait} seconds; terminating"
+        kill "${dialogPID}" 2>/dev/null || true
+        sleep 1
+    fi
+    
     info "Inspect Mode closed."
     
     notice "Execution complete: ${#completedItems[@]} completed, ${#skippedItems[@]} skipped, ${#failedItems[@]} failed"
@@ -1105,7 +1118,7 @@ function showCompletionDialog() {
     if [[ ${#failedItems[@]} -gt 0 ]]; then
         # Completion with errors
         dialogTitle="Completed with Errors"
-        dialogIcon="SF=exclamationmark.triangle.fill,weight=bold,colour1=#FF9500,colour2=#FF5500"
+        dialogIcon="SF=checkmark.circle.fill,weight=bold,colour1=#00ff44,colour2=#075c1e"
         
         dialogMessage="**${#completedItems[@]}** of **${#selectedItems[@]}** items completed successfully.\n\n"
         dialogMessage="${dialogMessage}The following items failed:\n\n"
@@ -1118,7 +1131,7 @@ function showCompletionDialog() {
     else
         # All successful
         dialogTitle="Installation Complete"
-        dialogIcon="SF=checkmark.circle.fill,weight=bold,colour1=#00C40C,colour2=##00C40C"
+        dialogIcon="SF=checkmark.circle.fill,weight=bold,colour1=#00ff44,colour2=#075c1e"
         
         if [[ ${#skippedItems[@]} -gt 0 ]]; then
             dialogMessage="**${#completedItems[@]}** items installed successfully.\n\n**${#skippedItems[@]}** items were already installed and skipped."
@@ -1183,7 +1196,7 @@ function promptForRestart() {
         --infotext "${scriptVersion}" \
         --messagefont "size=${fontSize}" \
         --message "A restart is recommended to complete the installation.\n\nWould you like to restart now?" \
-        --icon "SF=arrow.clockwise.circle,weight=semibold,colour1=#51a3ef,colour2=#5154ef" \
+        --icon "SF=restart.circle.fill,colour=#969899" \
         --button1text "Restart Now" \
         --button2text "Later" \
         --height 675 \
