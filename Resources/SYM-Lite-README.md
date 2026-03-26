@@ -15,8 +15,9 @@ SYM-Lite is a lean, purpose-built script for executing Jamf Pro Policy Custom Tr
 ✓ **Dual execution support** — Installomator labels AND Jamf Pro policies in single session  
 ✓ **Interactive selection UI** — User-friendly checkbox dialog  
 ✓ **Silent mode** — CSV-based automation support  
-✓ **Inspect Mode monitoring** — Real-time progress via swiftDialog 3.0  
+✓ **Inspect Mode monitoring** — Real-time progress via file system monitoring  
 ✓ **Path-based validation** — Pre/post-execution checks  
+✓ **Cache monitoring** — Detects in-progress downloads  
 ✓ **Completion dialogs** — Success/failure summary and restart prompt  
 ✓ **Graceful interruption** — Clean shutdown on SIGINT/SIGTERM  
 
@@ -140,14 +141,16 @@ SELECTION INTERFACE
 INSPECT MODE CONFIGURATION
   ├─ Build unified JSON config
   ├─ Merge Installomator + Jamf items
+  ├─ Add cachePaths for download detection
   └─ Validate JSON with jq
        ↓
 EXECUTION ENGINE
   ├─ Launch Inspect Mode dialog (background)
+  │   └─ Monitors file system for validation paths
   ├─ Process items sequentially
   │   ├─ Installomator: executeInstallomatorLabel()
   │   └─ Jamf: executeJamfPolicy()
-  ├─ Log all output
+  ├─ Inspect Mode auto-detects when paths appear
   └─ Wait for dialog close
        ↓
 COMPLETION & RESTART
@@ -157,20 +160,52 @@ COMPLETION & RESTART
 
 ---
 
+## How Inspect Mode Works
+
+swiftDialog's Inspect Mode **monitors the file system**, not log files. It uses Apple's FSEvents API to detect when files appear.
+
+**What Inspect Mode Does:**
+- Watches specified `paths` arrays for each item
+- Monitors `cachePaths` for download progress (`.pkg`, `.dmg`, `.download` files)
+- Updates item status when validation paths are detected
+- Scans every `scanInterval` seconds (default: 2)
+
+**What Inspect Mode Does NOT Do:**
+- Parse log files (no `Installomator.log` or `jamf.log` monitoring)
+- Track command output
+- Monitor process execution
+
+**How Items Complete:**
+1. Script executes Installomator or Jamf policy
+2. Inspect Mode continuously checks if validation path exists
+3. When file appears, item status updates to complete
+4. Dialog auto-enables "Close" button when all items done
+
+**Example:**
+- Installomator installs `/Applications/Microsoft Word.app`
+- Inspect Mode detects when that path exists
+- Item automatically marks complete in dialog
+
+---
+
 ## Validation & Skip Logic
 
 ### Installomator Items
 1. **Pre-check:** If validation path exists → skip, log "already exists"
 2. **Execute:** Run Installomator with `DEBUG=0 NOTIFY=silent`
-3. **Post-check:** Exit code 0 = success, non-zero = failure
+3. **Inspect Mode:** Watches validation path, marks complete when app appears
+4. **Post-check:** Exit code 0 = success, non-zero = failure
 
 ### Jamf Policy Items
 1. **Pre-check:** If validation path exists → skip, log "already configured"
 2. **Execute:** Run `jamf policy -event <trigger>`
-3. **Post-check:** 
+3. **Inspect Mode:** Watches validation path, marks complete when file appears
+4. **Post-check:** 
    - Exit code 0 + validation path exists = success
    - Exit code 0 + validation path missing = success (warn)
    - Non-zero exit code = failure
+
+**Important:** Inspect Mode visual feedback is independent of script success/failure tracking. The dialog shows items as complete when paths appear, but the script tracks actual execution success separately.
 
 ---
 
@@ -201,9 +236,14 @@ COMPLETION & RESTART
 - `[ERROR]` — Failures
 - `[FATAL ERROR]` — Script termination
 
-**Additional Logs:**
-- `/var/log/Installomator.log` — Installomator output (monitored by Inspect Mode)
-- `/var/log/jamf.log` — Jamf policy output
+**Output Capture:**
+- Installomator output: Captured and logged with `Installomator (label):` prefix
+- Jamf policy output: Captured and logged with `Jamf (trigger):` prefix
+- All output written to primary script log for troubleshooting
+
+**Inspect Mode Monitoring:**
+- Inspect Mode uses file system monitoring (FSEvents), not log parsing
+- Items complete when validation paths appear, independent of log output
 
 **Auto-rotation:** Log rotates when exceeds 10MB
 

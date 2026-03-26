@@ -50,14 +50,11 @@ scriptLog="/var/log/org.churchofjesuschrist.log"
 # Installomator Log
 installomatorLog="/var/log/Installomator.log"
 
-# Jamf Log
-jamfLog="/var/log/jamf.log"
-
 # Elapsed Time
 SECONDS="0"
 
 # Minimum Required Version of swiftDialog
-swiftDialogMinimumRequiredVersion="3.0.0.4952"
+swiftDialogMinimumRequiredVersion="3.0.1.4955"
 
 # Load is-at-least for version comparison
 autoload -Uz is-at-least
@@ -79,7 +76,7 @@ operationsCSV="${5:-""}"                # Parameter 5: Comma-separated list of i
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 # Organization's swiftDialog Inspect Mode Preset Option (See: https://swiftdialog.app/advanced/inspect-mode/)
-organizationPreset="1"
+organizationPreset="2"
 
 # Organization's Installomator Path
 organizationInstallomatorFile="/Library/Management/AppAutoPatch/Installomator/Installomator.sh"
@@ -109,23 +106,14 @@ restartPromptEnabled="true"
 # Installomator Items
 # Format: "label:Display Name:Validation Path:Icon URL"
 installomatorItems=(
-    "microsoftword:Microsoft Word:/Applications/Microsoft Word.app:https://usw2.ics.services.jamfcloud.com/icon/hash_51ae4c1e37bfbde2097e14712c3c13885157d632105804bcfaa912a627649b4c"
-    "microsoftexcel:Microsoft Excel:/Applications/Microsoft Excel.app:https://usw2.ics.services.jamfcloud.com/icon/hash_9df1c82089b6a3ef006dc6a94995782e1809d6f9767c189a1608067a9f651ca9"
-    "microsoftpowerpoint:Microsoft PowerPoint:/Applications/Microsoft PowerPoint.app:https://usw2.ics.services.jamfcloud.com/icon/hash_caadba785f099cec2bb510388390f5239c735a30723ba81b8a0e51792c4adff3"
-    "googlechrome:Google Chrome:/Applications/Google Chrome.app:https://usw2.ics.services.jamfcloud.com/icon/hash_6226b1b2b4734e04fc2b96c035ecc115a8ba4c54e45bdee5b28b25c35a66e223"
-    "firefox:Mozilla Firefox:/Applications/Firefox.app:https://usw2.ics.services.jamfcloud.com/icon/hash_e4929928e40e95a57f5cf3e1e4295d57aea40f6b6a7c1f5c2e4e6d0e02c75d3d"
-    "zoom:Zoom:/Applications/zoom.us.app:https://usw2.ics.services.jamfcloud.com/icon/hash_4d61a4c0ea2bd9a5f69d8c5e5f5c5f4f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f5f"
-    "adobeacrobatreader:Adobe Acrobat Reader:/Applications/Adobe Acrobat Reader.app:https://usw2.ics.services.jamfcloud.com/icon/hash_8d7b10f0e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5e5"
-    "vlc:VLC Media Player:/Applications/VLC.app:https://usw2.ics.services.jamfcloud.com/icon/hash_3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f3f"
+    "docker:Docker:/Applications/Docker.app:https://usw2.ics.services.jamfcloud.com/icon/hash_a344dca5fdc0e86822e8f21ec91088e6591b1e292bdcebdee1281fbd794c2724"
 )
 
 # Jamf Pro Policy Items
 # Format: "trigger:Display Name:Validation Path:Icon URL"
 jamfPolicyItems=(
-    "installRosetta:Install Rosetta 2:/usr/bin/arch:SF=cpu,weight=semibold,colour1=auto,colour2=auto"
-    "enableFileVault:Enable FileVault Encryption:/Library/Preferences/com.apple.fdesetup.plist:SF=lock.shield.fill,weight=semibold,colour1=auto,colour2=auto"
-    "installCompanyVPN:Install Company VPN:/Applications/Company VPN.app:SF=network.badge.shield.half.filled,weight=semibold,colour1=auto,colour2=auto"
-    "configureDock:Configure Dock:/usr/local/bin/dockutil:SF=dock.rectangle,weight=semibold,colour1=auto,colour2=auto"
+    "appleXcode:Apple Xcode:/Applications/Xcode.app:https://usw2.ics.services.jamfcloud.com/icon/hash_583afb5af440479d642b3c35ec4ec3ad06c74ec814dba9af84e4e69202edf62a"
+    "homebrew:Homebrew:/opt/homebrew/bin/brew:https://usw2.ics.services.jamfcloud.com/icon/hash_9edff3eb98482a1aaf17f8560488f7b500cc7dc64955b8a9027b3801cab0fd82"
 )
 
 
@@ -212,7 +200,24 @@ trap cleanup EXIT
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 function runAsUser() {
-    /bin/launchctl asuser "$loggedInUserID" /usr/bin/sudo -u "$loggedInUser" "$@"
+    local user="$1"
+    shift
+    local userID=""
+    local rc=0
+
+    if [[ -z "${user}" ]]; then
+        "$@"
+        return $?
+    fi
+
+    userID="$(id -u "${user}" 2>/dev/null)"
+    if [[ "${userID}" =~ ^[0-9]+$ ]]; then
+        /bin/launchctl asuser "${userID}" /usr/bin/sudo -u "${user}" "$@"
+        rc=$?
+        [[ ${rc} -eq 0 ]] && return 0
+    fi
+
+    /usr/bin/sudo -u "${user}" "$@"
 }
 
 
@@ -233,7 +238,8 @@ function parseInstallomatorItem() {
     itemLabel="${parts[1]}"
     itemDisplayName="${parts[2]}"
     itemValidationPath="${parts[3]}"
-    itemIconURL="${parts[4]}"
+    # Reconstruct icon URL from remaining parts (handles URLs with colons)
+    itemIconURL="${(j.:.)parts[4,-1]}"
 }
 
 
@@ -254,7 +260,8 @@ function parseJamfPolicyItem() {
     itemTrigger="${parts[1]}"
     itemDisplayName="${parts[2]}"
     itemValidationPath="${parts[3]}"
-    itemIconURL="${parts[4]}"
+    # Reconstruct icon URL from remaining parts (handles URLs with colons)
+    itemIconURL="${(j.:.)parts[4,-1]}"
 }
 
 
@@ -622,11 +629,11 @@ function createSYMLiteInspectConfig() {
     local totalItems=${#selectedItems[@]}
     local dialogTitle="Installing ${totalItems} Application"
     [[ ${totalItems} -gt 1 ]] && dialogTitle="${dialogTitle}s"
-    dialogTitle="${dialogTitle} and Policies"
     
-    # Build items array JSON
+    # Build items array JSON with guiIndex
     local itemsJSON=""
     local firstItem=true
+    local guiIndex=0
     
     for itemID in "${selectedItems[@]}"; do
         local itemType
@@ -640,6 +647,7 @@ function createSYMLiteInspectConfig() {
             local jsonBlock="{
             \"id\": \"${itemLabel}\",
             \"displayName\": \"${itemDisplayName}\",
+            \"guiIndex\": ${guiIndex},
             \"paths\": [\"${itemValidationPath}\"],
             \"icon\": \"${itemIconURL}\"
         }"
@@ -648,6 +656,7 @@ function createSYMLiteInspectConfig() {
             local jsonBlock="{
             \"id\": \"${itemTrigger}\",
             \"displayName\": \"${itemDisplayName}\",
+            \"guiIndex\": ${guiIndex},
             \"paths\": [\"${itemValidationPath}\"],
             \"icon\": \"${itemIconURL}\"
         }"
@@ -663,31 +672,41 @@ function createSYMLiteInspectConfig() {
             itemsJSON="${itemsJSON},
         ${jsonBlock}"
         fi
+        
+        ((guiIndex++))
     done
     
     # Create the full JSON configuration
+    # Note: Inspect Mode monitors file system paths, not log files
+    # Items are checked by watching for files to appear at specified paths
     if ! /bin/cat > "${dialogInspectModeJSONFile}" <<EOF
 {
     "preset": "preset${organizationPreset}",
     "title": "${dialogTitle}",
-    "message": "Installing selected applications and executing policies. Progress is monitored automatically.",
+    "message": "Installing selected applications and executing policies. Items complete when files appear at their validation paths.",
     "icon": "${mainDialogIcon}",
     "overlayicon": "${organizationOverlayiconURL}",
     "iconsize": 120,
-    "size": "standard",
+    "size": "compact",
     "logMonitor": {
         "path": "${installomatorLog}",
         "preset": "installomator",
         "autoMatch": true,
         "startFromEnd": true
     },
+    "cachePaths": [
+        "/Library/Application Support/Installomator/Downloads",
+        "/Library/Application Support/JAMF/Downloads",
+        "/Library/Managed Installs/Cache"
+    ],
+    "scanInterval": 2,
     "sideMessage": [
         "Thank you for your patience.",
-        "Installation progress is automatically monitored.",
+        "Installation progress is monitored by watching for files to appear.",
         "Applications are being installed via Installomator.",
         "Policies are being executed via Jamf Pro.",
         "Please wait while items are being processed.",
-        "Each item is verified after installation.",
+        "Each item completes when its validation path appears.",
         "This process may take several minutes.",
         "You can minimize this window if needed.",
         "The installation will complete automatically.",
@@ -817,7 +836,7 @@ function showSelectionDialog() {
     local rc
 
     # Build message
-    baseMessage="Select one or more applications or policies to install/execute.\n\n**Installomator Labels** and **Jamf Pro Policies** can be selected together."
+    baseMessage="Select one or more applications to install."
 
     # Add Installomator items as checkboxes with header
     if [[ ${#installomatorItems[@]} -gt 0 ]]; then
@@ -846,7 +865,7 @@ function showSelectionDialog() {
 
         dialogOutput="$(${dialogBinary} \
             --title "${humanReadableScriptName}" \
-            --infotext "Version ${scriptVersion}" \
+            --infotext "${scriptVersion}" \
             --messagefont "size=${fontSize}" \
             --message "${messageText}" \
             --icon "${mainDialogIcon}" \
@@ -854,6 +873,8 @@ function showSelectionDialog() {
             --json \
             --button1text "Install" \
             --button2text "Cancel" \
+            --height 675 \
+            --width 900 \
             "${checkboxArgs[@]}" 2>/dev/null)"
 
         rc=$?
@@ -870,7 +891,7 @@ function showSelectionDialog() {
 
         # Warn and retry if no selections
         warning "No items selected in picker; re-showing selection dialog"
-        warningMessage=":red[Warning:] Please select at least **one** option before clicking **Install**."
+        warningMessage="**:red[Warning:]** Please select at least _one_ option before clicking **Install**."
     done
 }
 
@@ -964,11 +985,9 @@ function executeJamfPolicy() {
     
     notice "Executing Jamf policy '${trigger}' (${displayName}) …"
     
-    # Execute Jamf policy and log output to jamf.log for Inspect Mode monitoring
+    # Execute Jamf policy and log output
     "${jamfBinary}" policy -event "${trigger}" 2>&1 | while IFS= read -r jamfOutputLine; do
         logComment "Jamf (${trigger}): ${jamfOutputLine}"
-        # Also write to jamf.log for potential Inspect Mode secondary monitoring
-        echo "$(date '+%Y-%m-%d %H:%M:%S') [${trigger}] ${jamfOutputLine}" >> "${jamfLog}"
     done
     jamfExitCode=${pipestatus[1]}
 
@@ -1008,7 +1027,7 @@ function executeSYMLiteItems() {
     
     # Launch Dialog in background for real-time progress
     notice "Launching Inspect Mode dialog …"
-    runAsUser DIALOG_INSPECT_CONFIG="${dialogInspectModeJSONFile}" "${dialogBinary}" --inspect-mode &
+    runAsUser "${loggedInUser}" DIALOG_INSPECT_CONFIG="${dialogInspectModeJSONFile}" "${dialogBinary}" --inspect-mode &
     dialogPID=$!
     info "Inspect Mode PID: ${dialogPID}"
     
@@ -1110,13 +1129,13 @@ function showCompletionDialog() {
     
     ${dialogBinary} \
         --title "${dialogTitle}" \
-        --infotext "Version ${scriptVersion}" \
+        --infotext "${scriptVersion}" \
         --messagefont "size=${fontSize}" \
         --message "${dialogMessage}" \
         --icon "${dialogIcon}" \
         --button1text "Close" \
-        --width 600 \
-        --height 400 2>/dev/null
+        --height 675 \
+        --width 900 2>/dev/null
     
     notice "Completion dialog closed"
 }
@@ -1124,8 +1143,33 @@ function showCompletionDialog() {
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
-# Restart Prompt
+# Restart Helpers
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+function executeRestartAction() {
+    local effectiveRestartMode="${1:-${restartMode}}"
+    local restartCommand=""
+
+    case "${effectiveRestartMode}" in
+        Restart)
+            restartCommand="sleep 1 && shutdown -r now &"
+            if /bin/zsh -c "${restartCommand}" >>"${scriptLog}" 2>&1; then
+                notice "Restart command '${effectiveRestartMode}' sent as root: ${restartCommand}"
+                return 0
+            fi
+            warning "Failed to invoke restart command '${effectiveRestartMode}' as root: ${restartCommand}"
+            return 1
+            ;;
+        "Restart Confirm"|*)
+            if runAsUser "${loggedInUser}" /usr/bin/osascript -e 'tell app "loginwindow" to «event aevtrrst»' >>"${scriptLog}" 2>&1; then
+                notice "Restart command '${effectiveRestartMode}' sent for ${loggedInUser}."
+                return 0
+            fi
+            warning "Failed to invoke restart command '${effectiveRestartMode}' for ${loggedInUser}."
+            return 1
+            ;;
+    esac
+}
 
 function promptForRestart() {
     if [[ "${restartPromptEnabled}" != "true" ]] || [[ "${operationMode}" == "silent" ]]; then
@@ -1136,22 +1180,20 @@ function promptForRestart() {
     
     ${dialogBinary} \
         --title "Restart Recommended" \
-        --infotext "Version ${scriptVersion}" \
+        --infotext "${scriptVersion}" \
         --messagefont "size=${fontSize}" \
         --message "A restart is recommended to complete the installation.\n\nWould you like to restart now?" \
         --icon "SF=arrow.clockwise.circle,weight=semibold,colour1=#51a3ef,colour2=#5154ef" \
         --button1text "Restart Now" \
         --button2text "Later" \
-        --width 500 \
-        --height 300 2>/dev/null
+        --height 675 \
+        --width 900 2>/dev/null
     
     rc=$?
     
     if [[ ${rc} -eq 0 ]]; then
         notice "User chose to restart now"
-        info "Executing restart in 5 seconds..."
-        sleep 5
-        /sbin/shutdown -r now
+        executeRestartAction "Restart Confirm"
     else
         notice "User chose to restart later"
     fi
