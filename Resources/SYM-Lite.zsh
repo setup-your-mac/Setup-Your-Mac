@@ -3,6 +3,14 @@
 
 ####################################################################################################
 #
+# !! SYM-Lite HAS MOVED !!
+#
+# This file is no longer maintained in the Setup-Your-Mac repository.
+# The new dedicated repository is: https://github.com/setup-your-mac/SYM-Lite
+# Please update any references to this file accordingly.
+#
+####################################################################################################
+#
 # SYM-Lite
 #
 # - Lean, purpose-built script for executing Jamf Pro Policy Custom Triggers and Installomator labels
