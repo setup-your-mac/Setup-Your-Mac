@@ -3,9 +3,9 @@
 ## Overview
 SYM-Lite is a lean, purpose-built script for executing Jamf Pro Policy Custom Triggers and Installomator labels through a unified swiftDialog selection interface.
 
-**Version:** 0.0.1a1  
+**Version:** 0.0.1a2  
 **File:** `Resources/SYM-Lite.zsh`  
-**Size:** 44KB (1,239 lines)  
+**Size:** 43KB (1,239 lines)  
 **Status:** ✓ Syntax validated, includes logMonitor support
 
 ---
@@ -13,13 +13,14 @@ SYM-Lite is a lean, purpose-built script for executing Jamf Pro Policy Custom Tr
 ## Key Features
 
 ✓ **Dual execution support** — Installomator labels AND Jamf Pro policies in single session  
-✓ **Interactive selection UI** — User-friendly checkbox dialog  
+✓ **Interactive selection UI** — User-friendly checkbox dialog with per-item icons  
+✓ **Alphabetical sorting** — All items sorted together by display name in selection dialog  
 ✓ **Silent mode** — CSV-based automation support  
 ✓ **Inspect Mode monitoring** — Real-time progress with rich status updates for Installomator labels  
 ✓ **Log monitoring** — Parses Installomator.log for intermediate states (downloading, installing, verifying)  
 ✓ **Path-based validation** — Pre/post-execution checks via file system monitoring  
 ✓ **Cache monitoring** — Detects in-progress downloads  
-✓ **Completion dialogs** — Success/failure summary and restart prompt  
+✓ **Completion dialogs** — Success/failure summary and restart prompt (skipped when all items already installed)  
 ✓ **Graceful interruption** — Clean shutdown on SIGINT/SIGTERM with 30-second timeout  
 
 ---
@@ -32,16 +33,16 @@ Edit the `installomatorItems` array (lines ~120-128):
 
 ```zsh
 installomatorItems=(
-    "label:Display Name:Validation Path:Icon URL"
+    "label | Display Name | Validation Path | Icon URL"
 )
 ```
 
 **Example:**
 ```zsh
 installomatorItems=(
-    "microsoftword:Microsoft Word:/Applications/Microsoft Word.app:https://icon.url"
-    "googlechrome:Google Chrome:/Applications/Google Chrome.app:https://icon.url"
-    "zoom:Zoom:/Applications/zoom.us.app:https://icon.url"
+    "microsoftword | Microsoft Word | /Applications/Microsoft Word.app | https://icon.url"
+    "googlechrome | Google Chrome | /Applications/Google Chrome.app | https://icon.url"
+    "zoom | Zoom | /Applications/zoom.us.app | https://icon.url"
 )
 ```
 
@@ -51,16 +52,16 @@ Edit the `jamfPolicyItems` array (lines ~131-136):
 
 ```zsh
 jamfPolicyItems=(
-    "trigger:Display Name:Validation Path:Icon URL"
+    "trigger | Display Name | Validation Path | Icon URL"
 )
 ```
 
 **Example:**
 ```zsh
 jamfPolicyItems=(
-    "installRosetta:Install Rosetta 2:/usr/bin/arch:SF=cpu"
-    "enableFileVault:Enable FileVault:/Library/Preferences/com.apple.fdesetup.plist:SF=lock.shield"
-    "configureDock:Configure Dock:/usr/local/bin/dockutil:SF=dock.rectangle"
+    "installRosetta | Install Rosetta 2 | /usr/bin/arch | SF=cpu"
+    "enableFileVault | Enable FileVault | /Library/Preferences/com.apple.fdesetup.plist | SF=lock.shield"
+    "configureDock | Configure Dock | /usr/local/bin/dockutil | SF=dock.rectangle"
 )
 ```
 
@@ -113,12 +114,13 @@ sudo /path/to/SYM-Lite.zsh "" "" "" silent "microsoftword,googlechrome"
 ### Required
 - **macOS** 10.14+
 - **Root access** — Script must run as root
-- **swiftDialog** 3.0.0.4952+ (auto-installed if missing)
+- **swiftDialog** 3.0.1.4955+ (auto-installed if missing)
 
 ### Conditional
 - **Installomator** — Required if Installomator items configured
   - Default path: `/Library/Management/AppAutoPatch/Installomator/Installomator.sh`
   - Edit `organizationInstallomatorFile` variable to customize
+  - Must be non-zero bytes; a zero-byte file is treated as missing (detected at pre-flight)
 - **Jamf Pro Client** — Required if Jamf policy items configured
   - Default path: `/usr/local/bin/jamf`
   - Edit `jamfBinary` variable to customize
@@ -131,7 +133,7 @@ sudo /path/to/SYM-Lite.zsh "" "" "" silent "microsoftword,googlechrome"
 PRE-FLIGHT CHECKS
   ├─ Verify root
   ├─ Check/install swiftDialog
-  ├─ Verify Installomator (if items configured)
+  ├─ Verify Installomator (if items configured; rejects zero-byte file)
   └─ Verify Jamf binary (if items configured)
        ↓
 SELECTION INTERFACE
@@ -329,13 +331,14 @@ Set `restartPromptEnabled="false"` in the script to skip the prompt entirely in 
 - Check policy exists in Jamf Pro and trigger name matches
 
 ### Installomator failures
-- Verify Installomator path: `ls -l /Library/Management/.../Installomator.sh`
+- Verify Installomator path: `ls -lah /Library/Management/.../Installomator.sh`
+- Verify file is non-zero bytes — a zero-byte file is detected at pre-flight and Installomator items will be skipped
 - Test label manually: `sudo /path/to/Installomator.sh <label> DEBUG=1`
 - Check label exists and is spelled correctly
 
 ### Selection dialog empty
 - Verify items are configured in arrays
-- Check array syntax (colon-separated fields)
+- Check array syntax (space-padded pipe-separated fields: `"id | Display Name | /validation/path | iconURL"`)
 - Review pre-flight log for parsing errors
 
 ### Script hangs after clicking Close
@@ -398,6 +401,6 @@ For issues or questions:
 ---
 
 **Script Location:** `/Users/[redacted]/Documents/GitHub/Setup-Your-Mac/Resources/SYM-Lite.zsh`  
-**Version:** 0.0.1a1  
-**Date:** March 26, 2026  
+**Version:** 0.0.1a2  
+**Date:** March 27, 2026  
 **Author:** Dan K. Snelson (@dan-snelson)
