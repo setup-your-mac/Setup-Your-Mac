@@ -1,3 +1,19 @@
+# SYM-Lite Has Moved
+
+> **SYM-Lite now has its own dedicated repository.**
+>
+> ## [github.com/setup-your-mac/SYM-Lite](https://github.com/setup-your-mac/SYM-Lite)
+>
+> Please update any bookmarks, links, or scripts that reference this location.
+
+This file is no longer maintained here and will not receive future updates.
+
+---
+
+_The content below is preserved for reference only and may be outdated._
+
+---
+
 # SYM-Lite Quick Start Guide
 
 ## Overview

@@ -46,3 +46,11 @@ While we _thought_ we'd done everything to ensure our users had a seamless exper
 
 ### Script
 - [Prompt-to-Setup-Your-Mac.bash](Prompt-to-Setup-Your-Mac.bash)
+
+---
+
+# SYM-Lite
+
+> SYM-Lite now has its own dedicated repository.
+
+**[github.com/setup-your-mac/SYM-Lite](https://github.com/setup-your-mac/SYM-Lite)**
