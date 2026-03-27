@@ -78,7 +78,7 @@ jamfPolicyItems=(
 Run the script as root with no parameters:
 
 ```bash
-sudo /Users/[redacted]/Documents/GitHub/Setup-Your-Mac/Resources/SYM-Lite.zsh
+sudo ~/Downloads/Setup-Your-Mac/Resources/SYM-Lite.zsh
 ```
 
 **User experience:**
