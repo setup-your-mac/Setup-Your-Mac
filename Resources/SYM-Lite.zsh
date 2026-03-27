@@ -570,6 +570,9 @@ if [[ ${#installomatorItems[@]} -gt 0 ]]; then
     if [[ ! -x "${organizationInstallomatorFile}" ]]; then
         warning "Installomator not found at ${organizationInstallomatorFile}"
         warning "Installomator items will be skipped"
+    elif [[ ! -s "${organizationInstallomatorFile}" ]]; then
+        fatal "Installomator at ${organizationInstallomatorFile} is zero bytes"
+        fatal "Installomator items will be skipped"
     else
         preFlight "Installomator found at ${organizationInstallomatorFile}"
     fi
