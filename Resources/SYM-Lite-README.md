@@ -400,7 +400,6 @@ For issues or questions:
 
 ---
 
-**Script Location:** `/Users/[redacted]/Documents/GitHub/Setup-Your-Mac/Resources/SYM-Lite.zsh`  
 **Version:** 0.0.1a2  
 **Date:** March 27, 2026  
 **Author:** Dan K. Snelson (@dan-snelson)
