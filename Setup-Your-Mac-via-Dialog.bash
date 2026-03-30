@@ -576,25 +576,25 @@ function confirmPolicyExecution() {
             fi
             ;;
             
-        "Miniaturize Dialog" | "miniaturize dialog" )
+        "Minimize Dialog" | "minimize dialog" )
 
             outputLineNumberInVerboseDebugMode
             logMessage "SETUP YOUR MAC DIALOG" "Confirm Policy Execution: ${validation}"
             if [[ "${debugMode}" == "true" ]] || [[ "${debugMode}" == "verbose" ]] ; then
                 sleep "${debugModeSleepAmount}"
             else
-                dialogUpdateSetupYourMac "miniaturize: "
+                dialogUpdateSetupYourMac "minimize:"
             fi
             ;;
 
-        "Deminiaturize Dialog" | "deminiaturize dialog" )
+        "Maximize Dialog" | "maximize dialog" )
 
             outputLineNumberInVerboseDebugMode
             logMessage "SETUP YOUR MAC DIALOG" "Confirm Policy Execution: ${validation}"
             if [[ "${debugMode}" == "true" ]] || [[ "${debugMode}" == "verbose" ]] ; then
                 sleep "${debugModeSleepAmount}"
             else
-                dialogUpdateSetupYourMac "deminiaturize: "
+                dialogUpdateSetupYourMac "maximize:"
             fi
             ;;
             
@@ -769,7 +769,7 @@ function validatePolicyResult() {
         # (Always evaluates as: 'success' and 'Installed')
         ###
 
-        "None" | "none" | *"Blurscreen"* | *"blurscreen"* | "Hide Dialog" | "hide dialog" | "Show Dialog" | "show dialog" | "Miniaturize Dialog" | "miniaturize dialog" | "Deminiaturize Dialog" | "deminiaturize dialog")
+        "None" | "none" | *"Blurscreen"* | *"blurscreen"* | "Hide Dialog" | "hide dialog" | "Show Dialog" | "show dialog" | "Minimize Dialog" | "minimize dialog" | "Maximize Dialog" | "maximize dialog")
         
             outputLineNumberInVerboseDebugMode
             logMessage "SETUP YOUR MAC DIALOG" "Confirm Policy Execution: ${validation}"
