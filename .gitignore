@@ -15,6 +15,9 @@ Icon?
 .VolumeIcon.icns
 .com.apple.timemachine.donotpresent
 .apdisk
+
+### Codex
+.codex/
 .envrc
 
 ### Zsh
