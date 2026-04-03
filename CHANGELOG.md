@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 1.16.2b1
+### 03-Apr-2026
+- Added `Minimize Dialog` and `Maximize Dialog` validations for swiftDialog window-state control commands ([Pull Request 183](https://github.com/setup-your-mac/Setup-Your-Mac/pull/183); keep 'em comin', @HowardGMac!)
+- Adjusted the `swiftDialogMinimumRequiredVersion` to `3.1.0.4970`
+- Added proof-of-concept support for triggering window-state control commands (e.g., minimize, maximize) via the `validation` key in `trigger_list` entries in the `policyJSON`.
+
 ## 1.16.1b1
 ### 25-Feb-2026
 - Fixed false `Error` list-item status for `Hide Dialog` and `Show Dialog` validations by treating only those explicit validation values as successful. ([Issue 178](https://github.com/setup-your-mac/Setup-Your-Mac/issues/178) and [Pull Request 179](https://github.com/setup-your-mac/Setup-Your-Mac/pull/179); thanks for the two-fer, @HowardGMac!)
