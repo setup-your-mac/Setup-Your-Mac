@@ -10,10 +10,10 @@
 #
 # HISTORY
 #
-#   Version 1.16.1b1, 25-Feb-2026
-#   - Fixed false `Error` list-item status for `Hide Dialog` and `Show Dialog` validations by treating only those explicit validation values as successful. ([Issue 178](https://github.com/setup-your-mac/Setup-Your-Mac/issues/178) and [Pull Request 179](https://github.com/setup-your-mac/Setup-Your-Mac/pull/179); thanks for the two-fer, @HowardGMac!)
-#   - Updated inline `policyJSON` validation documentation to include `Blurscreen` and `Hide Dialog` / `Show Dialog` control validations.
-#   - Added follow-up tracking for step validation hardening to evaluate each `trigger_list` entry (instead of only the final trigger/validation pair).
+#   Version 1.16.2b1, 03-Apr-2026
+#   - Added `Minimize Dialog` and `Maximize Dialog` validations for swiftDialog window-state control commands ([Pull Request 183](https://github.com/setup-your-mac/Setup-Your-Mac/pull/183); keep 'em comin', @HowardGMac!)
+#   - Adjusted the `swiftDialogMinimumRequiredVersion` to `3.1.0.4970`
+#   - Added proof-of-concept support for triggering window-state control commands (e.g., minimize, maximize) via the `validation` key in `trigger_list` entries in the `policyJSON`.
 #
 ####################################################################################################
 
@@ -29,17 +29,17 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.16.1b1"
+scriptVersion="1.16.2b1"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
-debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
+debugMode="${5:-"false"}"                                                       # Parameter 5: Debug Mode [ verbose (default) | true | false ]
 welcomeDialog="${6:-"userInput"}"                                               # Parameter 6: Welcome dialog [ userInput (default) | video | messageOnly | false ]
-completionActionOption="${7:-"Restart Attended"}"                               # Parameter 7: Completion Action [ wait | sleep (with seconds) | Shut Down | Shut Down Attended | Shut Down Confirm | Restart | Restart Attended (default) | Restart Confirm | Log Out | Log Out Attended | Log Out Confirm ]
+completionActionOption="${7:-"wait"}"                                           # Parameter 7: Completion Action [ wait | sleep (with seconds) | Shut Down | Shut Down Attended | Shut Down Confirm | Restart | Restart Attended (default) | Restart Confirm | Log Out | Log Out Attended | Log Out Confirm ]
 requiredMinimumBuild="${8:-"disabled"}"                                         # Parameter 8: Required Minimum Build [ disabled (default) | 23F ] (i.e., Your organization's required minimum build of macOS to allow users to proceed; use "23F" for macOS 14.5)
 outdatedOsAction="${9:-"/System/Library/CoreServices/Software Update.app"}"     # Parameter 9: Outdated OS Action [ /System/Library/CoreServices/Software Update.app (default) | jamfselfservice://content?entity=policy&id=117&action=view ] (i.e., Jamf Pro Self Service policy ID for operating system ugprades)
 webhookURL="${10:-""}"                                                          # Parameter 10: Microsoft Teams or Slack Webhook URL [ Leave blank to disable (default) | https://microsoftTeams.webhook.com/URL | https://hooks.slack.com/services/URL ] Can be used to send a success or failure message to Microsoft Teams or Slack via Webhook. (Function will automatically detect if Webhook URL is for Slack or Teams; can be modified to include other communication tools that support functionality.)
 presetConfiguration="${11:-""}"                                                 # Parameter 11: Specify a Configuration (i.e., `policyJSON`; NOTE: If set, `promptForConfiguration` will be automatically suppressed and the preselected configuration will be used instead)
-swiftDialogMinimumRequiredVersion="2.5.6.4805"                                  # This will be set and updated as dependancies on newer features change.
+swiftDialogMinimumRequiredVersion="3.1.0.4970"                                  # This will be set and updated as dependancies on newer features change.
 
 
 
@@ -79,7 +79,7 @@ promptForConfiguration="true"   # Removes the Configuration dropdown entirely an
 suppressReconOnPolicy="false"
 
 # [SYM-Helper] Disables the Blurscreen enabled by default in Production
-moveableInProduction="false"
+moveableInProduction="true"
 
 # [SYM-Helper] An unsorted, comma-separated list of buildings (with possible duplication). If empty, this will be hidden from the user info prompt
 buildingsListRaw="Benson (Ezra Taft) Building,Brimhall (George H.) Building,BYU Conference Center,Centennial Carillon Tower,Chemicals Management Building,Clark (Herald R.) Building,Clark (J. Reuben) Building,Clyde (W.W.) Engineering Building,Crabtree (Roland A.) Technology Building,Ellsworth (Leo B.) Building,Engineering Building,Eyring (Carl F.) Science Center,Grant (Heber J.) Building,Harman (Caroline Hemenway) Building,Harris (Franklin S.) Fine Arts Center,Johnson (Doran) House East,Kimball (Spencer W.) Tower,Knight (Jesse) Building,Lee (Harold B.) Library,Life Sciences Building,Life Sciences Greenhouses,Maeser (Karl G.) Building,Martin (Thomas L.) Building,McKay (David O.) Building,Nicholes (Joseph K.) Building,Smith (Joseph F.) Building,Smith (Joseph) Building,Snell (William H.) Building,Talmage (James E.) Math Sciences/Computer Building,Tanner (N. Eldon) Building,Taylor (John) Building,Wells (Daniel H.) Building"
@@ -253,7 +253,7 @@ function calculateFreeDiskSpace() {
 
 function dialogUpdateWelcome(){
     echo "$1" >> "$welcomeCommandFile"
-    sleep 0.3
+    sleep 0.1
 }
 
 
@@ -265,7 +265,7 @@ function dialogUpdateWelcome(){
 function dialogUpdateSetupYourMac() {
     logMessage "SETUP YOUR MAC DIALOG" "$1"
     echo "$1" >> "$setupYourMacCommandFile"
-    sleep 0.3
+    sleep 0.1
 }
 
 
@@ -277,7 +277,7 @@ function dialogUpdateSetupYourMac() {
 function dialogUpdateFailure(){
     logMessage "FAILURE DIALOG" "$1"
     echo "$1" >> "$failureCommandFile"
-    sleep 0.3
+    sleep 0.1
 }
 
 
@@ -575,7 +575,7 @@ function confirmPolicyExecution() {
                 dialogUpdateSetupYourMac "show: "
             fi
             ;;
-            
+
         "Minimize Dialog" | "minimize dialog" )
 
             outputLineNumberInVerboseDebugMode
@@ -597,7 +597,7 @@ function confirmPolicyExecution() {
                 dialogUpdateSetupYourMac "maximize:"
             fi
             ;;
-            
+
         * )
 
             outputLineNumberInVerboseDebugMode
@@ -769,7 +769,7 @@ function validatePolicyResult() {
         # (Always evaluates as: 'success' and 'Installed')
         ###
 
-        "None" | "none" | *"Blurscreen"* | *"blurscreen"* | "Hide Dialog" | "hide dialog" | "Show Dialog" | "show dialog" | "Minimize Dialog" | "minimize dialog" | "Maximize Dialog" | "maximize dialog")
+        "None" | "none" | *"Blurscreen"* | *"blurscreen"* | "Hide Dialog" | "hide dialog" | "Show Dialog" | "show dialog" | "Minimize Dialog" | "minimize dialog" | "Maximize Dialog" | "maximize dialog" )
         
             outputLineNumberInVerboseDebugMode
             logMessage "SETUP YOUR MAC DIALOG" "Confirm Policy Execution: ${validation}"
@@ -2299,7 +2299,7 @@ dialogSetupYourMacCMD="$dialogBinary \
 #   - See: https://vimeo.com/772998915
 # - progresstext: The text to be displayed below the progress bar
 # - trigger: The Jamf Pro Policy Custom Event Name
-# - validation: [ {absolute path} | Local | Remote | None | Recon | Blurscreen On/Off | Hide Dialog/Show Dialog ]
+# - validation: [ {absolute path} | Local | Remote | None | Recon | Blurscreen On/Off | Hide Dialog/Show Dialog | Minimize Dialog/Maximize Dialog ]
 #   See: https://snelson.us/2023/01/setup-your-mac-validation/
 #       - {absolute path} (simulates pre-v1.6.0 behavior, for example: "/Applications/Microsoft Teams classic.app/Contents/Info.plist")
 #       - Local (for validation within this script, for example: "filevault")
@@ -2308,6 +2308,7 @@ dialogSetupYourMacCMD="$dialogBinary \
 #       - Recon (to update the computer's inventory with your Jamf Pro server)
 #       - Blurscreen On / Blurscreen Off (for swiftDialog display controls; evaluates as successful)
 #       - Hide Dialog / Show Dialog (for swiftDialog visibility controls; evaluates as successful)
+#       - Minimize Dialog / Maximize Dialog (for swiftDialog window-state controls; evaluates as successful)
 #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #
@@ -2353,7 +2354,7 @@ function policyJSONConfiguration() {
                         "trigger_list": [
                             {
                                 "trigger": "rosettaInstall",
-                                "validation": "None"
+                                "validation": "Blurscreen On"
                             },
                             {
                                 "trigger": "rosetta",
@@ -2431,6 +2432,50 @@ function policyJSONConfiguration() {
                                 "trigger": "oktaVerify",
                                 "validation": "/Applications/Okta Verify.app"
                             }
+                        ]
+                    },
+                    {
+                        "listitem": "Microsoft Company Portal",
+                        "subtitle": "Device Compliance Application",
+                        "icon": "https://usw2.ics.services.jamfcloud.com/icon/hash_8ad08f4d28b61852f479fb343293d2a686a8f4fffcb7f2a866d8a7602ed0cb1d",
+                        "progresstext": "Microsoft Company Portal allows you to securely access the organization’s internal apps, data, and resources.",
+                        "trigger_list": [
+                            {
+                                "trigger": "microsoftCompanyPortal",
+                                "validation": "/Applications/Company Portal.app"
+                            }
+                        ]
+                    },
+                    {
+                        "listitem": "Device Compliance Registration",
+                        "subtitle": "Registers your Mac with Microsoft Intune for secure access to email and other resources.",
+                        "icon": "https://ics.services.jamfcloud.com/icon/hash_ff2147a6c09f5ef73d1c4406d00346811a9c64c0b6b7f36eb52fcb44943d26f9",
+                        "progresstext": "Registering your Mac with Microsoft Intune …",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "None",
+                                            "validation": "Blurscreen Off"
+                                         },
+                                         {
+                                            "trigger": "None",
+                                            "validation": "Minimize Dialog"
+                                         },
+                                         {
+                                            "trigger": "promptForMicrosoftDeviceComplianceRegistration",
+                                            "validation": "None"
+                                         },
+                                         {
+                                            "trigger": "microsoftDeviceComplianceRegistration",
+                                            "validation": "None"
+                                         },
+                                         {
+                                            "trigger": "none",
+                                            "validation": "Maximize Dialog"
+                                         },
+                                         {
+                                            "trigger": "None",
+                                            "validation": "Blurscreen On"
+                                         }
                         ]
                     },
                     {
@@ -2516,7 +2561,7 @@ function policyJSONConfiguration() {
                         "trigger_list": [
                             {
                                 "trigger": "rosettaInstall",
-                                "validation": "None"
+                                "validation": "Blurscreen On"
                             },
                             {
                                 "trigger": "rosetta",
@@ -2594,6 +2639,50 @@ function policyJSONConfiguration() {
                                 "trigger": "oktaVerify",
                                 "validation": "/Applications/Okta Verify.app"
                             }
+                        ]
+                    },
+                    {
+                        "listitem": "Microsoft Company Portal",
+                        "subtitle": "Device Compliance Application",
+                        "icon": "https://usw2.ics.services.jamfcloud.com/icon/hash_8ad08f4d28b61852f479fb343293d2a686a8f4fffcb7f2a866d8a7602ed0cb1d",
+                        "progresstext": "Microsoft Company Portal allows you to securely access the organization’s internal apps, data, and resources.",
+                        "trigger_list": [
+                            {
+                                "trigger": "microsoftCompanyPortal",
+                                "validation": "/Applications/Company Portal.app"
+                            }
+                        ]
+                    },
+                    {
+                        "listitem": "Device Compliance Registration",
+                        "subtitle": "Registers your Mac with Microsoft Intune for secure access to email and other resources.",
+                        "icon": "https://ics.services.jamfcloud.com/icon/hash_ff2147a6c09f5ef73d1c4406d00346811a9c64c0b6b7f36eb52fcb44943d26f9",
+                        "progresstext": "Registering your Mac with Microsoft Intune …",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "None",
+                                            "validation": "Blurscreen Off"
+                                         },
+                                         {
+                                            "trigger": "None",
+                                            "validation": "Minimize Dialog"
+                                         },
+                                         {
+                                            "trigger": "promptForMicrosoftDeviceComplianceRegistration",
+                                            "validation": "None"
+                                         },
+                                         {
+                                            "trigger": "microsoftDeviceComplianceRegistration",
+                                            "validation": "None"
+                                         },
+                                         {
+                                            "trigger": "none",
+                                            "validation": "Maximize Dialog"
+                                         },
+                                         {
+                                            "trigger": "None",
+                                            "validation": "Blurscreen On"
+                                         }
                         ]
                     },
                     {
@@ -2695,7 +2784,7 @@ function policyJSONConfiguration() {
                         "trigger_list": [
                             {
                                 "trigger": "rosettaInstall",
-                                "validation": "None"
+                                "validation": "Blurscreen On"
                             },
                             {
                                 "trigger": "rosetta",
@@ -2773,6 +2862,50 @@ function policyJSONConfiguration() {
                                 "trigger": "oktaVerify",
                                 "validation": "/Applications/Okta Verify.app"
                             }
+                        ]
+                    },
+                    {
+                        "listitem": "Microsoft Company Portal",
+                        "subtitle": "Device Compliance Application",
+                        "icon": "https://usw2.ics.services.jamfcloud.com/icon/hash_8ad08f4d28b61852f479fb343293d2a686a8f4fffcb7f2a866d8a7602ed0cb1d",
+                        "progresstext": "Microsoft Company Portal allows you to securely access the organization’s internal apps, data, and resources.",
+                        "trigger_list": [
+                            {
+                                "trigger": "microsoftCompanyPortal",
+                                "validation": "/Applications/Company Portal.app"
+                            }
+                        ]
+                    },
+                    {
+                        "listitem": "Device Compliance Registration",
+                        "subtitle": "Registers your Mac with Microsoft Intune for secure access to email and other resources.",
+                        "icon": "https://ics.services.jamfcloud.com/icon/hash_ff2147a6c09f5ef73d1c4406d00346811a9c64c0b6b7f36eb52fcb44943d26f9",
+                        "progresstext": "Registering your Mac with Microsoft Intune …",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "None",
+                                            "validation": "Blurscreen Off"
+                                         },
+                                         {
+                                            "trigger": "None",
+                                            "validation": "Minimize Dialog"
+                                         },
+                                         {
+                                            "trigger": "promptForMicrosoftDeviceComplianceRegistration",
+                                            "validation": "None"
+                                         },
+                                         {
+                                            "trigger": "microsoftDeviceComplianceRegistration",
+                                            "validation": "None"
+                                         },
+                                         {
+                                            "trigger": "none",
+                                            "validation": "Maximize Dialog"
+                                         },
+                                         {
+                                            "trigger": "None",
+                                            "validation": "Blurscreen On"
+                                         }
                         ]
                     },
                     {
@@ -2898,7 +3031,7 @@ function policyJSONConfiguration() {
                         "trigger_list": [
                             {
                                 "trigger": "rosettaInstall",
-                                "validation": "None"
+                                "validation": "Blurscreen On"
                             },
                             {
                                 "trigger": "rosetta",
@@ -2976,6 +3109,50 @@ function policyJSONConfiguration() {
                                 "trigger": "oktaVerify",
                                 "validation": "/Applications/Okta Verify.app"
                             }
+                        ]
+                    },
+                    {
+                        "listitem": "Microsoft Company Portal",
+                        "subtitle": "Device Compliance Application",
+                        "icon": "https://usw2.ics.services.jamfcloud.com/icon/hash_8ad08f4d28b61852f479fb343293d2a686a8f4fffcb7f2a866d8a7602ed0cb1d",
+                        "progresstext": "Microsoft Company Portal allows you to securely access the organization’s internal apps, data, and resources.",
+                        "trigger_list": [
+                            {
+                                "trigger": "microsoftCompanyPortal",
+                                "validation": "/Applications/Company Portal.app"
+                            }
+                        ]
+                    },
+                    {
+                        "listitem": "Device Compliance Registration",
+                        "subtitle": "Registers your Mac with Microsoft Intune for secure access to email and other resources.",
+                        "icon": "https://ics.services.jamfcloud.com/icon/hash_ff2147a6c09f5ef73d1c4406d00346811a9c64c0b6b7f36eb52fcb44943d26f9",
+                        "progresstext": "Registering your Mac with Microsoft Intune …",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "None",
+                                            "validation": "Blurscreen Off"
+                                         },
+                                         {
+                                            "trigger": "None",
+                                            "validation": "Minimize Dialog"
+                                         },
+                                         {
+                                            "trigger": "promptForMicrosoftDeviceComplianceRegistration",
+                                            "validation": "None"
+                                         },
+                                         {
+                                            "trigger": "microsoftDeviceComplianceRegistration",
+                                            "validation": "None"
+                                         },
+                                         {
+                                            "trigger": "none",
+                                            "validation": "Maximize Dialog"
+                                         },
+                                         {
+                                            "trigger": "None",
+                                            "validation": "Blurscreen On"
+                                         }
                         ]
                     },
                     {
