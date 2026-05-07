@@ -10,10 +10,11 @@
 #
 # HISTORY
 #
-#   Version 1.16.2b1, 03-Apr-2026
-#   - Added `Minimize Dialog` and `Maximize Dialog` validations for swiftDialog window-state control commands ([Pull Request 183](https://github.com/setup-your-mac/Setup-Your-Mac/pull/183); keep 'em comin', @HowardGMac!)
-#   - Adjusted the `swiftDialogMinimumRequiredVersion` to `3.1.0.4970`
-#   - Added proof-of-concept support for triggering window-state control commands (e.g., minimize, maximize) via the `validation` key in `trigger_list` entries in the `policyJSON`.
+#   Version 1.16.2b2, 07-May-2026
+# - Added `Minimize Dialog` and `Maximize Dialog` validations for swiftDialog window-state control commands ([Pull Request 183](https://github.com/setup-your-mac/Setup-Your-Mac/pull/183); keep 'em comin', @HowardGMac!)
+# - Adjusted the `swiftDialogMinimumRequiredVersion` to `3.1.0.4970`
+# - Added proof-of-concept support for triggering window-state control commands (e.g., minimize, maximize) via the `validation` key in `trigger_list` entries in the `policyJSON`.
+# - Updated `recon` handling so Setup Your Mac captures `jamf recon` exit status, stops forcing verbose inventory output, times out stalled inventory updates, and correctly marks the inventory step failed when Jamf inventory submission fails.
 #
 ####################################################################################################
 
@@ -29,7 +30,7 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.16.2b1"
+scriptVersion="1.16.2b2"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
 debugMode="${5:-"false"}"                                                       # Parameter 5: Debug Mode [ verbose (default) | true | false ]
@@ -39,7 +40,7 @@ requiredMinimumBuild="${8:-"disabled"}"                                         
 outdatedOsAction="${9:-"/System/Library/CoreServices/Software Update.app"}"     # Parameter 9: Outdated OS Action [ /System/Library/CoreServices/Software Update.app (default) | jamfselfservice://content?entity=policy&id=117&action=view ] (i.e., Jamf Pro Self Service policy ID for operating system ugprades)
 webhookURL="${10:-""}"                                                          # Parameter 10: Microsoft Teams or Slack Webhook URL [ Leave blank to disable (default) | https://microsoftTeams.webhook.com/URL | https://hooks.slack.com/services/URL ] Can be used to send a success or failure message to Microsoft Teams or Slack via Webhook. (Function will automatically detect if Webhook URL is for Slack or Teams; can be modified to include other communication tools that support functionality.)
 presetConfiguration="${11:-""}"                                                 # Parameter 11: Specify a Configuration (i.e., `policyJSON`; NOTE: If set, `promptForConfiguration` will be automatically suppressed and the preselected configuration will be used instead)
-swiftDialogMinimumRequiredVersion="3.1.0.4970"                                  # This will be set and updated as dependancies on newer features change.
+swiftDialogMinimumRequiredVersion="3.1.0.4976"                                  # This will be set and updated as dependancies on newer features change.
 
 
 
@@ -52,6 +53,8 @@ organizationScriptName="sym"                # Organization's Script Name
 debugModeSleepAmount="3"                    # Delay for various actions when running in Debug Mode
 failureDialog="true"                        # Display the so-called "Failure" dialog (after the main SYM dialog) [ true | false ]
 requiredMinimumBatteryPercentage="25"       # Minimum battery percentage allowed to run without AC power. Set to "0" to always require AC power (original behaviour).
+reconTimeoutSeconds="1800"                 # Maximum time to wait for `jamf recon` before failing the inventory step.
+reconTerminationGraceSeconds="10"          # Maximum time to wait after TERM before force-killing a stalled `jamf recon`.
 
 
 
@@ -136,6 +139,9 @@ osMajorVersion=$( echo "${osVersion}" | awk -F '.' '{print $1}' )
 if [[ -n $osVersionExtra ]] && [[ "${osMajorVersion}" -ge 13 ]]; then osVersion="${osVersion} ${osVersionExtra}"; fi # Report RSR sub version if applicable
 modelName=$( /usr/libexec/PlistBuddy -c 'Print :0:_items:0:machine_name' /dev/stdin <<< "$(system_profiler -xml SPHardwareDataType)" )
 reconOptions=""
+computerID=""
+reconExitCode="0"
+reconTimedOut="false"
 exitCode="0"
 
 
@@ -527,8 +533,51 @@ function confirmPolicyExecution() {
             else
                 logMessage "SETUP YOUR MAC DIALOG" "Updating computer inventory with the following 'reconOptions': \"${reconOptions}\" …"
                 dialogUpdateSetupYourMac "listitem: index: $i, status: wait, statustext: Updating …, "
-                reconRaw=$( eval "${jamfBinary} recon ${reconOptions} -verbose | tee -a ${scriptLog}" )
-                computerID=$( echo "${reconRaw}" | grep '<computer_id>' | xmllint --xpath xmllint --xpath '/computer_id/text()' - )
+                reconOutputFile=$( /usr/bin/mktemp "/private/tmp/reconOutput.XXXXXX" )
+                reconTimedOut="false"
+                (
+                    set -o pipefail
+                    eval "${jamfBinary} recon ${reconOptions}" 2>&1 | tee -a "${scriptLog}" > "${reconOutputFile}"
+                ) &
+                reconPID=$!
+                reconElapsedSeconds="0"
+                while kill -0 "${reconPID}" 2>/dev/null; do
+                    if [[ "${reconElapsedSeconds}" -ge "${reconTimeoutSeconds}" ]]; then
+                        reconTimedOut="true"
+                        logMessage "SETUP YOUR MAC DIALOG" "Computer inventory update exceeded ${reconTimeoutSeconds} seconds; terminating recon"
+                        /usr/bin/pkill -TERM -P "${reconPID}" 2>/dev/null
+                        kill -TERM "${reconPID}" 2>/dev/null
+                        reconTerminationElapsedSeconds="0"
+                        while kill -0 "${reconPID}" 2>/dev/null; do
+                            if [[ "${reconTerminationElapsedSeconds}" -ge "${reconTerminationGraceSeconds}" ]]; then
+                                logMessage "SETUP YOUR MAC DIALOG" "Computer inventory update still running ${reconTerminationGraceSeconds} seconds after TERM; force killing recon"
+                                /usr/bin/pkill -KILL -P "${reconPID}" 2>/dev/null
+                                kill -KILL "${reconPID}" 2>/dev/null
+                                break
+                            fi
+                            sleep 1
+                            ((reconTerminationElapsedSeconds++))
+                        done
+                        break
+                    fi
+                    sleep 1
+                    ((reconElapsedSeconds++))
+                done
+                wait "${reconPID}"
+                reconExitCode="$?"
+                if [[ "${reconTimedOut}" == "true" ]]; then
+                    reconExitCode="124"
+                fi
+                computerID=$( awk -F '[<>]' '/<computer_id>/{ print $3; exit }' "${reconOutputFile}" )
+                if [[ -z "${computerID}" ]]; then
+                    computerID=$( /usr/bin/defaults read /Library/Preferences/com.jamfsoftware.jamf.plist computer_id 2>/dev/null )
+                fi
+                rm -f "${reconOutputFile}"
+                if [[ "${reconExitCode}" -eq 0 ]]; then
+                    logMessage "SETUP YOUR MAC DIALOG" "Computer inventory update completed${computerID:+ with computer ID \"${computerID}\"}"
+                else
+                    logMessage "SETUP YOUR MAC DIALOG" "Computer inventory update failed with exit code '${reconExitCode}'"
+                fi
             fi
             ;;
 
@@ -787,7 +836,20 @@ function validatePolicyResult() {
 
             outputLineNumberInVerboseDebugMode
             logMessage "SETUP YOUR MAC DIALOG" "Confirm Policy Execution: ${validation}"
-            dialogUpdateSetupYourMac "listitem: index: $i, status: success, statustext: Updated"
+            if [[ "${reconExitCode}" -eq 0 ]]; then
+                dialogUpdateSetupYourMac "listitem: index: $i, status: success, statustext: Updated"
+            else
+                if [[ "${reconTimedOut}" == "true" ]]; then
+                    logMessage "SETUP YOUR MAC DIALOG" "Validate Policy Result: Recon timed out after '${reconTimeoutSeconds}' seconds"
+                    dialogUpdateSetupYourMac "listitem: index: $i, status: fail, statustext: Timed Out"
+                else
+                    logMessage "SETUP YOUR MAC DIALOG" "Validate Policy Result: Recon failed with exit code '${reconExitCode}'"
+                    dialogUpdateSetupYourMac "listitem: index: $i, status: fail, statustext: Failed"
+                fi
+                jamfProPolicyTriggerFailure="failed"
+                exitCode="1"
+                jamfProPolicyNameFailures+="• $listitem  \n"
+            fi
             ;;
 
 
@@ -1471,7 +1533,7 @@ logMessage "PRE-FLIGHT" "Initiating …"
 # Pre-flight Check: Confirm script is running under bash
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-if [[ "$BASH" != "/bin/bash" ]] ; then
+if [[ -z "${BASH_VERSION:-}" || -z "${BASH:-}" || ! -x "${BASH}" ]] ; then
     logMessage "PRE-FLIGHT" "This script must be run under 'bash', please do not run it using 'sh', 'zsh', etc.; exiting."
     exit 1
 fi
