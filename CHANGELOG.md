@@ -1,10 +1,12 @@
 # CHANGELOG
 
-## 1.16.2b1
-### 03-Apr-2026
+## 1.16.2b2
+### 07-May-2026
 - Added `Minimize Dialog` and `Maximize Dialog` validations for swiftDialog window-state control commands ([Pull Request 183](https://github.com/setup-your-mac/Setup-Your-Mac/pull/183); keep 'em comin', @HowardGMac!)
-- Adjusted the `swiftDialogMinimumRequiredVersion` to `3.1.0.4970`
+- Adjusted the `swiftDialogMinimumRequiredVersion` to `3.1.0.4976`
 - Added proof-of-concept support for triggering window-state control commands (e.g., minimize, maximize) via the `validation` key in `trigger_list` entries in the `policyJSON`.
+- Updated `recon` handling so Setup Your Mac captures `jamf recon` exit status, stops forcing verbose inventory output, times out stalled inventory updates, and correctly marks the inventory step failed when Jamf inventory submission fails.
+- Relaxed the bash pre-flight guard to accept any valid Bash interpreter instead of requiring `/bin/bash` specifically.
 
 ## 1.16.1b1
 ### 25-Feb-2026
