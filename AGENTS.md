@@ -1,4 +1,4 @@
-# AGENTS.md (Setup Your Mac, version 1.16.2b2)
+# AGENTS.md (Setup Your Mac, version 1.16.2)
 
 **Single source of truth for coding agents working in this repository.**
 Use this file for repo-specific agent behavior, boundaries, and validation rules. It takes precedence over `README.md`, `CONTRIBUTING.md`, and lightweight loader files such as `.github/copilot-instructions.md` when repository guidance overlaps.
