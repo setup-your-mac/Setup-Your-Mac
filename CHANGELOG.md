@@ -1,5 +1,22 @@
 # CHANGELOG
 
+## 1.16.2
+### 21-Sep-2026
+- Added `Minimize Dialog` and `Maximize Dialog` validations for swiftDialog window-state control commands ([Pull Request 183](https://github.com/setup-your-mac/Setup-Your-Mac/pull/183); keep 'em comin', @HowardGMac!)
+- Adjusted the `swiftDialogMinimumRequiredVersion` to `3.1.0.4994`
+- Added proof-of-concept support for triggering window-state control commands (e.g., minimize, maximize) via the `validation` key in `trigger_list` entries in the `policyJSON`.
+- Updated `recon` handling so Setup Your Mac captures `jamf recon` exit status, stops forcing verbose inventory output, times out stalled inventory updates, and correctly marks the inventory step failed when Jamf inventory submission fails.
+- Relaxed the bash pre-flight guard to accept any valid Bash interpreter instead of requiring `/bin/bash` specifically.
+- Hardened `recon` diagnostics so timeout and failure logs capture baseline Jamf context, process snapshots, output excerpts, and recent `jamf.log` details, and terminate the complete spawned process tree on timeout.
+- Raised the minimum supported operating system to macOS 15 to match swiftDialog 3 requirements.
+- Cleaned validation scripts by removing UTF-8 byte order marks from BeyondTrust and CrowdStrike and preserving complete Microsoft app names during iteration.
+
+## 1.16.1b1
+### 25-Feb-2026
+- Fixed false `Error` list-item status for `Hide Dialog` and `Show Dialog` validations by treating only those explicit validation values as successful. ([Issue 178](https://github.com/setup-your-mac/Setup-Your-Mac/issues/178) and [Pull Request 179](https://github.com/setup-your-mac/Setup-Your-Mac/pull/179); thanks for the two-fer, @HowardGMac!)
+- Updated inline `policyJSON` validation documentation to include `Blurscreen` and `Hide Dialog` / `Show Dialog` control validations.
+- Added follow-up tracking for step validation hardening to evaluate each `trigger_list` entry (instead of only the final trigger/validation pair).
+
 ## 1.16.0
 ### 19-Feb-2026
 - Added proof-of-concept validations for swiftDialog `2.5.1`'s "blurscreen" control

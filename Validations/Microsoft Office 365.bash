@@ -80,7 +80,7 @@ while pgrep -a "Microsoft AutoUpdate"; do
     sleep 10
 done
 
-for app in ${appsToCheck[@]}; do
+for app in "${appsToCheck[@]}"; do
   appCheck "$app"
 done
 

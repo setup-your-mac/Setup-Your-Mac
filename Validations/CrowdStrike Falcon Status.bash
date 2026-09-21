@@ -1,4 +1,4 @@
-﻿#!/usr/bin/env bash
+#!/usr/bin/env bash
 ########################################################################################################################################
 # A script to collect the state of CrowdStrike Falcon (thanks, ZT!)                                                                    #
 # - If CrowdStrike Falcon is not installed, "Not Installed" will be returned.                                                          #

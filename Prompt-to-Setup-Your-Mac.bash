@@ -33,6 +33,11 @@
 #   - Reverted `mktemp`-created files to pre-SYM `1.12.1` behaviour
 #   - Matched SYM version number
 #
+# Version 1.16.1, 26-Mar-2026, Dan K. Snelson (@dan-snelson)
+#   - Updated for Self Service+ with unified logging support
+#   - Added runAsUser function for proper GUI app launching from root context
+#   - Fixed plist read error handling for self_service_app_path
+#
 #################################################################################
 
 
@@ -68,14 +73,18 @@ fi
 # Global variables
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.12.10"
+scriptVersion="1.16.1"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 secondsToWait="${4:-"2700"}"                                    # Parameter 4: "secondsToWait" setting; defaults to "2700"
 scriptLog="/var/log/org.churchofjesuschrist.log"                # Your organization's default location for client-side logs
 plistPath="/Library/Preferences/com.company.plist"              # Your organization's Reverse Domain Name Notation
 jamfProPolicyName="@Setup Your Mac"
 plistKey="Setup Your Mac"
-selfServiceAppPath=$( defaults read /Library/Preferences/com.jamfsoftware.jamf.plist self_service_app_path )
+selfServiceAppPath=$( defaults read /Library/Preferences/com.jamfsoftware.jamf.plist self_service_plus_path 2>/dev/null )
+# If plist read failed or returned empty, use default Self Service path
+if [[ -z "${selfServiceAppPath}" ]]; then
+    selfServiceAppPath="/Applications/Self Service.app"
+fi
 dialogBinary="/usr/local/bin/dialog"
 dialogCommandFile=$( mktemp -u /var/tmp/Prompt-to-Setup-Your-Mac.XXX )
 swiftDialogMinimumRequiredVersion="2.3.2.4726"                  # This will be set and updated as dependancies on newer features change.
@@ -115,6 +124,17 @@ function updateScriptLog() {
 
 
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Run command as logged-in user (thanks, @scriptingosx!)
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+function runAsUser() {
+    loggedInUserID=$( id -u "${loggedInUser}" )
+    /bin/launchctl asuser "${loggedInUserID}" sudo -u "${loggedInUser}" "$@"
+}
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 # Prompt user to execute the Self Service policy via swiftDialog
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
@@ -127,23 +147,22 @@ function promptUser() {
     title="Welcome to your new Mac!"
     message="Please complete the following steps to apply Church settings to your new Mac:  \n1. Login to the **Workforce App Store**  \n2. Locate the **Setup Your Mac** policy  \n3. Click **Setup**  \n\nIf you need assistance, please contact the GSD:  \n+1 (801) 555-1212 and mention **KB12345678**."
 
-    appleInterfaceStyle=$( /usr/bin/defaults read /Users/"${loggedInUser}"/Library/Preferences/.GlobalPreferences.plist AppleInterfaceStyle 2>&1 )
+    appleInterfaceStyle=$( /usr/bin/defaults read /Users/"${loggedInUser}"/Library/Preferences/.GlobalPreferences.plist AppleInterfaceStyle 2>/dev/null )
 
     if [[ "${appleInterfaceStyle}" == "Dark" ]]; then
-        icon="https://raw.githubusercontent.com/dan-snelson/Setup-Your-Mac/development/images/SYM_icon.png"
+        icon="https://raw.githubusercontent.com/setup-your-mac/Setup-Your-Mac/refs/heads/main/images/SYM_icon.png"
     else
-        icon="https://raw.githubusercontent.com/dan-snelson/Setup-Your-Mac/development/images/SYM_icon.png"
+        icon="https://raw.githubusercontent.com/setup-your-mac/Setup-Your-Mac/refs/heads/main/images/SYM_icon.png"
     fi
 
-    overlayicon=$( defaults read /Library/Preferences/com.jamfsoftware.jamf.plist self_service_app_path )
+    # overlayicon="${selfServiceAppPath}"
 
     dialogCMD="$dialogBinary --ontop --title \"$title\" \
     --message \"$message\" \
     --icon \"$icon\" \
     --button1text \"OK\" \
-    --overlayicon \"$overlayicon\" \
     --titlefont 'size=28' \
-    --messagefont 'size=14' \
+    --messagefont 'size=13' \
     --infobuttontext 'KB12345678' \
     --infobuttonaction 'https://servicenow.company.com/support?id=kb_article_view&sysparm_article=KB12345678' \
     --small \
@@ -307,10 +326,14 @@ function selfServiceValidation() {
 
 function selfServiceLogValidation() {
 
+    # Self Service+ uses unified logging, check for classic log first
     if [[ -f "/Users/${loggedInUser}/Library/Logs/JAMF/selfservice.log" ]]; then
         selfServiceLogInstalled="Yes"
+        selfServicePlusMode="No"
     else
-        selfServiceLogInstalled="No"
+        # For Self Service+, unified logging is always available
+        selfServiceLogInstalled="Yes"
+        selfServicePlusMode="Yes"
     fi
 
 }
@@ -323,12 +346,15 @@ function selfServiceLogValidation() {
 
 function selfServiceLaunchValidation() {
 
-    if [[ ${selfServiceLogInstalled} == "Yes" ]]; then
-        selfServiceLaunches=$( /usr/bin/grep "Application successfully launched" /Users/"${loggedInUser}"/Library/Logs/JAMF/selfservice.log | /usr/bin/wc -l | /usr/bin/tr -d ' ' )
+    if [[ ${selfServicePlusMode} == "Yes" ]]; then
+        # Self Service+ uses unified logging
+        # Query for app launch events from Self Service+ processes
+        selfServiceLaunches=$( /usr/bin/log show --predicate '(process == "Self Service+" OR process == "SelfServicePlusAgent") AND eventMessage CONTAINS[c] "launch"' --info --last 7d 2>/dev/null | /usr/bin/grep -c "Self Service+" 2>/dev/null || echo "0" )
+    elif [[ ${selfServiceLogInstalled} == "Yes" ]]; then
+        # Classic Self Service uses flat file
+        selfServiceLaunches=$( /usr/bin/grep "Application successfully launched" /Users/"${loggedInUser}"/Library/Logs/JAMF/selfservice.log 2>/dev/null | /usr/bin/wc -l | /usr/bin/tr -d ' ' )
     else
-        updateScriptLog "Something went sideways when checking the number of times \"${selfServiceAppPath}\" has been launched; exiting."
-        echo "${scriptResult}"
-        exit 1
+        selfServiceLaunches="0"
     fi
 
 }
@@ -341,12 +367,15 @@ function selfServiceLaunchValidation() {
 
 function selfServiceLoginValidation() {
 
-    if [[ ${selfServiceLogInstalled} == "Yes" ]]; then
-        selfServiceLogins=$( /usr/bin/grep "user logged in" /Users/"${loggedInUser}"/Library/Logs/JAMF/selfservice.log | /usr/bin/wc -l | /usr/bin/tr -d ' ' )
+    if [[ ${selfServicePlusMode} == "Yes" ]]; then
+        # Self Service+ uses unified logging
+        # Query for authentication/login events from Self Service+ subsystems
+        selfServiceLogins=$( /usr/bin/log show --predicate '(subsystem BEGINSWITH "com.jamf.selfservice" OR subsystem BEGINSWITH "com.jamfsoftware.selfservice") AND (eventMessage CONTAINS[c] "authenticated" OR eventMessage CONTAINS[c] "login" OR eventMessage CONTAINS[c] "signed in")' --info --last 7d 2>/dev/null | /usr/bin/wc -l | /usr/bin/tr -d ' ' 2>/dev/null || echo "0" )
+    elif [[ ${selfServiceLogInstalled} == "Yes" ]]; then
+        # Classic Self Service uses flat file
+        selfServiceLogins=$( /usr/bin/grep "user logged in" /Users/"${loggedInUser}"/Library/Logs/JAMF/selfservice.log 2>/dev/null | /usr/bin/wc -l | /usr/bin/tr -d ' ' )
     else
-        updateScriptLog "Something went sideways when checking the number of times ${loggedInUser} has logged in to \"${selfServiceAppPath}\"; exiting."
-        echo "${scriptResult}"
-        exit 1
+        selfServiceLogins="0"
     fi
 
 }
@@ -460,20 +489,10 @@ fi
 
 selfServiceLogValidation
 
-if [[ ${selfServiceLogInstalled} == "No" ]]; then
-
-    updateScriptLog "${loggedInUser}'s selfservice.log NOT found, launching \"${selfServiceAppPath}\"; "
-    /usr/bin/su "${loggedInUser}" -c "/usr/bin/open \"${selfServiceAppPath}\""
-
-    promptUser
-
-    echo "${scriptResult}"
-    exit 1
-
-else
-
+if [[ ${selfServicePlusMode} == "Yes" ]]; then
+    updateScriptLog "Self Service+ detected, using unified logging; "
+elif [[ ${selfServiceLogInstalled} == "Yes" ]]; then
     updateScriptLog "${loggedInUser}'s selfservice.log found, proceeding; "
-
 fi
 
 
@@ -494,10 +513,14 @@ updateScriptLog "\"${selfServiceAppPath}\" has been launched for ${loggedInUser}
 
 selfServiceLoginValidation
 
-if [[ ${selfServiceLogins} -le "0" ]]; then
+if [[ ${selfServicePlusMode} == "Yes" ]]; then
+    # For Self Service+, unified logs may not be accessible or reliable
+    # Skip this check and proceed to policy execution validation
+    updateScriptLog "Self Service+ mode: skipping login validation (unified logs may be restricted); "
+elif [[ ${selfServiceLogins} -le "0" ]]; then
 
     updateScriptLog "${loggedInUser} has logged in to \"${selfServiceAppPath}\" ${selfServiceLogins} times; "
-    /usr/bin/su "${loggedInUser}" -c "/usr/bin/open \"${selfServiceAppPath}\""
+    runAsUser /usr/bin/open "${selfServiceAppPath}"
 
     promptUser
 
@@ -547,7 +570,7 @@ selfServicePolicyValidation
 if [[ ${selfServicePolicyExecutions} -le "0" ]]; then
 
     updateScriptLog "${loggedInUser} has started the \"${jamfProPolicyName}\" policy ${selfServicePolicyExecutions} times; "
-    /usr/bin/su "${loggedInUser}" -c "/usr/bin/open \"${selfServiceAppPath}\""
+    runAsUser /usr/bin/open "${selfServiceAppPath}"
 
     promptUser
 
@@ -571,7 +594,7 @@ selfServicePolicyCompletionValidation
 if [[ ${selfServicePolicyCompletion} == "No" ]]; then
 
     updateScriptLog "The \"${jamfProPolicyName}\" policy has NOT completed; launching \"${selfServiceAppPath}\"; "
-    /usr/bin/su "${loggedInUser}" -c "/usr/bin/open \"${selfServiceAppPath}\""
+    runAsUser /usr/bin/open "${selfServiceAppPath}"
 
     promptUser
 

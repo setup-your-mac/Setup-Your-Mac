@@ -10,19 +10,15 @@
 #
 # HISTORY
 #
-#   Version 1.16.0, 19-Feb-2026
-#   - Added proof-of-concept validations for swiftDialog `2.5.1`'s "blurscreen" control
-#   - Removed vendor-specific Local Validations (in favor of Remote Validations)
-#   - Updated Configuration `policyJSON` to better match internal usage
-#   - Added "activate" command to Validations
-#   - Updated the Microsoft Teams message template to the new format (Pull Request #156; thanks, @nlopezUA!)
-#   - Simplify Client-side Logging (thanks, @DevliegereM!)
-#   - Added proof-of-concept validations for swiftDialog `2.5.6`'s "hide or show" dialog window
-#   - Updated Dynamic Download Estimates for macOS 26 (and beyond)
-#   - Updated for swiftDialog `3.0.0`
-#   - Updated `checkNetworkQualityCatchAllConfiguration` for macOS 26 (thanks for the heads-up, @Harald Brouwers!)
-#   - Added new salutation banner greeting, based on time o’ day (Pull Request #171; thanks, @ScottEKendall!)
-#   - Add configurable battery threshold to AC power pre-flight check (Pull Request #175; thanks, @owainri!)
+#   Version 1.16.2, 21-Sep-2026
+# - Added `Minimize Dialog` and `Maximize Dialog` validations for swiftDialog window-state control commands ([Pull Request 183](https://github.com/setup-your-mac/Setup-Your-Mac/pull/183); keep 'em comin', @HowardGMac!)
+# - Adjusted the `swiftDialogMinimumRequiredVersion` to `3.1.0.4994`
+# - Added proof-of-concept support for triggering window-state control commands (e.g., minimize, maximize) via the `validation` key in `trigger_list` entries in the `policyJSON`.
+# - Updated `recon` handling so Setup Your Mac captures `jamf recon` exit status, stops forcing verbose inventory output, times out stalled inventory updates, and correctly marks the inventory step failed when Jamf inventory submission fails.
+# - Relaxed the bash pre-flight guard to accept any valid Bash interpreter instead of requiring `/bin/bash` specifically.
+# - Hardened `recon` diagnostics so timeout and failure logs capture baseline Jamf context, process snapshots, output excerpts, and recent `jamf.log` details, and terminate the complete spawned process tree on timeout.
+# - Raised the minimum supported operating system to macOS 15 to match swiftDialog 3 requirements.
+# - Cleaned validation scripts by removing UTF-8 byte order marks from BeyondTrust and CrowdStrike and preserving complete Microsoft app names during iteration.
 #
 ####################################################################################################
 
@@ -38,17 +34,17 @@
 # Script Version and Jamf Pro Script Parameters
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-scriptVersion="1.16.0"
+scriptVersion="1.16.2"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"                        # Parameter 4: Script Log Location [ /var/log/org.churchofjesuschrist.log ] (i.e., Your organization's default location for client-side logs)
-debugMode="${5:-"verbose"}"                                                     # Parameter 5: Debug Mode [ verbose (default) | true | false ]
+debugMode="${5:-"false"}"                                                       # Parameter 5: Debug Mode [ verbose (default) | true | false ]
 welcomeDialog="${6:-"userInput"}"                                               # Parameter 6: Welcome dialog [ userInput (default) | video | messageOnly | false ]
-completionActionOption="${7:-"Restart Attended"}"                               # Parameter 7: Completion Action [ wait | sleep (with seconds) | Shut Down | Shut Down Attended | Shut Down Confirm | Restart | Restart Attended (default) | Restart Confirm | Log Out | Log Out Attended | Log Out Confirm ]
+completionActionOption="${7:-"wait"}"                                           # Parameter 7: Completion Action [ wait | sleep (with seconds) | Shut Down | Shut Down Attended | Shut Down Confirm | Restart | Restart Attended (default) | Restart Confirm | Log Out | Log Out Attended | Log Out Confirm ]
 requiredMinimumBuild="${8:-"disabled"}"                                         # Parameter 8: Required Minimum Build [ disabled (default) | 23F ] (i.e., Your organization's required minimum build of macOS to allow users to proceed; use "23F" for macOS 14.5)
 outdatedOsAction="${9:-"/System/Library/CoreServices/Software Update.app"}"     # Parameter 9: Outdated OS Action [ /System/Library/CoreServices/Software Update.app (default) | jamfselfservice://content?entity=policy&id=117&action=view ] (i.e., Jamf Pro Self Service policy ID for operating system ugprades)
 webhookURL="${10:-""}"                                                          # Parameter 10: Microsoft Teams or Slack Webhook URL [ Leave blank to disable (default) | https://microsoftTeams.webhook.com/URL | https://hooks.slack.com/services/URL ] Can be used to send a success or failure message to Microsoft Teams or Slack via Webhook. (Function will automatically detect if Webhook URL is for Slack or Teams; can be modified to include other communication tools that support functionality.)
 presetConfiguration="${11:-""}"                                                 # Parameter 11: Specify a Configuration (i.e., `policyJSON`; NOTE: If set, `promptForConfiguration` will be automatically suppressed and the preselected configuration will be used instead)
-swiftDialogMinimumRequiredVersion="2.5.6.4805"                                  # This will be set and updated as dependancies on newer features change.
+swiftDialogMinimumRequiredVersion="3.1.0.4994"                                  # This will be set and updated as dependancies on newer features change.
 
 
 
@@ -61,6 +57,8 @@ organizationScriptName="sym"                # Organization's Script Name
 debugModeSleepAmount="3"                    # Delay for various actions when running in Debug Mode
 failureDialog="true"                        # Display the so-called "Failure" dialog (after the main SYM dialog) [ true | false ]
 requiredMinimumBatteryPercentage="25"       # Minimum battery percentage allowed to run without AC power. Set to "0" to always require AC power (original behaviour).
+reconTimeoutSeconds="1800"                 # Maximum time to wait for `jamf recon` before failing the inventory step.
+reconTerminationGraceSeconds="10"          # Maximum time to wait after TERM before force-killing a stalled `jamf recon`.
 
 
 
@@ -88,7 +86,7 @@ promptForConfiguration="true"   # Removes the Configuration dropdown entirely an
 suppressReconOnPolicy="false"
 
 # [SYM-Helper] Disables the Blurscreen enabled by default in Production
-moveableInProduction="false"
+moveableInProduction="true"
 
 # [SYM-Helper] An unsorted, comma-separated list of buildings (with possible duplication). If empty, this will be hidden from the user info prompt
 buildingsListRaw="Benson (Ezra Taft) Building,Brimhall (George H.) Building,BYU Conference Center,Centennial Carillon Tower,Chemicals Management Building,Clark (Herald R.) Building,Clark (J. Reuben) Building,Clyde (W.W.) Engineering Building,Crabtree (Roland A.) Technology Building,Ellsworth (Leo B.) Building,Engineering Building,Eyring (Carl F.) Science Center,Grant (Heber J.) Building,Harman (Caroline Hemenway) Building,Harris (Franklin S.) Fine Arts Center,Johnson (Doran) House East,Kimball (Spencer W.) Tower,Knight (Jesse) Building,Lee (Harold B.) Library,Life Sciences Building,Life Sciences Greenhouses,Maeser (Karl G.) Building,Martin (Thomas L.) Building,McKay (David O.) Building,Nicholes (Joseph K.) Building,Smith (Joseph F.) Building,Smith (Joseph) Building,Snell (William H.) Building,Talmage (James E.) Math Sciences/Computer Building,Tanner (N. Eldon) Building,Taylor (John) Building,Wells (Daniel H.) Building"
@@ -145,6 +143,11 @@ osMajorVersion=$( echo "${osVersion}" | awk -F '.' '{print $1}' )
 if [[ -n $osVersionExtra ]] && [[ "${osMajorVersion}" -ge 13 ]]; then osVersion="${osVersion} ${osVersionExtra}"; fi # Report RSR sub version if applicable
 modelName=$( /usr/libexec/PlistBuddy -c 'Print :0:_items:0:machine_name' /dev/stdin <<< "$(system_profiler -xml SPHardwareDataType)" )
 reconOptions=""
+computerID=""
+reconExitCode="0"
+reconWaitExitCode="0"
+reconTimedOut="false"
+reconFailureSummary=""
 exitCode="0"
 
 
@@ -190,6 +193,145 @@ function logMessage() {
     local logType="$1"
     local message="$2"
     echo -e "${organizationScriptName} ($scriptVersion): $(date +%Y-%m-%d\ %H:%M:%S) - [${logType}] ${message}" | tee -a "${scriptLog}"
+}
+
+
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+# Recon Diagnostics Helpers
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+
+function describeReconExitCode() {
+    case "$1" in
+        0 ) echo "completed successfully" ;;
+        1 ) echo "general Jamf recon failure" ;;
+        2 ) echo "invalid Jamf recon usage or arguments" ;;
+        124 ) echo "timed out waiting for jamf recon" ;;
+        137 ) echo "force-killed after timeout grace period" ;;
+        143 ) echo "terminated after timeout signal" ;;
+        * ) echo "Jamf recon exited with code $1" ;;
+    esac
+}
+
+
+
+function logReconBaseline() {
+    local jamfVersion
+    local jamfURL
+    local existingReconProcesses
+
+    if [[ -x "${jamfBinary}" ]]; then
+        jamfVersion=$( "${jamfBinary}" version 2>/dev/null | head -n 1 )
+    fi
+
+    if [[ -z "${jamfVersion}" ]]; then jamfVersion="Unavailable"; fi
+
+    jamfURL=$( /usr/bin/defaults read /Library/Preferences/com.jamfsoftware.jamf.plist jss_url 2>/dev/null )
+    if [[ -z "${jamfURL}" ]]; then jamfURL="Unavailable"; fi
+
+    existingReconProcesses=$( /usr/bin/pgrep -fl "bgrecon|jamf.*recon" 2>/dev/null | tail -n 5 )
+    if [[ -z "${existingReconProcesses}" ]]; then existingReconProcesses="No existing recon-related processes detected"; fi
+
+    logMessage "SETUP YOUR MAC DIALOG" "[RECON DIAGNOSTICS] Baseline: binary='${jamfBinary}', version='${jamfVersion}', jss_url='${jamfURL}', timeout='${reconTimeoutSeconds}', grace='${reconTerminationGraceSeconds}', options='${reconOptions}'"
+    logMessage "SETUP YOUR MAC DIALOG" "[RECON DIAGNOSTICS] Existing recon-related processes before launch:\n${existingReconProcesses}"
+}
+
+
+
+function collectReconProcessTreePIDs() {
+    local parentPID="$1"
+    local childPID
+
+    while IFS= read -r childPID; do
+        if [[ -n "${childPID}" ]]; then
+            collectReconProcessTreePIDs "${childPID}"
+        fi
+    done < <( /usr/bin/pgrep -P "${parentPID}" 2>/dev/null )
+
+    echo "${parentPID}"
+}
+
+
+
+function signalReconProcessTree() {
+    local signalName="$1"
+    local processPIDs="$2"
+    local processPID
+
+    for processPID in ${processPIDs}; do
+        kill "-${signalName}" "${processPID}" 2>/dev/null
+    done
+}
+
+
+
+function reconProcessTreeIsRunning() {
+    local processPIDs="$1"
+    local processPID
+
+    for processPID in ${processPIDs}; do
+        if kill -0 "${processPID}" 2>/dev/null; then
+            return 0
+        fi
+    done
+
+    return 1
+}
+
+
+
+function logReconProcessSnapshot() {
+    local reconParentPID="$1"
+    local snapshotLabel="$2"
+    local processPIDs
+    local processSnapshot
+
+    processPIDs=$( collectReconProcessTreePIDs "${reconParentPID}" | tr '\n' ' ' | sed 's/[[:space:]]*$//' )
+    processSnapshot=$( /bin/ps -o pid=,ppid=,state=,etime=,command= -p ${processPIDs} 2>/dev/null )
+    if [[ -z "${processSnapshot}" ]]; then processSnapshot="Process tree rooted at PID ${reconParentPID} no longer running"; fi
+
+    logMessage "SETUP YOUR MAC DIALOG" "[RECON DIAGNOSTICS] ${snapshotLabel}: process tree:\n${processSnapshot}"
+}
+
+
+
+function logReconOutputExcerpt() {
+    local reconOutputFilePath="$1"
+    local outputLabel="$2"
+    local outputSizeBytes
+    local outputHead
+    local outputTail
+
+    if [[ ! -s "${reconOutputFilePath}" ]]; then
+        logMessage "SETUP YOUR MAC DIALOG" "[RECON DIAGNOSTICS] ${outputLabel}: No recon output captured"
+        return
+    fi
+
+    outputSizeBytes=$( /usr/bin/wc -c < "${reconOutputFilePath}" 2>/dev/null | tr -d ' ' )
+    outputHead=$( LC_ALL=C /usr/bin/head -c 500 "${reconOutputFilePath}" 2>/dev/null | tr '\r\n' ' ' | tr -s ' ' )
+    outputTail=$( LC_ALL=C /usr/bin/tail -c 500 "${reconOutputFilePath}" 2>/dev/null | tr '\r\n' ' ' | tr -s ' ' )
+
+    logMessage "SETUP YOUR MAC DIALOG" "[RECON DIAGNOSTICS] ${outputLabel}: captured '${outputSizeBytes}' bytes"
+    logMessage "SETUP YOUR MAC DIALOG" "[RECON DIAGNOSTICS] ${outputLabel}: first 500 bytes: ${outputHead}"
+    logMessage "SETUP YOUR MAC DIALOG" "[RECON DIAGNOSTICS] ${outputLabel}: last 500 bytes: ${outputTail}"
+}
+
+
+
+function logRecentJamfLogContext() {
+    local jamfLogContext
+
+    if [[ ! -f /var/log/jamf.log ]]; then
+        logMessage "SETUP YOUR MAC DIALOG" "[RECON DIAGNOSTICS] /var/log/jamf.log not found"
+        return
+    fi
+
+    jamfLogContext=$( /usr/bin/tail -n 200 /var/log/jamf.log 2>/dev/null | /usr/bin/grep -Ei 'recon|inventory|submit|error|fail' | /usr/bin/tail -n 10 )
+    if [[ -z "${jamfLogContext}" ]]; then
+        jamfLogContext=$( /usr/bin/tail -n 10 /var/log/jamf.log 2>/dev/null )
+    fi
+
+    logMessage "SETUP YOUR MAC DIALOG" "[RECON DIAGNOSTICS] Recent jamf.log context:\n${jamfLogContext}"
 }
 
 
@@ -262,7 +404,7 @@ function calculateFreeDiskSpace() {
 
 function dialogUpdateWelcome(){
     echo "$1" >> "$welcomeCommandFile"
-    sleep 0.3
+    sleep 0.1
 }
 
 
@@ -274,7 +416,7 @@ function dialogUpdateWelcome(){
 function dialogUpdateSetupYourMac() {
     logMessage "SETUP YOUR MAC DIALOG" "$1"
     echo "$1" >> "$setupYourMacCommandFile"
-    sleep 0.3
+    sleep 0.1
 }
 
 
@@ -286,7 +428,7 @@ function dialogUpdateSetupYourMac() {
 function dialogUpdateFailure(){
     logMessage "FAILURE DIALOG" "$1"
     echo "$1" >> "$failureCommandFile"
-    sleep 0.3
+    sleep 0.1
 }
 
 
@@ -536,8 +678,59 @@ function confirmPolicyExecution() {
             else
                 logMessage "SETUP YOUR MAC DIALOG" "Updating computer inventory with the following 'reconOptions': \"${reconOptions}\" …"
                 dialogUpdateSetupYourMac "listitem: index: $i, status: wait, statustext: Updating …, "
-                reconRaw=$( eval "${jamfBinary} recon ${reconOptions} -verbose | tee -a ${scriptLog}" )
-                computerID=$( echo "${reconRaw}" | grep '<computer_id>' | xmllint --xpath xmllint --xpath '/computer_id/text()' - )
+                logReconBaseline
+                reconOutputFile=$( /usr/bin/mktemp "/private/tmp/reconOutput.XXXXXX" )
+                reconTimedOut="false"
+                reconFailureSummary=""
+                (
+                    set -o pipefail
+                    eval "${jamfBinary} recon ${reconOptions}" 2>&1 | tee -a "${scriptLog}" > "${reconOutputFile}"
+                ) &
+                reconPID=$!
+                reconElapsedSeconds="0"
+                while kill -0 "${reconPID}" 2>/dev/null; do
+                    if [[ "${reconElapsedSeconds}" -ge "${reconTimeoutSeconds}" ]]; then
+                        reconTimedOut="true"
+                        reconFailureSummary="timed out after ${reconTimeoutSeconds} seconds"
+                        logMessage "SETUP YOUR MAC DIALOG" "Computer inventory update exceeded ${reconTimeoutSeconds} seconds; terminating recon after ${reconElapsedSeconds} elapsed seconds"
+                        logReconProcessSnapshot "${reconPID}" "Timeout reached before TERM"
+                        reconProcessPIDs=$( collectReconProcessTreePIDs "${reconPID}" )
+                        signalReconProcessTree "TERM" "${reconProcessPIDs}"
+                        reconTerminationElapsedSeconds="0"
+                        while reconProcessTreeIsRunning "${reconProcessPIDs}"; do
+                            if [[ "${reconTerminationElapsedSeconds}" -ge "${reconTerminationGraceSeconds}" ]]; then
+                                logMessage "SETUP YOUR MAC DIALOG" "Computer inventory update still running ${reconTerminationGraceSeconds} seconds after TERM; force killing recon"
+                                logReconProcessSnapshot "${reconPID}" "Timeout grace exceeded before KILL"
+                                signalReconProcessTree "KILL" "${reconProcessPIDs}"
+                                break
+                            fi
+                            sleep 1
+                            ((reconTerminationElapsedSeconds++))
+                        done
+                        break
+                    fi
+                    sleep 1
+                    ((reconElapsedSeconds++))
+                done
+                wait "${reconPID}"
+                reconWaitExitCode="$?"
+                reconExitCode="${reconWaitExitCode}"
+                if [[ "${reconTimedOut}" == "true" ]]; then
+                    reconExitCode="124"
+                fi
+                computerID=$( awk -F '[<>]' '/<computer_id>/{ print $3; exit }' "${reconOutputFile}" )
+                if [[ -z "${computerID}" ]]; then
+                    computerID=$( /usr/bin/defaults read /Library/Preferences/com.jamfsoftware.jamf.plist computer_id 2>/dev/null )
+                fi
+                if [[ "${reconExitCode}" -eq 0 ]]; then
+                    logMessage "SETUP YOUR MAC DIALOG" "Computer inventory update completed${computerID:+ with computer ID \"${computerID}\"}"
+                else
+                    if [[ -z "${reconFailureSummary}" ]]; then reconFailureSummary=$( describeReconExitCode "${reconExitCode}" ); fi
+                    logMessage "SETUP YOUR MAC DIALOG" "Computer inventory update failed with exit code '${reconExitCode}' (${reconFailureSummary}); raw wait exit code '${reconWaitExitCode}'"
+                    logReconOutputExcerpt "${reconOutputFile}" "Recon output excerpt"
+                    logRecentJamfLogContext
+                fi
+                rm -f "${reconOutputFile}"
             fi
             ;;
 
@@ -582,6 +775,28 @@ function confirmPolicyExecution() {
                 sleep "${debugModeSleepAmount}"
             else
                 dialogUpdateSetupYourMac "show: "
+            fi
+            ;;
+
+        "Minimize Dialog" | "minimize dialog" )
+
+            outputLineNumberInVerboseDebugMode
+            logMessage "SETUP YOUR MAC DIALOG" "Confirm Policy Execution: ${validation}"
+            if [[ "${debugMode}" == "true" ]] || [[ "${debugMode}" == "verbose" ]] ; then
+                sleep "${debugModeSleepAmount}"
+            else
+                dialogUpdateSetupYourMac "minimize:"
+            fi
+            ;;
+
+        "Maximize Dialog" | "maximize dialog" )
+
+            outputLineNumberInVerboseDebugMode
+            logMessage "SETUP YOUR MAC DIALOG" "Confirm Policy Execution: ${validation}"
+            if [[ "${debugMode}" == "true" ]] || [[ "${debugMode}" == "verbose" ]] ; then
+                sleep "${debugModeSleepAmount}"
+            else
+                dialogUpdateSetupYourMac "maximize:"
             fi
             ;;
 
@@ -756,8 +971,8 @@ function validatePolicyResult() {
         # (Always evaluates as: 'success' and 'Installed')
         ###
 
-        "None" | "none" | *"Blurscreen"* | *"blurscreen"* )
-
+        "None" | "none" | *"Blurscreen"* | *"blurscreen"* | "Hide Dialog" | "hide dialog" | "Show Dialog" | "show dialog" | "Minimize Dialog" | "minimize dialog" | "Maximize Dialog" | "maximize dialog" )
+        
             outputLineNumberInVerboseDebugMode
             logMessage "SETUP YOUR MAC DIALOG" "Confirm Policy Execution: ${validation}"
             dialogUpdateSetupYourMac "listitem: index: $i, status: success, statustext: Installed"
@@ -774,7 +989,22 @@ function validatePolicyResult() {
 
             outputLineNumberInVerboseDebugMode
             logMessage "SETUP YOUR MAC DIALOG" "Confirm Policy Execution: ${validation}"
-            dialogUpdateSetupYourMac "listitem: index: $i, status: success, statustext: Updated"
+            if [[ "${reconExitCode}" -eq 0 ]]; then
+                dialogUpdateSetupYourMac "listitem: index: $i, status: success, statustext: Updated"
+            else
+                if [[ "${reconTimedOut}" == "true" ]]; then
+                    logMessage "SETUP YOUR MAC DIALOG" "Validate Policy Result: Recon timed out after '${reconTimeoutSeconds}' seconds"
+                    dialogUpdateSetupYourMac "listitem: index: $i, status: fail, statustext: Timed Out"
+                else
+                    logMessage "SETUP YOUR MAC DIALOG" "Validate Policy Result: Recon failed with exit code '${reconExitCode}'"
+                    dialogUpdateSetupYourMac "listitem: index: $i, status: fail, statustext: Failed"
+                fi
+                if [[ -z "${reconFailureSummary}" ]]; then reconFailureSummary=$( describeReconExitCode "${reconExitCode}" ); fi
+                logMessage "SETUP YOUR MAC DIALOG" "Validate Policy Result: Recon diagnostic summary: ${reconFailureSummary}"
+                jamfProPolicyTriggerFailure="failed"
+                exitCode="1"
+                jamfProPolicyNameFailures+="• $listitem  \n"
+            fi
             ;;
 
 
@@ -1458,7 +1688,7 @@ logMessage "PRE-FLIGHT" "Initiating …"
 # Pre-flight Check: Confirm script is running under bash
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-if [[ "$BASH" != "/bin/bash" ]] ; then
+if [[ -z "${BASH_VERSION:-}" || -z "${BASH:-}" || ! -x "${BASH}" ]] ; then
     logMessage "PRE-FLIGHT" "This script must be run under 'bash', please do not run it using 'sh', 'zsh', etc.; exiting."
     exit 1
 fi
@@ -1532,37 +1762,31 @@ logMessage "PRE-FLIGHT" "Current Logged-in User ID: ${loggedInUserID}"
 # Pre-flight Check: Validate Operating System Version and Build
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-if [[ "${requiredMinimumBuild}" == "disabled" ]]; then
+if [[ "${osMajorVersion}" -lt 15 ]] ; then
 
-    logMessage "PRE-FLIGHT" "'requiredMinimumBuild' has been set to ${requiredMinimumBuild}; skipping OS validation."
+    logMessage "PRE-FLIGHT" "swiftDialog 3 requires macOS 15 or later and this Mac is running ${osVersion} (${osBuild}); exiting with error."
+    osascript -e 'display dialog "Please advise your Support Representative of the following error:\r\rSetup Your Mac requires macOS 15 or later, but found macOS '${osVersion}' ('${osBuild}').\r\r" with title "Setup Your Mac: Detected Unsupported Operating System" buttons {"Open Software Update"} with icon caution'
+    logMessage "PRE-FLIGHT" "Executing /usr/bin/open '${outdatedOsAction}' …"
+    su - "${loggedInUser}" -c "/usr/bin/open \"${outdatedOsAction}\""
+    exit 1
+
+elif [[ "${requiredMinimumBuild}" == "disabled" ]]; then
+
+    logMessage "PRE-FLIGHT" "'requiredMinimumBuild' has been set to ${requiredMinimumBuild}; skipping additional OS build validation."
     logMessage "PRE-FLIGHT" "macOS ${osVersion} (${osBuild}) installed"
 
 else
 
-    # Since swiftDialog requires at least macOS 12 Monterey, first confirm the major OS version
-    if [[ "${osMajorVersion}" -ge 12 ]] ; then
+    logMessage "PRE-FLIGHT" "macOS ${osMajorVersion} installed; checking build version ..."
 
-        logMessage "PRE-FLIGHT" "macOS ${osMajorVersion} installed; checking build version ..."
+    # Confirm the Mac is running `requiredMinimumBuild` (or later)
+    if [[ "${osBuild}" > "${requiredMinimumBuild}" ]]; then
 
-        # Confirm the Mac is running `requiredMinimumBuild` (or later)
-        if [[ "${osBuild}" > "${requiredMinimumBuild}" ]]; then
+        logMessage "PRE-FLIGHT" "macOS ${osVersion} (${osBuild}) installed; proceeding ..."
 
-            logMessage "PRE-FLIGHT" "macOS ${osVersion} (${osBuild}) installed; proceeding ..."
-
-        # When the current `osBuild` is older than `requiredMinimumBuild`; exit with error
-        else
-            logMessage "PRE-FLIGHT" "The installed operating system, macOS ${osVersion} (${osBuild}), needs to be updated to Build ${requiredMinimumBuild}; exiting with error."
-            osascript -e 'display dialog "Please advise your Support Representative of the following error:\r\rExpected macOS Build '${requiredMinimumBuild}' (or newer), but found macOS '${osVersion}' ('${osBuild}').\r\r" with title "Setup Your Mac: Detected Outdated Operating System" buttons {"Open Software Update"} with icon caution'
-            logMessage "PRE-FLIGHT" "Executing /usr/bin/open '${outdatedOsAction}' …"
-            su - "${loggedInUser}" -c "/usr/bin/open \"${outdatedOsAction}\""
-            exit 1
-
-        fi
-
-    # The Mac is running an operating system older than macOS 12 Monterey; exit with error
+    # When the current `osBuild` is older than `requiredMinimumBuild`; exit with error
     else
-
-        logMessage "PRE-FLIGHT" "swiftDialog requires at least macOS 12 Monterey and this Mac is running ${osVersion} (${osBuild}), exiting with error."
+        logMessage "PRE-FLIGHT" "The installed operating system, macOS ${osVersion} (${osBuild}), needs to be updated to Build ${requiredMinimumBuild}; exiting with error."
         osascript -e 'display dialog "Please advise your Support Representative of the following error:\r\rExpected macOS Build '${requiredMinimumBuild}' (or newer), but found macOS '${osVersion}' ('${osBuild}').\r\r" with title "Setup Your Mac: Detected Outdated Operating System" buttons {"Open Software Update"} with icon caution'
         logMessage "PRE-FLIGHT" "Executing /usr/bin/open '${outdatedOsAction}' …"
         su - "${loggedInUser}" -c "/usr/bin/open \"${outdatedOsAction}\""
@@ -2286,13 +2510,16 @@ dialogSetupYourMacCMD="$dialogBinary \
 #   - See: https://vimeo.com/772998915
 # - progresstext: The text to be displayed below the progress bar
 # - trigger: The Jamf Pro Policy Custom Event Name
-# - validation: [ {absolute path} | Local | Remote | None | Recon ]
+# - validation: [ {absolute path} | Local | Remote | None | Recon | Blurscreen On/Off | Hide Dialog/Show Dialog | Minimize Dialog/Maximize Dialog ]
 #   See: https://snelson.us/2023/01/setup-your-mac-validation/
 #       - {absolute path} (simulates pre-v1.6.0 behavior, for example: "/Applications/Microsoft Teams classic.app/Contents/Info.plist")
 #       - Local (for validation within this script, for example: "filevault")
 #       - Remote (for validation via a single-script Jamf Pro policy, for example: "symvGlobalProtect")
 #       - None (for triggers which don't require validation; always evaluates as successful)
 #       - Recon (to update the computer's inventory with your Jamf Pro server)
+#       - Blurscreen On / Blurscreen Off (for swiftDialog display controls; evaluates as successful)
+#       - Hide Dialog / Show Dialog (for swiftDialog visibility controls; evaluates as successful)
+#       - Minimize Dialog / Maximize Dialog (for swiftDialog window-state controls; evaluates as successful)
 #
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 #
@@ -2338,7 +2565,7 @@ function policyJSONConfiguration() {
                         "trigger_list": [
                             {
                                 "trigger": "rosettaInstall",
-                                "validation": "None"
+                                "validation": "Blurscreen On"
                             },
                             {
                                 "trigger": "rosetta",
@@ -2416,6 +2643,50 @@ function policyJSONConfiguration() {
                                 "trigger": "oktaVerify",
                                 "validation": "/Applications/Okta Verify.app"
                             }
+                        ]
+                    },
+                    {
+                        "listitem": "Microsoft Company Portal",
+                        "subtitle": "Device Compliance Application",
+                        "icon": "https://usw2.ics.services.jamfcloud.com/icon/hash_8ad08f4d28b61852f479fb343293d2a686a8f4fffcb7f2a866d8a7602ed0cb1d",
+                        "progresstext": "Microsoft Company Portal allows you to securely access the organization’s internal apps, data, and resources.",
+                        "trigger_list": [
+                            {
+                                "trigger": "microsoftCompanyPortal",
+                                "validation": "/Applications/Company Portal.app"
+                            }
+                        ]
+                    },
+                    {
+                        "listitem": "Device Compliance Registration",
+                        "subtitle": "Registers your Mac with Microsoft Intune for secure access to email and other resources.",
+                        "icon": "https://ics.services.jamfcloud.com/icon/hash_ff2147a6c09f5ef73d1c4406d00346811a9c64c0b6b7f36eb52fcb44943d26f9",
+                        "progresstext": "Registering your Mac with Microsoft Intune …",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "None",
+                                            "validation": "Blurscreen Off"
+                                         },
+                                         {
+                                            "trigger": "None",
+                                            "validation": "Minimize Dialog"
+                                         },
+                                         {
+                                            "trigger": "promptForMicrosoftDeviceComplianceRegistration",
+                                            "validation": "None"
+                                         },
+                                         {
+                                            "trigger": "microsoftDeviceComplianceRegistration",
+                                            "validation": "None"
+                                         },
+                                         {
+                                            "trigger": "none",
+                                            "validation": "Maximize Dialog"
+                                         },
+                                         {
+                                            "trigger": "None",
+                                            "validation": "Blurscreen On"
+                                         }
                         ]
                     },
                     {
@@ -2501,7 +2772,7 @@ function policyJSONConfiguration() {
                         "trigger_list": [
                             {
                                 "trigger": "rosettaInstall",
-                                "validation": "None"
+                                "validation": "Blurscreen On"
                             },
                             {
                                 "trigger": "rosetta",
@@ -2579,6 +2850,50 @@ function policyJSONConfiguration() {
                                 "trigger": "oktaVerify",
                                 "validation": "/Applications/Okta Verify.app"
                             }
+                        ]
+                    },
+                    {
+                        "listitem": "Microsoft Company Portal",
+                        "subtitle": "Device Compliance Application",
+                        "icon": "https://usw2.ics.services.jamfcloud.com/icon/hash_8ad08f4d28b61852f479fb343293d2a686a8f4fffcb7f2a866d8a7602ed0cb1d",
+                        "progresstext": "Microsoft Company Portal allows you to securely access the organization’s internal apps, data, and resources.",
+                        "trigger_list": [
+                            {
+                                "trigger": "microsoftCompanyPortal",
+                                "validation": "/Applications/Company Portal.app"
+                            }
+                        ]
+                    },
+                    {
+                        "listitem": "Device Compliance Registration",
+                        "subtitle": "Registers your Mac with Microsoft Intune for secure access to email and other resources.",
+                        "icon": "https://ics.services.jamfcloud.com/icon/hash_ff2147a6c09f5ef73d1c4406d00346811a9c64c0b6b7f36eb52fcb44943d26f9",
+                        "progresstext": "Registering your Mac with Microsoft Intune …",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "None",
+                                            "validation": "Blurscreen Off"
+                                         },
+                                         {
+                                            "trigger": "None",
+                                            "validation": "Minimize Dialog"
+                                         },
+                                         {
+                                            "trigger": "promptForMicrosoftDeviceComplianceRegistration",
+                                            "validation": "None"
+                                         },
+                                         {
+                                            "trigger": "microsoftDeviceComplianceRegistration",
+                                            "validation": "None"
+                                         },
+                                         {
+                                            "trigger": "none",
+                                            "validation": "Maximize Dialog"
+                                         },
+                                         {
+                                            "trigger": "None",
+                                            "validation": "Blurscreen On"
+                                         }
                         ]
                     },
                     {
@@ -2680,7 +2995,7 @@ function policyJSONConfiguration() {
                         "trigger_list": [
                             {
                                 "trigger": "rosettaInstall",
-                                "validation": "None"
+                                "validation": "Blurscreen On"
                             },
                             {
                                 "trigger": "rosetta",
@@ -2758,6 +3073,50 @@ function policyJSONConfiguration() {
                                 "trigger": "oktaVerify",
                                 "validation": "/Applications/Okta Verify.app"
                             }
+                        ]
+                    },
+                    {
+                        "listitem": "Microsoft Company Portal",
+                        "subtitle": "Device Compliance Application",
+                        "icon": "https://usw2.ics.services.jamfcloud.com/icon/hash_8ad08f4d28b61852f479fb343293d2a686a8f4fffcb7f2a866d8a7602ed0cb1d",
+                        "progresstext": "Microsoft Company Portal allows you to securely access the organization’s internal apps, data, and resources.",
+                        "trigger_list": [
+                            {
+                                "trigger": "microsoftCompanyPortal",
+                                "validation": "/Applications/Company Portal.app"
+                            }
+                        ]
+                    },
+                    {
+                        "listitem": "Device Compliance Registration",
+                        "subtitle": "Registers your Mac with Microsoft Intune for secure access to email and other resources.",
+                        "icon": "https://ics.services.jamfcloud.com/icon/hash_ff2147a6c09f5ef73d1c4406d00346811a9c64c0b6b7f36eb52fcb44943d26f9",
+                        "progresstext": "Registering your Mac with Microsoft Intune …",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "None",
+                                            "validation": "Blurscreen Off"
+                                         },
+                                         {
+                                            "trigger": "None",
+                                            "validation": "Minimize Dialog"
+                                         },
+                                         {
+                                            "trigger": "promptForMicrosoftDeviceComplianceRegistration",
+                                            "validation": "None"
+                                         },
+                                         {
+                                            "trigger": "microsoftDeviceComplianceRegistration",
+                                            "validation": "None"
+                                         },
+                                         {
+                                            "trigger": "none",
+                                            "validation": "Maximize Dialog"
+                                         },
+                                         {
+                                            "trigger": "None",
+                                            "validation": "Blurscreen On"
+                                         }
                         ]
                     },
                     {
@@ -2883,7 +3242,7 @@ function policyJSONConfiguration() {
                         "trigger_list": [
                             {
                                 "trigger": "rosettaInstall",
-                                "validation": "None"
+                                "validation": "Blurscreen On"
                             },
                             {
                                 "trigger": "rosetta",
@@ -2961,6 +3320,50 @@ function policyJSONConfiguration() {
                                 "trigger": "oktaVerify",
                                 "validation": "/Applications/Okta Verify.app"
                             }
+                        ]
+                    },
+                    {
+                        "listitem": "Microsoft Company Portal",
+                        "subtitle": "Device Compliance Application",
+                        "icon": "https://usw2.ics.services.jamfcloud.com/icon/hash_8ad08f4d28b61852f479fb343293d2a686a8f4fffcb7f2a866d8a7602ed0cb1d",
+                        "progresstext": "Microsoft Company Portal allows you to securely access the organization’s internal apps, data, and resources.",
+                        "trigger_list": [
+                            {
+                                "trigger": "microsoftCompanyPortal",
+                                "validation": "/Applications/Company Portal.app"
+                            }
+                        ]
+                    },
+                    {
+                        "listitem": "Device Compliance Registration",
+                        "subtitle": "Registers your Mac with Microsoft Intune for secure access to email and other resources.",
+                        "icon": "https://ics.services.jamfcloud.com/icon/hash_ff2147a6c09f5ef73d1c4406d00346811a9c64c0b6b7f36eb52fcb44943d26f9",
+                        "progresstext": "Registering your Mac with Microsoft Intune …",
+                        "trigger_list": [
+                                         {
+                                            "trigger": "None",
+                                            "validation": "Blurscreen Off"
+                                         },
+                                         {
+                                            "trigger": "None",
+                                            "validation": "Minimize Dialog"
+                                         },
+                                         {
+                                            "trigger": "promptForMicrosoftDeviceComplianceRegistration",
+                                            "validation": "None"
+                                         },
+                                         {
+                                            "trigger": "microsoftDeviceComplianceRegistration",
+                                            "validation": "None"
+                                         },
+                                         {
+                                            "trigger": "none",
+                                            "validation": "Maximize Dialog"
+                                         },
+                                         {
+                                            "trigger": "None",
+                                            "validation": "Blurscreen On"
+                                         }
                         ]
                     },
                     {
@@ -3720,6 +4123,7 @@ for (( i=0; i<dialog_step_length; i++ )); do
 
     fi
 
+    # TODO (Hardening): Evaluate validation per `trigger_list` entry instead of only the final trigger/validation pair.
     validatePolicyResult "${trigger}" "${validation}"
 
     # Increment the progress bar

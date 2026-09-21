@@ -1,5 +1,5 @@
 # Setup Your Mac
-## Version 1.16.0
+## Version 1.16.2
 
 ### macOS
 .DS_Store
@@ -16,9 +16,14 @@ Icon?
 .com.apple.timemachine.donotpresent
 .apdisk
 
+### Codex
+.codex/
+.envrc
+
 ### Zsh
 .zsh_history
 .zsh_sessions/
 .zcompdump*
 .zcompcache/
 *.zwc
+.deploySetupYourMac.zsh
