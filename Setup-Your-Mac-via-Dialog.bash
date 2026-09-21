@@ -12,11 +12,13 @@
 #
 #   Version 1.16.2, 21-Sep-2026
 # - Added `Minimize Dialog` and `Maximize Dialog` validations for swiftDialog window-state control commands ([Pull Request 183](https://github.com/setup-your-mac/Setup-Your-Mac/pull/183); keep 'em comin', @HowardGMac!)
-# - Adjusted the `swiftDialogMinimumRequiredVersion` to `3.1.0.4976`
+# - Adjusted the `swiftDialogMinimumRequiredVersion` to `3.1.0.4994`
 # - Added proof-of-concept support for triggering window-state control commands (e.g., minimize, maximize) via the `validation` key in `trigger_list` entries in the `policyJSON`.
 # - Updated `recon` handling so Setup Your Mac captures `jamf recon` exit status, stops forcing verbose inventory output, times out stalled inventory updates, and correctly marks the inventory step failed when Jamf inventory submission fails.
 # - Relaxed the bash pre-flight guard to accept any valid Bash interpreter instead of requiring `/bin/bash` specifically.
-# - Hardened `recon` diagnostics so timeout and failure logs capture baseline Jamf context, process snapshots, output excerpts, and recent `jamf.log` details without changing existing recon behavior.
+# - Hardened `recon` diagnostics so timeout and failure logs capture baseline Jamf context, process snapshots, output excerpts, and recent `jamf.log` details, and terminate the complete spawned process tree on timeout.
+# - Raised the minimum supported operating system to macOS 15 to match swiftDialog 3 requirements.
+# - Cleaned validation scripts by removing UTF-8 byte order marks from BeyondTrust and CrowdStrike and preserving complete Microsoft app names during iteration.
 #
 ####################################################################################################
 
@@ -236,27 +238,59 @@ function logReconBaseline() {
 
 
 
+function collectReconProcessTreePIDs() {
+    local parentPID="$1"
+    local childPID
+
+    while IFS= read -r childPID; do
+        if [[ -n "${childPID}" ]]; then
+            collectReconProcessTreePIDs "${childPID}"
+        fi
+    done < <( /usr/bin/pgrep -P "${parentPID}" 2>/dev/null )
+
+    echo "${parentPID}"
+}
+
+
+
+function signalReconProcessTree() {
+    local signalName="$1"
+    local processPIDs="$2"
+    local processPID
+
+    for processPID in ${processPIDs}; do
+        kill "-${signalName}" "${processPID}" 2>/dev/null
+    done
+}
+
+
+
+function reconProcessTreeIsRunning() {
+    local processPIDs="$1"
+    local processPID
+
+    for processPID in ${processPIDs}; do
+        if kill -0 "${processPID}" 2>/dev/null; then
+            return 0
+        fi
+    done
+
+    return 1
+}
+
+
+
 function logReconProcessSnapshot() {
     local reconParentPID="$1"
     local snapshotLabel="$2"
-    local parentProcessSnapshot
-    local childPIDs
-    local childProcessSnapshot
+    local processPIDs
+    local processSnapshot
 
-    parentProcessSnapshot=$( /bin/ps -o pid=,ppid=,state=,etime=,command= -p "${reconParentPID}" 2>/dev/null )
-    if [[ -z "${parentProcessSnapshot}" ]]; then
-        parentProcessSnapshot="Parent PID ${reconParentPID} no longer running"
-    fi
+    processPIDs=$( collectReconProcessTreePIDs "${reconParentPID}" | tr '\n' ' ' | sed 's/[[:space:]]*$//' )
+    processSnapshot=$( /bin/ps -o pid=,ppid=,state=,etime=,command= -p ${processPIDs} 2>/dev/null )
+    if [[ -z "${processSnapshot}" ]]; then processSnapshot="Process tree rooted at PID ${reconParentPID} no longer running"; fi
 
-    childPIDs=$( /usr/bin/pgrep -P "${reconParentPID}" 2>/dev/null | tr '\n' ' ' | sed 's/[[:space:]]*$//' )
-    if [[ -n "${childPIDs}" ]]; then
-        childProcessSnapshot=$( /bin/ps -o pid=,ppid=,state=,etime=,command= -p ${childPIDs} 2>/dev/null )
-    else
-        childProcessSnapshot="No child processes"
-    fi
-
-    logMessage "SETUP YOUR MAC DIALOG" "[RECON DIAGNOSTICS] ${snapshotLabel}: parent: ${parentProcessSnapshot}"
-    logMessage "SETUP YOUR MAC DIALOG" "[RECON DIAGNOSTICS] ${snapshotLabel}: children:\n${childProcessSnapshot}"
+    logMessage "SETUP YOUR MAC DIALOG" "[RECON DIAGNOSTICS] ${snapshotLabel}: process tree:\n${processSnapshot}"
 }
 
 
@@ -660,15 +694,14 @@ function confirmPolicyExecution() {
                         reconFailureSummary="timed out after ${reconTimeoutSeconds} seconds"
                         logMessage "SETUP YOUR MAC DIALOG" "Computer inventory update exceeded ${reconTimeoutSeconds} seconds; terminating recon after ${reconElapsedSeconds} elapsed seconds"
                         logReconProcessSnapshot "${reconPID}" "Timeout reached before TERM"
-                        /usr/bin/pkill -TERM -P "${reconPID}" 2>/dev/null
-                        kill -TERM "${reconPID}" 2>/dev/null
+                        reconProcessPIDs=$( collectReconProcessTreePIDs "${reconPID}" )
+                        signalReconProcessTree "TERM" "${reconProcessPIDs}"
                         reconTerminationElapsedSeconds="0"
-                        while kill -0 "${reconPID}" 2>/dev/null; do
+                        while reconProcessTreeIsRunning "${reconProcessPIDs}"; do
                             if [[ "${reconTerminationElapsedSeconds}" -ge "${reconTerminationGraceSeconds}" ]]; then
                                 logMessage "SETUP YOUR MAC DIALOG" "Computer inventory update still running ${reconTerminationGraceSeconds} seconds after TERM; force killing recon"
                                 logReconProcessSnapshot "${reconPID}" "Timeout grace exceeded before KILL"
-                                /usr/bin/pkill -KILL -P "${reconPID}" 2>/dev/null
-                                kill -KILL "${reconPID}" 2>/dev/null
+                                signalReconProcessTree "KILL" "${reconProcessPIDs}"
                                 break
                             fi
                             sleep 1
@@ -1729,37 +1762,31 @@ logMessage "PRE-FLIGHT" "Current Logged-in User ID: ${loggedInUserID}"
 # Pre-flight Check: Validate Operating System Version and Build
 # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-if [[ "${requiredMinimumBuild}" == "disabled" ]]; then
+if [[ "${osMajorVersion}" -lt 15 ]] ; then
 
-    logMessage "PRE-FLIGHT" "'requiredMinimumBuild' has been set to ${requiredMinimumBuild}; skipping OS validation."
+    logMessage "PRE-FLIGHT" "swiftDialog 3 requires macOS 15 or later and this Mac is running ${osVersion} (${osBuild}); exiting with error."
+    osascript -e 'display dialog "Please advise your Support Representative of the following error:\r\rSetup Your Mac requires macOS 15 or later, but found macOS '${osVersion}' ('${osBuild}').\r\r" with title "Setup Your Mac: Detected Unsupported Operating System" buttons {"Open Software Update"} with icon caution'
+    logMessage "PRE-FLIGHT" "Executing /usr/bin/open '${outdatedOsAction}' …"
+    su - "${loggedInUser}" -c "/usr/bin/open \"${outdatedOsAction}\""
+    exit 1
+
+elif [[ "${requiredMinimumBuild}" == "disabled" ]]; then
+
+    logMessage "PRE-FLIGHT" "'requiredMinimumBuild' has been set to ${requiredMinimumBuild}; skipping additional OS build validation."
     logMessage "PRE-FLIGHT" "macOS ${osVersion} (${osBuild}) installed"
 
 else
 
-    # Since swiftDialog requires at least macOS 12 Monterey, first confirm the major OS version
-    if [[ "${osMajorVersion}" -ge 12 ]] ; then
+    logMessage "PRE-FLIGHT" "macOS ${osMajorVersion} installed; checking build version ..."
 
-        logMessage "PRE-FLIGHT" "macOS ${osMajorVersion} installed; checking build version ..."
+    # Confirm the Mac is running `requiredMinimumBuild` (or later)
+    if [[ "${osBuild}" > "${requiredMinimumBuild}" ]]; then
 
-        # Confirm the Mac is running `requiredMinimumBuild` (or later)
-        if [[ "${osBuild}" > "${requiredMinimumBuild}" ]]; then
+        logMessage "PRE-FLIGHT" "macOS ${osVersion} (${osBuild}) installed; proceeding ..."
 
-            logMessage "PRE-FLIGHT" "macOS ${osVersion} (${osBuild}) installed; proceeding ..."
-
-        # When the current `osBuild` is older than `requiredMinimumBuild`; exit with error
-        else
-            logMessage "PRE-FLIGHT" "The installed operating system, macOS ${osVersion} (${osBuild}), needs to be updated to Build ${requiredMinimumBuild}; exiting with error."
-            osascript -e 'display dialog "Please advise your Support Representative of the following error:\r\rExpected macOS Build '${requiredMinimumBuild}' (or newer), but found macOS '${osVersion}' ('${osBuild}').\r\r" with title "Setup Your Mac: Detected Outdated Operating System" buttons {"Open Software Update"} with icon caution'
-            logMessage "PRE-FLIGHT" "Executing /usr/bin/open '${outdatedOsAction}' …"
-            su - "${loggedInUser}" -c "/usr/bin/open \"${outdatedOsAction}\""
-            exit 1
-
-        fi
-
-    # The Mac is running an operating system older than macOS 12 Monterey; exit with error
+    # When the current `osBuild` is older than `requiredMinimumBuild`; exit with error
     else
-
-        logMessage "PRE-FLIGHT" "swiftDialog requires at least macOS 12 Monterey and this Mac is running ${osVersion} (${osBuild}), exiting with error."
+        logMessage "PRE-FLIGHT" "The installed operating system, macOS ${osVersion} (${osBuild}), needs to be updated to Build ${requiredMinimumBuild}; exiting with error."
         osascript -e 'display dialog "Please advise your Support Representative of the following error:\r\rExpected macOS Build '${requiredMinimumBuild}' (or newer), but found macOS '${osVersion}' ('${osBuild}').\r\r" with title "Setup Your Mac: Detected Outdated Operating System" buttons {"Open Software Update"} with icon caution'
         logMessage "PRE-FLIGHT" "Executing /usr/bin/open '${outdatedOsAction}' …"
         su - "${loggedInUser}" -c "/usr/bin/open \"${outdatedOsAction}\""
@@ -2363,7 +2390,7 @@ welcomeJSON='
     "selectitems" : [
         '${selectItemsJSON}'
     ],
-    "height" : "800"
+    "height" : "1001"
 }
 '
 

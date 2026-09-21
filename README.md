@@ -1,14 +1,13 @@
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/setup-your-mac/Setup-Your-Mac?display_name=tag) ![GitHub pre-release (latest by date)](https://img.shields.io/github/v/release/setup-your-mac/Setup-Your-Mac?display_name=tag&include_prereleases) ![GitHub issues](https://img.shields.io/github/issues-raw/setup-your-mac/Setup-Your-Mac) ![GitHub closed issues](https://img.shields.io/github/issues-closed-raw/setup-your-mac/Setup-Your-Mac) ![GitHub pull requests](https://img.shields.io/github/issues-pr-raw/setup-your-mac/Setup-Your-Mac) ![GitHub closed pull requests](https://img.shields.io/github/issues-pr-closed-raw/setup-your-mac/Setup-Your-Mac) [![swiftDialog](https://img.shields.io/badge/swiftDialog-Enabled-blue)](https://swiftdialog.app) [![Semgrep Security Scan](https://img.shields.io/badge/security%20scanned%20by-Semgrep-00C7B7?style=flat&logo=semgrep&logoColor=white)](https://semgrep.dev)
-
 <!-- markdownlint-disable-next-line first-line-heading no-inline-html -->
 [<img align="right" alt="Setup Your Mac (1.16.2)" src="images/SYM_icon_255.png" width="128" />](https://github.com/setup-your-mac/Setup-Your-Mac/wiki)
 
 # Setup Your Mac (1.16.2) <br> with SYM-Helper (1.4.0) <br> via swiftDialog (3.1.0)
 
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/dan-snelson/Setup-Your-Mac?display_name=tag) ![GitHub issues](https://img.shields.io/github/issues-raw/dan-snelson/Setup-Your-Mac) ![GitHub closed issues](https://img.shields.io/github/issues-closed-raw/dan-snelson/Setup-Your-Mac) ![GitHub pull requests](https://img.shields.io/github/issues-pr-raw/dan-snelson/Setup-Your-Mac) ![GitHub closed pull requests](https://img.shields.io/github/issues-pr-closed-raw/dan-snelson/Setup-Your-Mac)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/setup-your-mac/Setup-Your-Mac?display_name=tag) ![GitHub pre-release (latest by date)](https://img.shields.io/github/v/release/setup-your-mac/Setup-Your-Mac?display_name=tag&include_prereleases) ![GitHub issues](https://img.shields.io/github/issues-raw/setup-your-mac/Setup-Your-Mac) ![GitHub closed issues](https://img.shields.io/github/issues-closed-raw/setup-your-mac/Setup-Your-Mac) ![GitHub pull requests](https://img.shields.io/github/issues-pr-raw/setup-your-mac/Setup-Your-Mac) ![GitHub closed pull requests](https://img.shields.io/github/issues-pr-closed-raw/setup-your-mac/Setup-Your-Mac) [![swiftDialog](https://img.shields.io/badge/swiftDialog-Enabled-blue)](https://swiftdialog.app) [![Semgrep Security Scan](https://img.shields.io/badge/security%20scanned%20by-Semgrep-00C7B7?style=flat&logo=semgrep&logoColor=white)](https://semgrep.dev)
 
 > Optimized to leverage SYM-Helper (1.4.0), Setup Your Mac (1.16.2) offers full support of swiftDialog (3.1.0).
-[<img alt="Setup Your Mac (1.16.0)" src="images/SYM-Helper_1.3.1_SYM-1.16.0_Hero.png" />](https://github.com/setup-your-mac/Setup-Your-Mac/wiki)
+
+> Setup Your Mac 1.16.2 requires macOS 15 or later.
 
 Apple's Automated Device Enrollment helps streamline Mobile Device Management (MDM) enrollment and device Supervision during activation, enabling IT to manage enterprise devices with "zero touch."
 
